@@ -9,9 +9,7 @@ let login = (function () {
     function getSessionID(userID, casinoID) {
         return new Promise(function (resolve, reject) {
             $.ajax({
-                /* eslint-disable */
                 url: `${serviceUrl}_Login/${userID}/${casinoID}`,
-                /* eslint-enable */
                 dataType: 'JSONP',
                 type: 'GET',
                 success: resolve,
@@ -21,7 +19,7 @@ let login = (function () {
     }
 
     function tryToLogin(userID, casinoID) {
-        getSessionID(userID, casinoID)
+        return getSessionID(userID, casinoID)
             .then(sessionID => {
                 logged = true;
                 console.log(`I am logged! SessionID is ${sessionID}`);
