@@ -3,10 +3,10 @@ let login = (function () {
     // Consts
     const serviceUrl = 'http://gameservice.bossgs.org/slot/SlotService.svc/';
 
-    // Flag
     let logged = false;
+    let sessionID;
 
-    function getSessionID(userID, casinoID) {
+    function requestSessionID(userID, casinoID) {
         return new Promise(function (resolve, reject) {
             $.ajax({
                 url: `${serviceUrl}_Login/${userID}/${casinoID}`,
@@ -19,10 +19,13 @@ let login = (function () {
     }
 
     function tryToLogin(userID, casinoID) {
-        return getSessionID(userID, casinoID)
-            .then(sessionID => {
+        userID = userID || 1; // КОСТЫЛЬ! Должен получать от сервера инициализации.
+        casinoID = casinoID || 1; // КОСТЫЛЬ! Должен получать от сервера инициализации.
+        return requestSessionID(userID, casinoID)
+            .then((ID) => {
                 logged = true;
-                console.log(`I am logged! SessionID is ${sessionID}`);
+                sessionID = ID;
+                console.log(`I am logged! SessionID is ${sessionID}.`);
                 /* eslint-disable */
                 events.trigger('logged', sessionID);
                 /* eslint-enable */
@@ -30,17 +33,17 @@ let login = (function () {
             .catch(error => console.error(error));
     }
 
-    function isLogged() {
+    function getSessionID() {
         if (logged) {
-            console.log('You are logged.');
+            return sessionID;
         } else {
-            console.log('I don\'t know you.');
+            throw new Error('You are not logged.');
         }
     }
 
     return {
         tryToLogin: tryToLogin,
-        isLogged: isLogged
+        getSessionID: getSessionID
     };
 
 })();
