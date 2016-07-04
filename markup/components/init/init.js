@@ -156,7 +156,6 @@ let init = (function () {
     function initGame(sessionID) {
         startGame(sessionID)
             .then((balanceData) => {
-                console.log('Data from Play request is ', balanceData);
                 if (checkBalance(balanceData)) {
                     /* eslint-disable */
                     events.trigger('initBalance', balanceData);
@@ -186,10 +185,10 @@ let init = (function () {
     events.on('logged', initGame);
     /* eslint-enable */
     return {
-        initGame: initGame,
-        requestWheels: requestWheels,
-        getWheels: getWheels,
-        getBalance: getBalance,
-        getLines: getLines
+        initGame,
+        requestWheels,
+        getWheels,
+        getBalance,
+        getLines
     };
 })();
