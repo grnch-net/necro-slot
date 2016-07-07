@@ -28,13 +28,17 @@ let login = (function () {
                 console.log(`I am logged! SessionID is ${sessionID}.`);
                 /* eslint-disable */
                 events.trigger('logged', sessionID);
+                events.trigger('initCanvas', sessionID);
+                events.trigger('initPreloader', sessionID);
                 /* eslint-enable */
             })
             .catch(error => console.error(error));
     }
 
     function getSessionID() {
-        if (logged) {
+        /* eslint-disable */
+        if (sessionID !== undefined) {
+        /* eslint-enable */
             return sessionID;
         } else {
             throw new Error('You are not logged.');
@@ -42,8 +46,8 @@ let login = (function () {
     }
 
     return {
-        tryToLogin: tryToLogin,
-        getSessionID: getSessionID
+        tryToLogin,
+        getSessionID
     };
 
 })();
