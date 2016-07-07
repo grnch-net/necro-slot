@@ -4,19 +4,45 @@ html, body {
     height: 100%;
 }
 
-.page {
-    
+#game {
+    position: relative;
+    max-width: 100%;
 }
 
-.page__wrapper {
-    min-height: 100%;
-    margin-bottom: -50px;
+%canvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    display: block;
+    max-width: 100%;
 }
 
-* html .page__wrapper {
-    height: 100%;
+#bgStaticCanvas {
+    @extend %canvas;
+    z-index: 1;
 }
 
-.page__buffer {
-    height: 50px;
+#bgCanvas {
+    @extend %canvas;
+    z-index: 2;
+}
+
+#gameStaticCanvas {
+    @extend %canvas;
+    z-index: 3;
+}
+
+#gameCanvas {
+    @extend %canvas;
+    z-index: 4;
+}
+
+#bonusStaticCanvas {
+    @extend %canvas;
+    z-index: 5;
+}
+
+#bonusCanvas {
+    @extend %canvas;
+    z-index: 6;
 }
