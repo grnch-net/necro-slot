@@ -1,0 +1,8 @@
+{
+    "images": ["static/img/general/preloader/sprite.png"],
+    "frames": {
+        "width": 1227,
+        "height": 68,
+        "count": 24
+    }
+}
