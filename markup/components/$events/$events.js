@@ -14,10 +14,10 @@ const events = {
             }
         }
     },
-    trigger: function (eventName, data) {
+    trigger: function (eventName, data, ...rest) {
         if (this.events[eventName]) {
             this.events[eventName].forEach(function (fn) {
-                fn(data);
+                fn(data, rest);
             });
         }
     }
