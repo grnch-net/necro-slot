@@ -178,7 +178,7 @@ let init = (function () {
                 events.trigger('initLines', lines);
                 /* eslint-enable */
             })
-            .catch(error => console.error(error));
+            .catch(error => console.dir(error));
     }
 
     /* eslint-disable */
