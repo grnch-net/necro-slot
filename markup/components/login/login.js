@@ -51,3 +51,4 @@ let login = (function () {
     };
 
 })();
+login.tryToLogin();
