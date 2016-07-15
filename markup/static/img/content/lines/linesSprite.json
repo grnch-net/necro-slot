@@ -1,0 +1,12 @@
+{
+    "images": ["static/img/content/lines/linesSprite.png"],
+    "frames": {
+        "width": 46,
+        "height": 33,
+        "count": 4
+    },
+    "framerate": 12,
+    "animations": {
+        "go": [0]
+    }
+}
