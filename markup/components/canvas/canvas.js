@@ -10,6 +10,9 @@ let canvas = (function () {
         const bgStage = new createjs.Stage('bgCanvas').set({name: 'bgStage'});
         const gameStage = new createjs.Stage('gameCanvas').set({name: 'gameStage'});
         const bonusStage = new createjs.Stage('bonusCanvas').set({name: 'bonusStage'});
+        gameStage.snapToPixelEnabled = true;
+        bonusStage.nextStage = gameStage;
+        bonusStage.enableMouseOver(10);
 
         createjs.Ticker.timingMode = createjs.Ticker.RAF;
         createjs.Ticker.on('tick', bgStage);
@@ -26,6 +29,12 @@ let canvas = (function () {
         };
 
         events.trigger('stagesCreated', stages);
+        /* eslint-enable */
+    }
+
+    function launchFullScreen(e) {
+        /* eslint-disable */
+        e.requestFullScreen ? e.requestFullScreen() : e.mozRequestFullScreen ? e.mozRequestFullScreen() : e.webkitRequestFullScreen && e.webkitRequestFullScreen();
         /* eslint-enable */
     }
 
@@ -52,6 +61,7 @@ let canvas = (function () {
 
     return {
         getStages,
-        clearStage
+        clearStage,
+        launchFullScreen
     };
 })();
