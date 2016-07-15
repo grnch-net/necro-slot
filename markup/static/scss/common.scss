@@ -15,10 +15,12 @@ html, body {
     left: 0;
     display: block;
     max-width: 100%;
+    -webkit-tap-highlight-color: rgba(0,0,0,0);
 }
 
 #bgStaticCanvas {
     @extend %canvas;
+    position: relative; // Для того чтобы GAME был нужного размера
     z-index: 1;
 }
 
