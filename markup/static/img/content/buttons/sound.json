@@ -1,0 +1,14 @@
+{
+    "images": ["static/img/content/buttons/sound.png"],
+    "frames": {
+        "width": 77,
+        "height": 78,
+        "count": 3
+    },
+    "framerate": 12,
+    "animations": {
+        "out": 0,
+        "over": 2,
+        "down": 1
+    }
+}

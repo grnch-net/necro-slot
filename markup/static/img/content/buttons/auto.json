@@ -1,0 +1,14 @@
+{
+    "images": ["static/img/content/buttons/auto.png"],
+    "frames": {
+        "width": 100,
+        "height": 101,
+        "count": 3
+    },
+    "framerate": 12,
+    "animations": {
+        "out": 0,
+        "over": 2,
+        "down": 1
+    }
+}
