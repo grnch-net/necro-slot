@@ -1,0 +1,14 @@
+{
+    "images": ["static/img/content/elements/5.png"],
+    "frames": {
+        "width": 192,
+        "height": 180,
+        "count": 3
+    },
+    "framerate": 12,
+    "animations": {
+        "normal": [0],
+        "blur": [1],
+        "win": [2]
+    }
+}
