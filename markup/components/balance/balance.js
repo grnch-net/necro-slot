@@ -25,9 +25,10 @@ let balance = (function () {
 
     let stages;
     let lines;
+    let balanceContainer;
 
     let parameters = {
-        font: 'bold 25px Arial',
+        font: 'bold 20px Arial',
         color: '#dddddd',
         coinsValue: {
             x: 50,
@@ -36,14 +37,15 @@ let balance = (function () {
             name: 'coinsValue'
         },
         coinsSum: {
-            x: 100,
-            y: 100,
+            x: 295,
+            y: 630,
             textAlign: 'center',
+            font: 'bold 25px Arial',
             name: 'coinsSum'
         },
         coinsCash: {
-            x: 150,
-            y: 150,
+            x: 470,
+            y: 690,
             textAlign: 'center',
             name: 'coinsCash'
         },
@@ -54,20 +56,21 @@ let balance = (function () {
             name: 'betValue'
         },
         betSum: {
-            x: 250,
-            y: 250,
+            x: 1005,
+            y: 630,
             textAlign: 'center',
+            font: 'bold 25px Arial',
             name: 'betSum'
         },
         betCash: {
-            x: 300,
-            y: 300,
+            x: 637,
+            y: 690,
             textAlign: 'center',
             name: 'betCash'
         },
         winCash: {
-            x: 350,
-            y: 350,
+            x: 810,
+            y: 690,
             textAlign: 'center',
             name: 'winCash'
         },
@@ -94,13 +97,14 @@ let balance = (function () {
     function getLines(linesArray) {
         lines = linesArray.length;
         /* eslint-disable */
-        events.trigger('linesWriten', lines);
-        /* eslint-disable */
+        initBalance();
+        /* eslint-enable */
         console.log('Lines are given:', lines);
         return lines;
     }
 
     function writeBalance() {
+        /* eslint-disable */
         coinsValueText = new createjs.Text(coinsValue, parameters.font, parameters.color).set(parameters.coinsValue);
         coinsSumText = new createjs.Text(coinsSum, parameters.font, parameters.color).set(parameters.coinsSum);
         coinsCashText = new createjs.Text(coinsCash, parameters.font, parameters.color).set(parameters.coinsCash);
@@ -108,11 +112,18 @@ let balance = (function () {
         betSumText = new createjs.Text(betSum, parameters.font, parameters.color).set(parameters.betSum);
         betCashText = new createjs.Text(betCash, parameters.font, parameters.color).set(parameters.betCash);
         winCashText = new createjs.Text(winCash, parameters.font, parameters.color).set(parameters.winCash);
-        let stage = canvas.getStages().bonusStage;
-        stage.addChild(coinsValueText, coinsSumText, coinsCashText, betValueText, betSumText, betCashText, winCashText);
+        let stage = canvas.getStages().gameStaticStage;
+        balanceContainer = new createjs.Container().set({
+            name: 'balanceContainer'
+        });
+        stage.addChild(balanceContainer);
+        balanceContainer.addChild(/*coinsValueText,*/ coinsSumText, coinsCashText, /*betValueText,*/ betSumText, betCashText, winCashText);
+        stage.update();
+        /* eslint-enable */
     }
 
     function updateBalance() {
+        /* eslint-disable */
         if (coinsValueText.text !== coinsValue) coinsValueText.text = coinsValue;
         if (coinsSumText.text !== coinsSum) coinsSumText.text = coinsSum;
         if (coinsCashText.text !== coinsCash) coinsCashText.text = coinsCash;
@@ -120,9 +131,12 @@ let balance = (function () {
         if (betSumText.text !== betSum) betSumText.text = betSum;
         if (betCashText.text !== betCash) betCashText.text = betCash;
         if (winCashText.text !== winCash) winCashText.text = winCash;
+        let stage = canvas.getStages().gameStaticStage;
+        /* eslint-enable */
+        stage.update();
     }
 
-    function initBalance(lines) {
+    function initBalance() {
         coinsSteps = balanceData.CoinValue;
         coinsValue = balanceData.CoinValue[0];
         coinsSum = balanceData.ScoreCoins;
@@ -223,6 +237,7 @@ let balance = (function () {
         if (coinsSum >= betSum) {
             coinsSum -= betSum;
             coinsCash = ((coinsCash * 100 - betCash * 100) / 100).toFixed(2);
+            winCash = (0).toFixed(2);
             balance.updateBalance();
         } else {
             console.error('Too low cash for spin!');
@@ -284,7 +299,6 @@ let balance = (function () {
     events.on('stagesCreated', getStages);
     events.on('linesCreated', getLines);
     events.on('initBalance', saveBalance);
-    events.on('linesWriten', initBalance);
     // Еще будут какие-то события от бонусов и фри-спинов
     /* eslint-enable */
 
