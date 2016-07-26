@@ -1,7 +1,6 @@
 let bg = (function () {
 
     function drawBG(queue) {
-        console.log('I am drawing BG!');
         /* eslint-disable */
         let bgStaticStage = canvas.getStages().bgStaticStage;
         let gameStaticStage = canvas.getStages().gameStaticStage;
@@ -22,11 +21,10 @@ let bg = (function () {
             y: 720 - 40,
             name: 'footerBG'
         });
-        bgStaticStage.addChild(mainBG, gameBG);
-        bgStaticStage.update();
+        bgStaticStage.addChildAt(mainBG, gameBG, 0);
         gameStaticStage.addChildAt(gameMachine, footerBG, 0);
+        bgStaticStage.update();
         gameStaticStage.update();
-        events.trigger('bgDrawEnd');
     }
 
     events.on('preloadComplete', drawBG);

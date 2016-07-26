@@ -1,71 +1,138 @@
 let buttons = (function () {
 
     let buttonsContainer;
+    let menuSprite;
+    let autoSprite;
+    let spinSprite;
+    let betSprite;
+    let soundSprite;
+    let soundMuted = true;
+    let autoMode;
+    let autoText;
+    let fsMode;
 
-    function drawButtons() {
+    function handleSpin() {
         /* eslint-disable */
-        let loader = preloader.getLoadResult();
+        let spinClicked = 0;
+        spinSprite.on('mousedown', function(event) {
+            spinClicked++;
+            if (spinClicked === 1) {
+                event.remove();
+                if (spinSprite.currentAnimation !== 'down' && spinSprite.currentAnimation !== 'auto') {
+                    spinSprite.gotoAndStop('down');
+                    let spinState = spin.getSpinState();
+                    if (!spinState.locked) {
+                        createjs.Tween.get(spinSprite)
+                        .to({scaleX: 0.95, scaleY: 0.95}, 75)
+                        .to({scaleX: 1, scaleY: 1}, 75);
+                        if (spinState.inProgress && spinState.fastSpinFlag && !spinState.locked) {
+                            spin.fastSpin();
+                        } else if (!spinState.inProgress && !spinState.locked) {
+                            spin.spinStart();
+                        }
+                    }
+                }
+            }
+        }, null, true);
+    }
+
+    function drawButtons(loader) {
         buttonsContainer = new createjs.Container();
-        let spinSpriteSheet = loader.getResult('spinButton');
-        let spinSprite = new createjs.Sprite(spinSpriteSheet).set({
-            x: 1092,
-            y: 273,
+        spinSprite = new createjs.Sprite(loader.getResult('spinButton')).set({
+            x: 1180,
+            y: 360,
+            regX: 87,
+            regY: 87,
             name: 'spinSprite'
         });
-        let spinHelper = new createjs.ButtonHelper(spinSprite);
-        spinSprite.on('click', function(event){
-            let spinState = spin.getSpinState();
-            if (spinState.inProgress && spinState.fastSpinFlag) {
-                console.log('I am trying to do Fast Spin!');
-                spin.fastSpin();
-            } else if (!spinState.inProgress) {
-                spin.spinStart();
-            }
-        });
-        let autoSpriteSheet = loader.getResult('autoButton');
-        let autoSprite = new createjs.Sprite(autoSpriteSheet).set({
-            x: 1128,
-            y: 160,
+        spinSprite.gotoAndStop('out');
+        // let spinHelper = new createjs.ButtonHelper(spinSprite);
+        handleSpin();
+
+        autoSprite = new createjs.Sprite(loader.getResult('autoButton')).set({
+            x: 1128 + 50,
+            y: 160 + 50,
+            regX: 50,
+            regY: 50,
             name: 'autoSprite'
         });
-        let autoHelper = new createjs.ButtonHelper(autoSprite);
-        let betSpriteSheet = loader.getResult('betButton');
-        let betSprite = new createjs.Sprite(betSpriteSheet).set({
-            x: 1128,
-            y: 460,
+        autoSprite.gotoAndStop('out');
+        autoSprite.on('click', function() {
+            if (autoSprite.currentAnimation === 'out') {
+                menu.showMenu('auto');
+            } else if (autoSprite.currentAnimation === 'auto') {
+                stopAutoButtons();
+                autoplay.stopAutoplay();
+            }
+        });
+        // let autoHelper = new createjs.ButtonHelper(autoSprite);
+        betSprite = new createjs.Sprite(loader.getResult('betButton')).set({
+            x: 1128 + 50,
+            y: 460 + 50,
+            regX: 50,
+            regY: 50,
             name: 'betSprite'
         });
-        let betHelper = new createjs.ButtonHelper(betSprite);
-        let menuSpriteSheet = loader.getResult('menuButton');
-        let menuSprite = new createjs.Sprite(menuSpriteSheet).set({
+        betSprite.gotoAndStop('out');
+        betSprite.on('click', function() {
+            if (betSprite.currentAnimation === 'out') {
+                menu.showMenu('bet');
+            }
+        });
+        // let betHelper = new createjs.ButtonHelper(betSprite);
+        menuSprite = new createjs.Sprite(loader.getResult('menuButton')).set({
             x: 1140,
             y: 70,
             name: 'menuSprite'
         });
-        let menuHelper = new createjs.ButtonHelper(menuSprite);
-        let soundSpriteSheet = loader.getResult('soundButton');
-        let soundSprite = new createjs.Sprite(soundSpriteSheet).set({
+        menuSprite.gotoAndStop('out');
+        menuSprite.on('click', function() {
+            if (menuSprite.currentAnimation === 'out') {
+                menu.showMenu('settings');
+            }
+        });
+        // let menuHelper = new createjs.ButtonHelper(menuSprite);
+        soundSprite = new createjs.Sprite(loader.getResult('soundButton')).set({
             x: 1140,
             y: 570,
             name: 'soundSprite'
         });
-        let soundHelper = new createjs.ButtonHelper(soundSprite);
+        if (soundMuted) {
+            soundSprite.gotoAndStop('down');
+        }
+        soundSprite.on('click', function() {
+            soundMuted = !soundMuted;
+            if (soundMuted) {
+                soundSprite.gotoAndStop('down');
+            } else {
+                soundSprite.gotoAndStop('out');
+            }
+        });
+        // let soundHelper = new createjs.ButtonHelper(soundSprite);
         buttonsContainer.addChild(spinSprite, autoSprite, betSprite, menuSprite, soundSprite);
-        let gameStage = canvas.getStages().gameStage;
-        gameStage.enableMouseOver(10);
-        gameStage.addChild(buttonsContainer);
+        let stage = canvas.getStages().gameStage;
+        stage.enableMouseOver(10);
+        stage.addChild(buttonsContainer);
     }
 
     function checkButtonsState() {
         if (buttonsContainer) {
             let spinState = spin.getSpinState();
-            let menuSprite = buttonsContainer.getChildByName('menuSprite');
-            let autoSprite = buttonsContainer.getChildByName('autoSprite');
-            let spinSprite = buttonsContainer.getChildByName('spinSprite');
-            let betSprite = buttonsContainer.getChildByName('betSprite');
-            let soundSprite = buttonsContainer.getChildByName('soundSprite');
-            if (spinState.inProgress && spinState.fastSpinFlag) {
-                spinSprite.gotoAndStop('out');
+            if (autoMode) {
+                autoSprite.gotoAndStop('auto');
+                spinSprite.gotoAndStop('auto');
+                menuSprite.gotoAndStop('down');
+                betSprite.gotoAndStop('down');
+            } else if (fsMode) {
+                autoSprite.gotoAndStop('fs');
+                betSprite.gotoAndStop('fs');
+                spinSprite.gotoAndStop('auto');
+                menuSprite.gotoAndStop('down');
+            } else if (spinState.locked) {
+                spinSprite.gotoAndStop('down');
+            } else if (spinState.inProgress && spinState.fastSpinFlag) {
+                handleSpin();
+                spinSprite.gotoAndStop('over');
             } else if (spinState.inProgress) {
                 menuSprite.gotoAndStop('down');
                 autoSprite.gotoAndStop('down');
@@ -73,20 +140,94 @@ let buttons = (function () {
                 betSprite.gotoAndStop('down');
                 soundSprite.gotoAndStop('down');
             } else {
+                handleSpin();
                 autoSprite.gotoAndStop('out');
                 menuSprite.gotoAndStop('out');
                 spinSprite.gotoAndStop('out');
                 betSprite.gotoAndStop('out');
-                soundSprite.gotoAndStop('out');
+                if (!soundMuted) {
+                    soundSprite.gotoAndStop('out');
+                } else {
+                    soundSprite.gotoAndStop('down');
+                }
             }
         }
     }
 
+    function startAutoButtons(count) {
+        autoMode = true;
+        autoText = new createjs.Text(count, "bold 75px Arial", "#90fd5a").set({
+            x: 1180,
+            y: 360,
+            name: 'autoText',
+            textAlign: 'center',
+            textBaseline: 'middle',
+            shadow: new createjs.Shadow('#90fd5a', 0, 0, 8)
+        });
+        buttonsContainer.addChild(autoText);
+        setTimeout(function () {
+            events.trigger('startAutoplay');
+        }, 500);
+    }
 
+    function stopAutoButtons() {
+        autoSprite.gotoAndStop('down');
+        autoMode = false;
+        buttonsContainer.removeChild(autoText);
+    }
+
+    function changeAutoText(newText) {
+        autoText.text = newText;
+    }
+
+    function startFSButtons(count, rest) {
+        fsMode = true;
+        let level = rest[0];
+        let multi = rest[1];
+        let fsLevel = new createjs.Text(level, "50px bold Arial", "#90fd5a").set({
+            name: 'fsLevel',
+            x: autoSprite.x,
+            y: autoSprite.y + 5,
+            textAlign: 'center',
+            textBaseline: 'middle',
+            shadow: new createjs.Shadow('#90fd5a', 0, 0, 8)
+        });
+        let fsMulti = new createjs.Text(multi, "50px bold Arial", "#90fd5a").set({
+            name: 'fsMulti',
+            x: betSprite.x,
+            y: betSprite.y + 5,
+            textAlign: 'center',
+            textBaseline: 'middle',
+            shadow: new createjs.Shadow('#90fd5a', 0, 0, 8)
+        });
+        let fsCount = new createjs.Text(count, "85px bold Arial", "#90fd5a").set({
+            name: 'fsCount',
+            x: spinSprite.x,
+            y: spinSprite.y,
+            textAlign: 'center',
+            textBaseline: 'middle',
+            shadow: new createjs.Shadow('#90fd5a', 0, 0, 8)
+        });
+        buttonsContainer.addChild(fsLevel, fsMulti, fsCount);
+    }
+
+    function stopFSButtons() {
+        fsMode = false;
+        let fsLevel = buttonsContainer.getChildByName('fsLevel');
+        let fsMulti = buttonsContainer.getChildByName('fsMulti');
+        let fsCount = buttonsContainer.getChildByName('fsCount');
+        buttonsContainer.removeChild(fsLevel, fsMulti, fsCount);
+    }
+
+    events.on('preloadComplete', drawButtons);
+    events.on('initAutoplay', startAutoButtons);
+    events.on('stopAutoplay', stopAutoButtons);
+    events.on('initFreeSpins', startFSButtons);
+    events.on('stopFreeSpins', stopFSButtons);
     createjs.Ticker.on('tick', checkButtonsState);
-    events.on('bgDrawEnd', drawButtons);
     /* eslint-enable */
     return {
-
+        changeAutoText,
+        stopAutoButtons
     };
 })();

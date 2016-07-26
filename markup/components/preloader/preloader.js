@@ -1,11 +1,14 @@
 const preloaderManifest = [
     {id: 'preloaderBG', src: 'static/img/general/preloader/bg.png'},
     {id: 'preloaderPlay', src: 'static/img/general/preloader/play.png'},
-    {id: 'preloaderSpriteSheet', src: 'static/img/general/preloader/sprite.json', type: 'spritesheet'}
+    {id: 'preloaderLogo', src: 'static/img/general/preloader/logo.png'},
+    {id: 'preloaderSpriteSheet', src: 'static/img/general/preloader/sprite.json', type: 'spritesheet'},
+    {id: 'preloaderClockSpriteSheet', src: 'static/img/general/preloader/clock.json', type: 'spritesheet'}
 ];
 
 const mainManifest = [
     // bg
+    {id: 'fsBG', src: 'static/img/content/bg/fsBG.png'},
     {id: 'mainBG', src: 'static/img/content/bg/mainBG.png'},
     {id: 'gameBG', src: 'static/img/content/bg/gameBG.png'},
     {id: 'footerBG', src: 'static/img/content/bg/footerBG.png'},
@@ -17,25 +20,38 @@ const mainManifest = [
     {id: 'betButton', src: 'static/img/content/buttons/bet.json', type: 'spritesheet'},
     {id: 'menuButton', src: 'static/img/content/buttons/menu.json', type: 'spritesheet'},
     {id: 'soundButton', src: 'static/img/content/buttons/sound.json', type: 'spritesheet'},
+    // menu
+    {id: 'menuBG', src: 'static/img/content/menu/menuBG.png'},
+    {id: 'menuBetTitle', src: 'static/img/content/menu/menuBetTitle.png'},
+    {id: 'menuAutoTitle', src: 'static/img/content/menu/menuAutoTitle.png'},
+    {id: 'menuSettingsTitle', src: 'static/img/content/menu/menuSettingsTitle.png'},
+    {id: 'menuBetLevel', src: 'static/img/content/menu/menuBetLevel.png'},
+    {id: 'menuCoinValue', src: 'static/img/content/menu/menuCoinValue.png'},
+    {id: 'menuDisc', src: 'static/img/content/menu/menuDisc.png'},
+    {id: 'menuDivider', src: 'static/img/content/menu/menuDivider.png'},
+    {id: 'menuMaxBet', src: 'static/img/content/menu/menuMaxBet.json', type: 'spritesheet'},
+    {id: 'menuMinusPlus', src: 'static/img/content/menu/menuMinusPlus.json', type: 'spritesheet'},
+    {id: 'menuBack', src: 'static/img/content/menu/menuBack.json', type: 'spritesheet'},
     // lines
-    {id: 'linesPipka', src: 'static/img/content/lines/linesPipka.json', type: 'spritesheet'},
+    {id: 'linesDisc', src: 'static/img/content/lines/linesDisc.json', type: 'spritesheet'},
     {id: 'linesSprite', src: 'static/img/content/lines/linesSprite.json', type: 'spritesheet'},
-    {id: 'winLine', src: 'static/img/content/lines/winLine.png'},
-    {id: 'winTotal', src: 'static/img/content/lines/winTotal.png'},
+    {id: 'winLineRect', src: 'static/img/content/lines/winLineRect.png'},
+    {id: 'winTotalRect', src: 'static/img/content/lines/winTotalRect.png'},
     // elements
-    {id: 'element1', src: 'static/img/content/elements/element1.json', type: 'spritesheet'},
-    {id: 'element2', src: 'static/img/content/elements/element2.json', type: 'spritesheet'},
-    {id: 'element3', src: 'static/img/content/elements/element3.json', type: 'spritesheet'},
-    {id: 'element4', src: 'static/img/content/elements/element4.json', type: 'spritesheet'},
-    {id: 'element5', src: 'static/img/content/elements/element5.json', type: 'spritesheet'},
-    {id: 'element6', src: 'static/img/content/elements/element6.json', type: 'spritesheet'},
-    {id: 'element7', src: 'static/img/content/elements/element7.json', type: 'spritesheet'},
-    {id: 'element8', src: 'static/img/content/elements/element8.json', type: 'spritesheet'},
-    {id: 'element9', src: 'static/img/content/elements/element9.json', type: 'spritesheet'},
-    {id: 'element10', src: 'static/img/content/elements/element10.json', type: 'spritesheet'},
-    {id: 'element11', src: 'static/img/content/elements/element11.json', type: 'spritesheet'},
-    {id: 'element12', src: 'static/img/content/elements/element12.json', type: 'spritesheet'},
-    {id: 'element13', src: 'static/img/content/elements/element13.json', type: 'spritesheet'}
+    {id: 'elements', src: 'static/img/content/elements/elements.json', type: 'spritesheet'}
+    // {id: 'element2', src: 'static/img/content/elements/element2.json', type: 'spritesheet'},
+    // {id: 'element1', src: 'static/img/content/elements/element1.json', type: 'spritesheet'},
+    // {id: 'element3', src: 'static/img/content/elements/element3.json', type: 'spritesheet'},
+    // {id: 'element4', src: 'static/img/content/elements/element4.json', type: 'spritesheet'},
+    // {id: 'element5', src: 'static/img/content/elements/element5.json', type: 'spritesheet'},
+    // {id: 'element6', src: 'static/img/content/elements/element6.json', type: 'spritesheet'},
+    // {id: 'element7', src: 'static/img/content/elements/element7.json', type: 'spritesheet'},
+    // {id: 'element8', src: 'static/img/content/elements/element8.json', type: 'spritesheet'},
+    // {id: 'element9', src: 'static/img/content/elements/element9.json', type: 'spritesheet'},
+    // {id: 'element10', src: 'static/img/content/elements/element10.json', type: 'spritesheet'},
+    // {id: 'element11', src: 'static/img/content/elements/element11.json', type: 'spritesheet'},
+    // {id: 'element12', src: 'static/img/content/elements/element12.json', type: 'spritesheet'},
+    // {id: 'element13', src: 'static/img/content/elements/element13.json', type: 'spritesheet'}
 ];
 
 let preloader = (function () {
@@ -58,47 +74,59 @@ let preloader = (function () {
     function showPreloader(event) {
         const queue = event.target;
         /* eslint-disable */
-        const preloaderBG = new createjs.Bitmap(queue.getResult('preloaderBG'));
-        // const preloaderButton = new createjs.Bitmap(queue.getResult('preloaderButton'));
+        const preloaderBG = new createjs.Bitmap(queue.getResult('preloaderBG'))
+            .set({name: 'preloaderBG'});
+        const preloaderLogo = new createjs.Bitmap(queue.getResult('preloaderLogo'))
+            .set({
+                x: 288,
+                y: 40,
+                name: 'preloaderLogo'
+            });
         const preloaderPlay = new createjs.Bitmap(queue.getResult('preloaderPlay'))
-            .set({name: 'playText'});
+            .set({name: 'preloaderPlay'});
+
         const preloaderSpriteSheet = queue.getResult('preloaderSpriteSheet');
-        const preloaderFinishSpriteSheet = queue.getResult('preloaderFinishSpriteSheet');
+        const preloaderClockSpriteSheet = queue.getResult('preloaderClockSpriteSheet');
 
         const playButton = new createjs.Container()
             .set({
                 name: 'playButton',
-                x: 482,
-                y: 560,
+                x: 530,
+                y: 310,
                 visible: false,
                 shadow: new createjs.Shadow('#C19433', 0, 0, 20)
             });
         const buttonTween = createjs.Tween.get(preloaderPlay, {loop: true, paused: true})
             .to({alpha: 0.7}, 400)
             .to({alpha: 1}, 400);
-
         const preloaderSprite = new createjs.Sprite(preloaderSpriteSheet, "start")
             .set({
                 name: 'preloaderSprite',
-                x: 614,
-                y: 232
+                x: 485,
+                y: 200
+            });
+        const preloaderClock = new createjs.Sprite(preloaderClockSpriteSheet, "start")
+            .set({
+                name: 'preloaderClock',
+                x: 233,
+                y: 150
             });
 
         bonusStaticStage = canvas.getStages().bonusStaticStage;
         bonusStage = canvas.getStages().bonusStage;
 
-        bonusStaticStage.addChild(preloaderBG);
+        bonusStaticStage.addChild(preloaderBG, preloaderLogo);
         bonusStaticStage.update();
 
-        playButton.addChild(/*preloaderButton, */preloaderPlay);
-        bonusStage.addChild(playButton, preloaderSprite);
+        playButton.addChild(preloaderPlay);
+        bonusStage.addChild(playButton, preloaderClock, preloaderSprite);
 
-        mainPreload(preloaderSprite, buttonTween, playButton);
+        mainPreload(preloaderSprite, preloaderClock, buttonTween, playButton);
         console.log('I am Preloader and I has started loading!');
         /* eslint-enable */
     }
 
-    function mainPreload(sprite, buttonTween, playButton) {
+    function mainPreload(sprite, clock, buttonTween, playButton) {
         /* eslint-disable */
         const queue = new createjs.LoadQueue(true);
         queue.setMaxConnections(20);
@@ -109,7 +137,8 @@ let preloader = (function () {
         queue.on('complete', _handleLoadComplete, this, true, {
             buttonTween,
             playButton,
-            sprite
+            sprite,
+            clock
         });
     }
 
@@ -129,10 +158,21 @@ let preloader = (function () {
         let buttonTween = data.buttonTween;
         let playButton = data.playButton;
         let sprite = data.sprite;
+        let clock = data.clock;
+        clock.framerate = 12;
 
         playButton.visible = true;
         buttonTween.setPaused(false);
-        sprite.gotoAndPlay("finish");
+        sprite.alpha = 0;
+        clock.gotoAndPlay("finish");
+        clock.on('animationend', (event) => {
+            clock.stop();
+            createjs.Tween.get(clock)
+                .to({alpha: 0}, 700);
+            createjs.Tween.get(sprite)
+                .to({alpha: 1}, 700);
+            sprite.gotoAndPlay('finish');
+        });
 
         /* eslint-disable */
         playButton.on('click', _handlePlayClick, this, true, {
@@ -147,16 +187,22 @@ let preloader = (function () {
     function _handlePlayClick(event, data) {
         let game = document.querySelector('#game');
         let playButton = data.playButton;
-        let playText = playButton.getChildByName('playText');
+        let preloaderPlay = playButton.getChildByName('preloaderPlay');
         /* eslint-disable */
-        createjs.Tween.removeTweens(playText);
+        createjs.Tween.removeTweens(preloaderPlay);
         createjs.Ticker.on('tick', bonusStaticStage);
         createjs.Tween.get(bonusStage)
             .to({alpha: 0}, 1000, createjs.Ease.circIn)
-            .call(canvas.clearStage, [bonusStage]);
+            .call(function () {
+                bonusStage.removeAllChildren();
+            });
+            // .call(canvas.clearStage, [bonusStage]);
         createjs.Tween.get(bonusStaticStage)
             .to({alpha: 0}, 1000, createjs.Ease.circIn)
-            .call(canvas.clearStage, [bonusStaticStage]);
+            .call(function () {
+                bonusStaticStage.removeAllChildren();
+            });
+            // .call(canvas.clearStage, [bonusStaticStage]);
         canvas.launchFullScreen(game);
         /* eslint-enable */
     }

@@ -1,50 +1,35 @@
 let lines = (function () {
+    // Motion Plugin For Lines
+    /* eslint-disable */
+    createjs.MotionGuidePlugin.install(createjs.Tween);
+    /* eslint-enable */
 
-    // Flags
-    let linesIsParsed;
+    // Containers
+    let winNumbersContainer;
+    let winLinesContainer;
+    let winRectsContainer;
 
-    let linesResult;
+    let autoModeFlag;
+    let autoTimer;
     let winCoins;
     let winCents;
     let winData = [];
+    let winFinishData = [];
+    let lineTrigger;
+    let linesTrigger;
 
     let linesArray;
     let linesCoord;
-    let linesPipkas = [];
+    let linesPaths;
+
+    let linesDiscs = [];
     let linesNumbers = [];
     let winLines = [];
-    let linesContainer;
-    let winLinesContainer;
-
-    createjs.MotionGuidePlugin.install(createjs.Tween);
-    function guideBall(linePath) {
-        let i;
-        let amount = Math.round(Math.random() * 50) + 10;
-        let rotation = Math.random() * 360;
-        let stage = canvas.getStages().bgStage;
-        let loader = preloader.getLoadResult();
-        for (i = 0; i < amount; i++) {
-            let timeout = Math.random() * 1500;
-            let ball = new createjs.Sprite(loader.getResult('linesSprite'), 'go').set({
-                x: linePath[0],
-                y: linePath[1],
-                regX: 24,
-                regY: 19,
-                rotation: 0
-            });
-            let ballTween = createjs.Tween.get(ball)
-                .wait(timeout)
-                .to({rotation: rotation, guide: {path: linePath, orient: 'cw'}}, 700)
-                .call(function (tween) {
-                    winLinesContainer.removeChild(tween.target);
-                });
-            winLinesContainer.addChild(ball);
-        }
-    }
+    let winRects = [];
 
     let parameters = {
         font: 'normal 15px Arial',
-        color: '#dddddd',
+        color: 'gold',
         1: {
             x: 95,
             y: 336,
@@ -157,67 +142,34 @@ let lines = (function () {
         }
     };
 
-    function initLines(linesArr) {
-        linesArray = linesArr;
+    function initLines(arr) {
+        linesArray = arr;
         console.log('Lines are downloaded!');
         /* eslint-disable */
-        linesCoord = parseLinesCoords(linesArr);
-        linesContainer = new createjs.Container().set({
-            name: 'linesContainer'
-        });
-        winLinesContainer = new createjs.Container().set({
-            name: 'winLinesContainer'
-        });
-        let bgStage = canvas.getStages().bgStage;
-        bgStage.addChildAt(winLinesContainer, 0);
-        let gameStage = canvas.getStages().gameStage;
-        gameStage.addChild(linesContainer);
-        events.trigger('linesCreated', linesCoord);
-        /* eslint-enable */
-        linesIsParsed = true;
-    }
-
-    function drawLinesNumbers() {
-        let i;
-        let linesLength = linesCoord.length;
-        /* eslint-disable */
-        let loader = preloader.getLoadResult();
-        linesContainer.removeAllChildren();
-        for (i = 0; i < linesLength; i++) {
-            let linesNumber = new createjs.Text(i + 1, parameters.font, parameters.color).set({
-                x: parameters[i + 1].x,
-                y: parameters[i + 1].y,
-                name: 'linesNumber' + (i + 1),
-                textAlign: 'center'
+        linesCoord = parseLinesCoords(arr);
+        linesPaths = parseLinesPaths(linesCoord);
+        spin.getGameDelta()
+            .then((result) => {
+                winLinesContainer = new createjs.Container().set({
+                    name: 'winLinesContainer',
+                    x: result.x,
+                    y: result.y
+                });
+                winRectsContainer = new createjs.Container().set({
+                    name: 'winRectsContainer',
+                    x: result.x,
+                    y: result.y
+                });
+                winNumbersContainer = new createjs.Container().set({
+                    name: 'winNumbersContainer'
+                });
+                let bgStage = canvas.getStages().bgStage;
+                let gameStage = canvas.getStages().gameStage;
+                bgStage.addChildAt(winLinesContainer, 0);
+                gameStage.addChildAt(winNumbersContainer, winRectsContainer, 0);
+                events.trigger('linesInited', linesCoord);
             });
-            let linesPipka = new createjs.Sprite(loader.getResult('linesPipka'), 'on').set({
-                x: parameters[i + 1].x,
-                y: parameters[i + 1].y,
-                name: 'linesPipka' + (i + 1),
-                regX: 11,
-                regY: 0
-            });
-            linesPipkas.push(linesPipka);
-            linesNumbers.push(linesNumber);
-            linesContainer.addChild(linesNumber, linesPipka);
-        }
-        let linesNumber = new createjs.Text(1, parameters.font, parameters.color).set({
-            x: parameters[22].x,
-            y: parameters[22].y,
-            name: 'linesNumber22',
-            textAlign: 'center'
-        });
-        let linesPipka = new createjs.Sprite(loader.getResult('linesPipka'), 'on').set({
-            x: parameters[22].x,
-            y: parameters[22].y,
-            name: 'linesPipka22',
-            regX: 11,
-            regY: 0
-        });
         /* eslint-enable */
-        linesPipkas.push(linesPipka);
-        linesNumbers.push(linesNumber);
-        linesContainer.addChild(linesNumber, linesPipka);
     }
 
     function parseLinesResult(arr) {
@@ -239,16 +191,16 @@ let lines = (function () {
         return result;
     }
 
-    function parseLinesCoords(linesArray) {
+    function parseLinesCoords(arr) {
         let i, j, len;
         let result = [];
-        for (i = 0, len = linesArray.length; i < len; i++) {
+        for (i = 0, len = arr.length; i < len; i++) {
             result[i] = [];
             for (j = 0; j < 5; j++) {
-                let x = +linesArray[i][j][0];
-                let y = +linesArray[i][j][1];
+                let x = +arr[i][j][0];
+                let y = +arr[i][j][1];
                 let resultX = 192 * (x + 0.5);
-                let resultY = 192 * (y + 0.5);
+                let resultY = 180 * (y + 0.5);
                 let resultCoords = {
                     x: resultX,
                     y: resultY
@@ -259,116 +211,328 @@ let lines = (function () {
         return result;
     }
 
+    function parseLinesPaths(coords) {
+        let result = [];
+        let linesLength = coords.length;
+        coords.forEach((line, number) => {
+            result[number] = [];
+            line.forEach((point, ind) => {
+                let x = point.x;
+                let y = point.y;
+                result[number].push(x, y);
+            });
+        });
+        return result;
+    }
+
     function saveWinLines(arr, rest) {
-        linesResult = arr;
+        winData = parseLinesResult(arr);
         winCoins = rest[0];
         winCents = rest[1];
-        winData = parseLinesResult(linesResult);
     }
 
-    function drawWinLine(data, winFlag) {
+    function drawLinesNumbers() {
         let i;
-        let stage = canvas.getStages().bgStage;
-        let gameContainer = stage.getChildByName('gameContainer');
+        let linesLength = linesCoord.length;
+        /* eslint-disable */
         let loader = preloader.getLoadResult();
-        console.log('Win Line Data is:', data);
-        let amount = data.amount;
-        let win = data.win;
-        let number = data.number;
-        gameContainer.removeChild(gameContainer.getChildByName('winText'));
-        gameContainer.removeChild(gameContainer.getChildByName('winLine'));
-        if (winFlag) {
-            let winLine = new createjs.Bitmap(loader.getResult('winLine')).set({
-                x: linesCoord[number - 1][amount - 1].x + 60,
-                y: linesCoord[number - 1][amount - 1].y + 40,
-                name: 'winLine'
-            });
-            let winText = new createjs.Text(win, 'bold 40px Arial', '#f0e194').set({
-                x: linesCoord[number - 1][amount - 1].x + 60,
-                y: linesCoord[number - 1][amount - 1].y + 40,
+        // winNumbersContainer.removeAllChildren();
+        for (i = 0; i < linesLength + 1; i++) {
+            let linesNumber = new createjs.Text(i + 1, parameters.font, parameters.color).set({
+                x: parameters[i + 1].x,
+                y: parameters[i + 1].y,
+                name: 'linesNumber' + (i + 1),
                 textAlign: 'center',
-                textBaseline: 'middle',
-                name: 'winText'
+                shadow: new createjs.Shadow('#C19433', 0, 0, 8)
             });
-            gameContainer.addChild(winLine, winText);
-        }
-        let line = linesArray[number - 1];
-        for (i = 0; i < amount; i++) {
-            let x = +line[i][0];
-            let y = +line[i][1];
-            let column = gameContainer.getChildByName('gameColumn' + i);
-            let element = column.getChildByName('gameElement' + (y + 1));
-            console.log('I find win Element:', element);
-            element.gotoAndStop('win');
-            let firstTween = createjs.Tween.get(element)
-                .to({scaleX: 0.8, scaleY: 0.8}, 200)
-                .to({scaleX: 1.15, scaleY: 1.15}, 700, createjs.Ease.bounceOut);
-            // let scaleTween = createjs.Tween.get(element, {loop: true})
-            //     .to({scaleX: 1, scaleY: 1}, 500)
-            //     .to({scaleX: 1.1, scaleY: 1.1}, 500);
+            if (i === linesLength) {
+                linesNumber.text = '1';
+            }
+            let linesDisc = new createjs.Sprite(loader.getResult('linesDisc'), 'on').set({
+                x: parameters[i + 1].x,
+                y: parameters[i + 1].y,
+                name: 'linesDisc' + (i + 1),
+                regX: 11,
+                regY: 0
+            });
+            linesDiscs.push(linesDisc);
+            linesNumbers.push(linesNumber);
+            winNumbersContainer.addChild(linesNumber, linesDisc);
         }
     }
 
-    function drawWinLines() {
-        let i, j, len;
-        if (winData[0]) {
-            for (i = 0, len = winData.length; i < len; i++) {
-                drawWinLine(winData[i], true);
-                let winNumber = winData[i].number;
-                let winPath = [];
-                if (+winNumber !== -1) {
-                    let winPipka = linesPipkas[winNumber - 1];
-                    winPipka.gotoAndStop('off');
-                    /* eslint-disable */
-                    let winLine = new createjs.Shape();
-                    /* eslint-enable */
-                    for (j = 0; j < 5; j++) {
-                        let currentCoords = linesCoord[winNumber - 1][j];
-                        console.log(currentCoords);
-                        winPath.push(currentCoords.x + 100, currentCoords.y + 75);
-                        if (j === 0) {
-                            winLine.graphics.s('rgba(244, 233, 205, 0.15)').setStrokeStyle(2).lt(currentCoords.x + 100, currentCoords.y + 75);
-                        } else {
-                            winLine.graphics.lt(currentCoords.x + 100, currentCoords.y + 75);
-                        }
-                    }
-                    winLine.graphics.es();
-                    winLines.push(winLine);
-                    guideBall(winPath);
-                    winLinesContainer.addChild(winLine);
+    function drawLinesLight(linePath) {
+        let i;
+        // if (winData.length < 4 && typeof index === 'undefined') {
+            var amount = Math.round(Math.random() * 50) + 10;
+        // } else {
+        //     var amount = Math.round(Math.random() * 10) + 10;
+        // }
+        /* eslint-disable */
+        let stage = canvas.getStages().bgStage;
+        let loader = preloader.getLoadResult();
+        for (i = 0; i < amount; i++) {
+            let timeout = Math.random() * 700;
+            let light = new createjs.Sprite(loader.getResult('linesSprite'), 'go').set({
+                x: linePath[0],
+                y: linePath[1],
+                regX: 24,
+                regY: 19,
+                name: 'winLight'
+            });
+            createjs.Tween.get(light)
+                .wait(timeout)
+                .to({guide: {path: linePath, orient: 'cw'}}, 700)
+                .call((tween) => {
+                    winLinesContainer.removeChild(tween.target);
+                });
+            /* eslint-enable */
+            winLinesContainer.addChild(light);
+        }
+    }
+
+    function drawLinesText(num, amt, win) {
+        let loader = preloader.getLoadResult();
+        let winText = new createjs.Container().set({
+            y: linesCoord[num - 1][amt - 1].y + 30,
+            x: linesCoord[num - 1][amt - 1].x + 32,
+            name: 'winText'
+        });
+        let winLineRect = new createjs.Bitmap(loader.getResult('winLineRect')).set({
+            name: 'winLineRect',
+            scaleX: 1.8,
+            scaleY: 1.8
+        });
+        let winLineText = new createjs.Text(win, 'bold 35px Arial', '#f0e194').set({
+            x: 30,
+            y: 23,
+            textAlign: 'center',
+            textBaseline: 'middle',
+            name: 'winLineText',
+            shadow: new createjs.Shadow('#C19433', 0, 0, 8)
+        });
+        if ((winLineText.text+'').length > 3) {
+            winLineText.font = 'bold 20px Arial';
+        } else if ((winLineText.text+'').length > 2) {
+            winLineText.font = 'bold 25px Arial';
+        } else if ((winLineText.text+'').length > 1) {
+            winLineText.font = 'bold 30px Arial';
+        }
+        winText.addChild(winLineRect, winLineText);
+        winRects.push(winText);
+        winRectsContainer.addChild(winText);
+    }
+
+    function drawLinesShape(num) {
+        let j;
+        if (num !== -1) {
+            let winDisc = linesDiscs[num - 1];
+            winDisc.gotoAndStop('off');
+            /* eslint-disable */
+            let winLine = new createjs.Shape();
+            /* eslint-enable */
+            for (j = 0; j < 5; j++) {
+                let currentCoords = linesCoord[num - 1][j];
+                if (j === 0) {
+                    winLine.graphics.s('rgba(244, 233, 205, 0.15)').setStrokeStyle(2).lt(currentCoords.x, currentCoords.y);
+                } else {
+                    winLine.graphics.lt(currentCoords.x, currentCoords.y);
                 }
             }
+            winLine.graphics.es();
+            winLines.push(winLine);
+            winLinesContainer.addChild(winLine);
+        }
+    }
+
+    function drawWinLine(data, winFlag = false, lightFlag = true, shapeFlag = true, index) {
+        console.log('I called with data:', data);
+        let i, j;
+        let stage = canvas.getStages().bgStage;
+        let loader = preloader.getLoadResult();
+        let gameContainer = stage.getChildByName('gameContainer');
+
+        if (data) {
+            let number = data.number;
+            let amount = data.amount;
+            let win = data.win;
+
+            if (number !== -1) {
+                if (winFlag) {
+                    drawLinesText(number, amount, win);
+                }
+                if (lightFlag) {
+                    let path = linesPaths[number - 1];
+                    drawLinesLight(path);
+                }
+                if (shapeFlag) {
+                    drawLinesShape(number);
+                }
+                let line = linesArray[number - 1];
+                for (i = 0; i < amount; i++) {
+                    let x = +line[i][0];
+                    let y = +line[i][1];
+                    let column = gameContainer.getChildByName('gameColumn' + i);
+                    let element = column.getChildByName('gameElement' + (y + 1));
+                    let animationName = element.currentAnimation;
+                    let elementIndex = animationName.substr(animationName.indexOf('-') + 1);
+                    element.gotoAndStop(`win-${elementIndex}`);
+                    createjs.Tween.get(element)
+                    .to({scaleX: 0.8, scaleY: 0.8}, 200)
+                    .to({scaleX: 1.1, scaleY: 1.1}, 700, createjs.Ease.bounceOut);
+                }
+            } else {
+                for (i = 0; i < 5; i++) {
+                    let column = gameContainer.getChildByName('gameColumn' + i);
+                    for (j = 0; j < 5; j++) {
+                        let element = column.getChildByName('gameElement' + j);
+                        let animationName = element.currentAnimation;
+                        let elementIndex = animationName.substr(animationName.indexOf('-') + 1);
+                        if (+elementIndex === 10) {
+                            element.gotoAndStop(`win-${elementIndex}`);
+                            createjs.Tween.get(element)
+                            .to({scaleX: 0.8, scaleY: 0.8}, 200)
+                            .to({scaleX: 1.1, scaleY: 1.1}, 700, createjs.Ease.bounceOut);
+                        }
+                    }
+                }
+            }
+            if (typeof index !== 'undefined') {
+                let scatterTimer;
+                lineTrigger = createjs.Ticker.on('tick', (event) => {
+                    if (number !== -1) {
+                        if(!winLinesContainer.getChildByName('winLight')) {
+                            event.remove();
+                            removeWinScreen();
+                            if (winFinishData[index + 1]) {
+                                drawWinLine(winFinishData[index + 1], true, true, true, index + 1)
+                            } else {
+                                drawWinLine(winFinishData[0], true, true, true, 0)
+                            }
+                        }
+                    }
+                    else {
+                        if(!scatterTimer) {
+                            scatterTimer = setTimeout(function () {
+                                event.remove();
+                                removeWinScreen();
+                                if (winFinishData[index + 1]) {
+                                    drawWinLine(winFinishData[index + 1], true, true, true, index + 1)
+                                } else {
+                                    drawWinLine(winFinishData[0], true, true, true, 0)
+                                }
+                            }, 1000);
+
+                        }
+                    }
+                });
+            }
+        }
+    }
+
+    function drawWinLines(autoMode) {
+        autoModeFlag = autoMode;
+        let i, j, len;
+        let loader = preloader.getLoadResult();
+        if (winData[0]) {
+            for (i = 0, len = winData.length; i < len; i++) {
+                drawWinLine(winData[i], false);
+            }
+            let totalWin = new createjs.Container().set({
+                name: 'totalWin',
+                x: (960 - 176) / 2 + 3,
+                y: (540 - 150) / 2
+            });
+            let totalWinText = new createjs.Text(winCoins, 'bold 75px Arial', '#f0e194').set({
+                x: 88,
+                y: 75,
+                name: 'totalWinText',
+                textAlign: 'center',
+                textBaseline: 'middle',
+                shadow: new createjs.Shadow('#C19433', 0, 0, 8)
+            });
+            let totalWinRect = new createjs.Bitmap(loader.getResult('winTotalRect')).set({
+                name: 'totalWinRect'
+            })
+            totalWin.addChild(totalWinRect, totalWinText);
+            winRectsContainer.addChild(totalWin);
+            if (!autoModeFlag) {
+                if (winData.length === 1 && +winData[0].number === -1) {
+                    console.warn('Only Scatters here!');
+                } else {
+                    linesTrigger = createjs.Ticker.on('tick', (event) => {
+                        if(!winLinesContainer.getChildByName('winLight')) {
+                            console.warn('Animation finished!');
+                            event.remove();
+                            removeWinScreen();
+                            for (let i = 0, len = winData.length; i < len; i++) {
+                                winFinishData[i] = winData[i];
+                            }
+                            drawWinLine(winFinishData[0], true, true, true, 0);
+                        }
+                    });
+                }
+            } else {
+                autoTimer = setTimeout(function () {
+                    events.trigger('startAutoplay');
+                }, 1500);
+            }
+        } else if (autoModeFlag) {
+            autoTimer = setTimeout(function () {
+                events.trigger('startAutoplay');
+            }, 200);
+        }
+    }
+
+    function removeWinScreen() {
+        let i, j, len;
+        let stage = canvas.getStages().bgStage;
+        let gameContainer = stage.getChildByName('gameContainer');
+        winRectsContainer.removeAllChildren();
+        winLinesContainer.removeAllChildren();
+        for (i = 0; i < 5; i++) {
+            let column = gameContainer.getChildByName('gameColumn' + i);
+            for (j = 0; j < 5; j++) {
+                let element = column.getChildByName('gameElement' + j);
+                let animationName = element.currentAnimation;
+                let elementIndex = animationName.substr(animationName.indexOf('-') + 1);
+                element.gotoAndStop(`normal-${elementIndex}`);
+                element.set({scaleX: 1, scaleY: 1});
+            }
+        }
+        for (i = 0, len = linesCoord.length; i < len; i++) {
+            let lineDisc = linesDiscs[i];
+            lineDisc.gotoAndStop('on');
         }
     }
 
     function removeWinLines() {
         let i, len;
+        createjs.Ticker.off('tick', lineTrigger);
+        createjs.Ticker.off('tick', linesTrigger);
         if (winData[0]) {
-            for (i = 0, len = linesPipkas.length; i < len; i++) {
-                let winPipka = linesPipkas[i];
-                winPipka.gotoAndStop('on');
-                if (winLines[i]) {
-                    winLinesContainer.removeChild(winLines[i]);
-                    // winLinesContainer.removeAllChildren();
-                }
-            }
             winData = [];
+            winFinishData = [];
+            for (i = 0, len = linesDiscs.length; i < len; i++) {
+                let winDisc = linesDiscs[i];
+                winDisc.gotoAndStop('on');
+            }
+            winLinesContainer.removeAllChildren();
+            winRectsContainer.removeAllChildren();
             winLines = [];
+            winRects = [];
         }
     }
 
-    function checkLines() {
-        if (linesIsParsed) {
-            /* eslint-disable */
-            events.trigger('linesParsed');
-            /* eslint-enable */
-        }
+    function clearAutoTimer() {
+        clearTimeout(autoTimer);
+        autoModeFlag = false;
+        console.warn('I try to clear Timer!', autoTimer);
     }
 
     /* eslint-disable */
     events.on('initLines', initLines);
-    events.on('preloadComplete', checkLines);
-    events.on('linesParsed', drawLinesNumbers);
+    events.on('linesInited', drawLinesNumbers);
     events.on('spinStart', removeWinLines);
     events.on('spinEnd', drawWinLines);
     events.on('spinWin', saveWinLines);
@@ -376,7 +540,7 @@ let lines = (function () {
 
     return {
         drawLinesNumbers,
-        guideBall,
-        drawWinLine
+        drawWinLine,
+        clearAutoTimer
     };
 })();

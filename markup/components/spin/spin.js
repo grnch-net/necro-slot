@@ -11,14 +11,18 @@ let spin = (function () {
     // Flag
     let inProgress;
     let fastSpinFlag;
+    let locked;
     let fastSpinTimer;
+    let autoSpinFlag;
+
+    // Container
+    let gameContainer;
 
     // Data
     let wheels;
     let columns;
     let currentScreen;
     let nextScreen;
-    let gameContainer;
 
     // Balance
     let winCoins;
@@ -29,14 +33,49 @@ let spin = (function () {
     let linesResult;
 
     // Bonuses
-    let bonusLevelStart;
+    let bonusLevelName;
     let bonusEnd;
     let bonusValue;
     let bonusOldValues;
     let bonusWinCoins;
     let bonusWinCents;
 
-    function getScreenData(inds) {
+    function initWheels(wheelsArray) {
+        let i, randomArray = [];
+        wheels = wheelsArray;
+        console.log('Wheels:', wheels);
+        for (i = 0; i < columnsNumber; i++) {
+            let randomNumber = Math.round(Math.random() * (wheelsArray.length - 1));
+            randomArray.push(randomNumber);
+        }
+        /* eslint-disable */
+        currentScreen = _getScreenData(randomArray);
+        events.on('preloadComplete', _initScreen);
+        /* eslint-enable */
+    }
+
+    function _initScreen() {
+        /* eslint-disable */
+        drawScreen(currentScreen);
+        /* eslint-enable */
+    }
+
+    function _initGameContainer(x, y) {
+        /* eslint-disable */
+        gameContainer = new createjs.Container().set({
+            x: x, // Смещение gameContainer и маски должны совпадать
+            y: y, // Смещение gameContainer и маски должны совпадать
+            name: 'gameContainer'
+        });
+        let stage = canvas.getStages().bgStage;
+        let gameMask = new createjs.Shape();
+        /* eslint-enable */
+        gameMask.graphics.drawRect(x, y, 960, 540); // Смещение gameContainer и маски должны совпадать
+        gameContainer.mask = gameMask;
+        stage.addChild(gameContainer);
+    }
+
+    function _getScreenData(inds) {
         inds = inds || indexes;
         let i, j, screen = [];
         let wheelsLength = +wheels[0].length; // Если колеса будут разной длинны поломается
@@ -59,67 +98,103 @@ let spin = (function () {
         return screen;
     }
 
-    function getWheels(wheelsArray) {
-        let i, randomArray = [];
-        for (i = 0; i < columnsNumber; i++) {
-            let randomNumber = Math.round(Math.random() * (wheelsArray.length - 1));
-            randomArray.push(randomNumber);
-        }
-        wheels = wheelsArray;
-        console.log('Wheels:', wheels);
-        currentScreen = getScreenData(randomArray);
+    function _createColumn(startArray, endArray) {
+        let i;
         /* eslint-disable */
-        events.on('preloadComplete', initScreen);
+        let loader = preloader.getLoadResult();
+        let spriteSheet = loader.getResult('elements');
+        if (endArray) {
+            let column = new createjs.SpriteContainer(spriteSheet);
+            for (i = 0; i < longRowsNumber; i++) {
+                if (i < rowsNumber) {
+                    let elementNumber = endArray[i];
+                    let element = new createjs.Sprite(spriteSheet, `normal-${elementNumber}`).set({
+                        x: 96,
+                        y: elementHeight * i + 90,
+                        name: 'gameElement' + i,
+                        regX: 96,
+                        regY: 90
+                    });
+                    element.snapToPixel = true;
+                    column.addChild(element);
+                } else if (i >= longRowsNumber - rowsNumber) {
+                    let elementNumber = startArray[i - longRowsNumber + rowsNumber];
+                    let element = new createjs.Sprite(spriteSheet, `normal-${elementNumber}`).set({
+                        x: 96,
+                        y: elementHeight * i + 90,
+                        name: 'gameElement' + i,
+                        regX: 96,
+                        regY: 90
+                    });
+                    element.snapToPixel = true;
+                    column.addChild(element);
+                } else {
+                    let elementNumber = Math.ceil(Math.random() * 10);
+                    let element = new createjs.Sprite(spriteSheet, `blur-${elementNumber}`).set({
+                        x: 96,
+                        y: elementHeight * i + 90,
+                        name: 'gameElement' + i,
+                        regX: 96,
+                        regY: 90
+                    });
+                    element.snapToPixel = true;
+                    column.addChild(element);
+                }
+                column.set({
+                    y: -elementHeight * (longRowsNumber - 4)
+                });
+            }
+            return column;
+        } else {
+            let column = new createjs.SpriteContainer(spriteSheet);
+            for (i = 0; i < rowsNumber; i++) {
+                let elementNumber = startArray[i];
+                let element = new createjs.Sprite(spriteSheet, `normal-${elementNumber}`).set({
+                    y: elementHeight * i
+                });
+                column.addChild(element);
+                column.set({
+                    y: -elementHeight
+                });
+            }
+            return column;
+        }
         /* eslint-enable */
     }
 
-    function getCurrentScreen() {
-        if (currentScreen) {
-            return currentScreen;
-        } else {
-            console.error('Current screen is not defined!');
-        }
-    }
-
-    function getNextScreen() {
-        if (nextScreen) {
-            return nextScreen;
-        } else {
-            console.error('I do not know next screen!');
-        }
-    }
-
-    function getSpinState() {
-        return {
-            inProgress,
-            fastSpinFlag
-        };
-    }
-
-    function initGameContainer(x, y) {
-        /* eslint-disable */
-        gameContainer = new createjs.Container().set({
-            x: x, // Смещение gameContainer и маски должны совпадать
-            y: y, // Смещение gameContainer и маски должны совпадать
-            name: 'gameContainer'
+    function _requestSpin() {
+        return new Promise(function (resolve, reject) {
+            /* eslint-disable */
+            let coinsValue = balance.getBalance().coinsValue.toString().replace('.', ','); // КОСТЫЛЬ coinsValue должен быть адекватным (без точки)
+            let betValue = balance.getBalance().betValue;
+            $.ajax({
+                url: `${serviceUrl}_Roll/${login.getSessionID()}/${betValue}/${coinsValue}`,
+                /* eslint-enable */
+                dataType: 'JSONP',
+                type: 'GET',
+                success: resolve,
+                error: reject
+            });
         });
-        let stage = canvas.getStages().bgStage;
-        let gameMask = new createjs.Shape();
-        /* eslint-enable */
-        gameMask.graphics.drawRect(x, y, 960, 540); // Смещение gameContainer и маски должны совпадать
-        gameContainer.mask = gameMask;
-        stage.addChild(gameContainer);
     }
 
-    function initScreen() {
-        /* eslint-disable */
-        drawScreen(currentScreen);
-        /* eslint-enable */
+    function _requestReady() {
+        return new Promise(function (resolve, reject) {
+            $.ajax({
+                /* eslint-disable */
+                url: `${serviceUrl}_Ready/${login.getSessionID()}`,
+                /* eslint-enable */
+                dataType: 'JSONP',
+                type: 'GET',
+                success: resolve,
+                error: reject
+            });
+        });
     }
 
     function drawScreen(nextScreenData) {
         if (!gameContainer) {
-            initGameContainer(100, 89);
+            _initGameContainer(100, 89);
         } else {
             gameContainer.removeAllChildren();
         }
@@ -131,7 +206,7 @@ let spin = (function () {
 
         if (nextScreen) {
             for (i = 0; i < columnsNumber; i++) {
-                columns[i] = createColumn(currentScreen[i], nextScreenData[i]).set({
+                columns[i] = _createColumn(currentScreen[i], nextScreenData[i]).set({
                     x: elementWidth * i,
                     name: 'gameColumn' + i
                 });
@@ -147,76 +222,12 @@ let spin = (function () {
             console.log('I am drawing new screen!');
         } else {
             for (i = 0; i < columnsNumber; i++) {
-                columns[i] = createColumn(nextScreenData[i]).set({
+                columns[i] = _createColumn(nextScreenData[i]).set({
                     x: elementWidth * i
                 });
                 gameContainer.addChild(columns[i]);
             }
             console.log('I am drawing first screen!');
-        }
-        /* eslint-enable */
-    }
-
-    function createColumn(startArray, endArray) {
-        let i;
-        /* eslint-disable */
-        let loader = preloader.getLoadResult();
-        if (endArray) {
-            let column = new createjs.Container();
-            for (i = 0; i < longRowsNumber; i++) {
-                if (i < rowsNumber) {
-                    let elementNumber = endArray[i];
-                    let element = new createjs.Sprite(loader.getResult('element' + elementNumber), 'normal').set({
-                        x: 96,
-                        y: elementHeight * i + 90,
-                        name: 'gameElement' + i,
-                        regX: 96,
-                        regY: 90
-                    });
-                    element.snapToPixel = true;
-                    column.addChild(element);
-                } else if (i >= longRowsNumber - rowsNumber) {
-                    let elementNumber = startArray[i - longRowsNumber + rowsNumber];
-                    let element = new createjs.Sprite(loader.getResult('element' + elementNumber), 'normal').set({
-                        x: 96,
-                        y: elementHeight * i + 90,
-                        name: 'gameElement' + i,
-                        regX: 96,
-                        regY: 90
-                    });
-                    element.snapToPixel = true;
-                    column.addChild(element);
-                } else {
-                    let elementNumber = Math.ceil(Math.random() * 10);
-                    let element = new createjs.Sprite(loader.getResult('element' + elementNumber), 'blur').set({
-                        x: 96,
-                        y: elementHeight * i + 90,
-                        name: 'gameElement' + i,
-                        regX: 96,
-                        regY: 90
-                    });
-                    element.snapToPixel = true;
-                    column.addChild(element);
-                }
-                column.set({
-                    y: -elementHeight * (longRowsNumber - 4)
-                });
-                // column.cache(0, 0, elementWidth, elementHeight * longRowsNumber);
-            }
-            return column;
-        } else {
-            let column = new createjs.Container();
-            for (i = 0; i < rowsNumber; i++) {
-                let elementNumber = startArray[i];
-                let element = new createjs.Sprite(loader.getResult('element' + elementNumber), 'normal').set({
-                    y: elementHeight * i
-                });
-                column.addChild(element);
-                column.set({
-                    y: -elementHeight
-                });
-            }
-            return column;
         }
         /* eslint-enable */
     }
@@ -243,49 +254,24 @@ let spin = (function () {
         console.log('I am Fast Spin! And I am called!');
         let i, time = 500;
         /* eslint-disable */
-        let gameStage = canvas.getStages().bgStage;
-        for (i = 0; i < columns.length; i++) {
-            let shadow = gameStage.getChildByName('gameContainer').getChildByName('gameShadow' + i);
-            createjs.Tween.get(columns[i], {override: true})
+        if (!locked) {
+            let gameStage = canvas.getStages().bgStage;
+            for (i = 0; i < columns.length; i++) {
+                let shadow = gameStage.getChildByName('gameContainer').getChildByName('gameShadow' + i);
+                createjs.Tween.get(columns[i], {override: true})
                 .to({ y: -elementHeight}, time, createjs.Ease.circOut)
                 .call(spinEnd.bind(null, i));
-            createjs.Tween.get(shadow, {override: true})
+                createjs.Tween.get(shadow, {override: true})
                 .to({ alpha: 0}, time, createjs.Ease.circOut);
+            }
         }
+        locked = true;
         /* eslint-enable */
     }
 
-    function requestSpin() {
-        return new Promise(function (resolve, reject) {
-            /* eslint-disable */
-            let coinsValue = balance.getCoinsValue().toString().replace('.', ','); // КОСТЫЛЬ coinsValue должен быть адекватным (без точки)
-            $.ajax({
-                url: `${serviceUrl}_Roll/${login.getSessionID()}/${balance.getBetValue()}/${coinsValue}`,
-                /* eslint-enable */
-                dataType: 'JSONP',
-                type: 'GET',
-                success: resolve,
-                error: reject
-            });
-        });
-    }
-
-    function requestReady() {
-        return new Promise(function (resolve, reject) {
-            $.ajax({
-                /* eslint-disable */
-                url: `${serviceUrl}_Ready/${login.getSessionID()}`,
-                /* eslint-enable */
-                dataType: 'JSONP',
-                type: 'GET',
-                success: resolve,
-                error: reject
-            });
-        });
-    }
-
-    function spinStart() {
-        requestSpin()
+    function spinStart(autoSpin = false) {
+        autoSpinFlag = autoSpin;
+        _requestSpin()
             .then((data) => {
                 console.log('Spin data:', data);
                 if (data.Type === 'Simple') {
@@ -305,23 +291,31 @@ let spin = (function () {
                     } else {
                         console.log('You win nothing.');
                     }
-                    bonusLevelStart = data.BonusResults[0];
-                    if (bonusLevelStart === 'StagesSlotBonus') {
+                    bonusLevelName = data.BonusResults[0];
+                    if (bonusLevelName === 'StagesSlotBonus') {
                         console.log('You are starting Bonus Level!');
                         /* eslint-disable */
-                        events.trigger('bonusStart');
+                        events.trigger('startBonus');
+                        /* eslint-enable */
+                    } else if (bonusLevelName === 'FreeSpinBonus') {
+                        console.log('You are starting Free Spins!');
+                        let fsCount = data.FreeSpins;
+                        let fsLevel = data.Multiplier.MultiplierStep;
+                        let fsMulti = data.Multiplier.MultiplierValue;
+                        /* eslint-disable */
+                        events.trigger('initFreeSpins', fsCount, fsLevel, fsMulti);
                         /* eslint-enable */
                     }
 
                     indexes = data.Indexes;
-                    nextScreen = getScreenData();
+                    nextScreen = _getScreenData();
                     drawScreen();
                     currentScreen = nextScreen;
                     inProgress = true;
                     fastSpinTimer = setTimeout(function () {
                         fastSpinFlag = true;
                         console.log('You could do Fast Spin!');
-                    }, 500);
+                    }, 750);
                 } else if (data.Type === 'StagesSlotBonus') {
                     bonusEnd = data.BonusEnd;
                     if (bonusEnd) {
@@ -345,15 +339,22 @@ let spin = (function () {
 
     function spinEnd(i) {
         if (i === 4) {
-            requestReady()
+            _requestReady()
             .then((response) => {
                 if (response.ErrorCode === 0) {
                     inProgress = false;
                     fastSpinFlag = false;
+                    if (linesResult[0]) {
+                        setTimeout(function () {
+                            locked = false;
+                        }, 300);
+                    } else {
+                        locked = false;
+                    }
                     console.log('Spin is done!');
                     let winCash = (winCents / 100).toFixed(2);
                     /* eslint-disable */
-                    events.trigger('spinEnd', winCash, scoreCoins, scoreCents);
+                    events.trigger('spinEnd', autoSpinFlag, winCash, scoreCoins, scoreCents);
                     /* eslint-enable */
                 } else {
                     console.error(response.ErrorMessage);
@@ -362,18 +363,69 @@ let spin = (function () {
         }
     }
 
+    function getCurrentScreen() {
+        if (typeof currentScreen !== 'undefined') {
+            return currentScreen;
+        } else {
+            console.error('Current screen is not defined!');
+        }
+    }
+
+    function getNextScreen() {
+        if (typeof nextScreen !== 'undefined') {
+            return nextScreen;
+        } else {
+            console.error('I do not know next screen!');
+        }
+    }
+
+    function getSpinState() {
+        return {
+            inProgress,
+            fastSpinFlag,
+            locked
+        };
+    }
+
+    function getGameDelta() {
+        return new Promise(function (resolve, reject) {
+            /* eslint-disable */
+            createjs.Ticker.on('tick', function(event){
+            /* eslint-enable */
+                if (gameContainer) {
+                    if (typeof gameContainer.x !== 'undefined') {
+                        if (typeof gameContainer.y !== 'undefined') {
+                            event.remove();
+                            let result = {
+                                x: gameContainer.x,
+                                y: gameContainer.y
+                            };
+                            resolve(result);
+                        }
+                    }
+                }
+            });
+        });
+    }
+
+    function logWinLines(lin) {
+        console.log(`Win Lines is: ${lin}`);
+    }
+
     /* eslint-disable */
-    events.on('initWheels', getWheels);
+    events.on('initWheels', initWheels);
     events.on('initScreen', drawScreen);
+
+    events.on('spinWin', logWinLines);
     /* eslint-enable */
 
     return {
         spinStart,
         spinEnd,
         fastSpin,
-        getScreenData,
         getCurrentScreen,
         getNextScreen,
-        getSpinState
+        getSpinState,
+        getGameDelta
     };
 })();

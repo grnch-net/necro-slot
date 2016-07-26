@@ -39,7 +39,7 @@ let canvas = (function () {
     }
 
     function getStages() {
-        if (stages) {
+        if (typeof stages !== 'undefined') {
             return stages;
         } else {
             throw new Error('Stages are not created.');
@@ -56,7 +56,7 @@ let canvas = (function () {
     }
 
     /* eslint-disable */
-    events.on('initCanvas', initStages);
+    events.on('initStages', initStages);
     /* eslint-enable */
 
     return {

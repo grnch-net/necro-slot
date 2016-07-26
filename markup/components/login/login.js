@@ -3,10 +3,9 @@ let login = (function () {
     // Consts
     const serviceUrl = 'http://gameservice.bossgs.org/slot/SlotService.svc/';
 
-    let logged = false;
     let sessionID;
 
-    function requestSessionID(userID, casinoID) {
+    function _requestSessionID(userID, casinoID) {
         return new Promise(function (resolve, reject) {
             $.ajax({
                 url: `${serviceUrl}_Login/${userID}/${casinoID}`,
@@ -18,37 +17,49 @@ let login = (function () {
         });
     }
 
-    function tryToLogin(userID, casinoID) {
+    function enter(userID, casinoID) {
         userID = userID || 1; // КОСТЫЛЬ! Должен получать от сервера инициализации.
         casinoID = casinoID || 1; // КОСТЫЛЬ! Должен получать от сервера инициализации.
-        return requestSessionID(userID, casinoID)
-            .then((ID) => {
-                logged = true;
+        _requestSessionID(userID, casinoID)
+            .then(ID => {
                 sessionID = ID;
                 console.log(`I am logged! SessionID is ${sessionID}.`);
                 /* eslint-disable */
-                events.trigger('logged', sessionID);
-                events.trigger('initCanvas', sessionID);
+                events.trigger('initGame', sessionID);
+                events.trigger('initStages', sessionID);
                 events.trigger('initPreloader', sessionID);
                 /* eslint-enable */
             })
             .catch(error => console.error(error));
     }
 
+    function promiseSessionID() {
+        return new Promise(function (resolve, reject) {
+            /* eslint-disable */
+            createjs.Ticker.on('tick', (event) => {
+                /* eslint-enable */
+                if (typeof sessionID !== 'undefined') {
+                    event.remove();
+                    resolve(sessionID);
+                }
+            });
+        });
+    }
+
     function getSessionID() {
-        /* eslint-disable */
-        if (sessionID !== undefined) {
-        /* eslint-enable */
+        if (typeof sessionID !== 'undefined') {
             return sessionID;
         } else {
-            throw new Error('You are not logged.');
+            throw new Error('We have no sessionID!');
         }
     }
 
     return {
-        tryToLogin,
-        getSessionID
+        enter,
+        getSessionID,
+        promiseSessionID
     };
 
 })();
-login.tryToLogin();
+
+login.enter();

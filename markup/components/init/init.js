@@ -2,13 +2,13 @@ let init = (function () {
 
     // Consts
     const serviceUrl = 'http://gameservice.bossgs.org/slot/SlotService.svc/';
-    const gameID = 1; // КОСТЫЛЬ! Должен получать от сервера инициализации.
+    const gameID = 6; // КОСТЫЛЬ! Должен получать от сервера инициализации.
 
     let wheels;
     let balance;
     let lines;
 
-    function startGame(sessionID) {
+    function _startGame(sessionID) {
         return new Promise(function (resolve, reject) {
             $.ajax({
                 url: `${serviceUrl}_Play/${sessionID}/${gameID}`,
@@ -20,17 +20,15 @@ let init = (function () {
         });
     }
 
-    function checkBalance(balanceData) {
-        if (balanceData.ScoreCents && balanceData.ScoreCoins) {
-            console.log('Balance is normal.');
-            balance = balanceData;
+    function _checkBalance(balanceData) {
+        if (+balanceData.ScoreCents > 0 && +balanceData.ScoreCoins > 0) {
             return true;
         } else {
             throw new Error('Low money(((');
         }
     }
 
-    function requestWheels(sessionID, gameMode) {
+    function _requestWheels(sessionID, gameMode) {
         return new Promise(function (resolve, reject) {
             switch (gameMode) {
                 case 'fsMode':
@@ -54,7 +52,7 @@ let init = (function () {
         });
     }
 
-    function parseWheels(string) {
+    function _parseWheels(string) {
         let wheelsMas = string.split('|').map((column) => {
             return column.split('@');
         });
@@ -108,7 +106,7 @@ let init = (function () {
         return wheelsMas;
     }
 
-    function requestLines(sessionID) {
+    function _requestLines(sessionID) {
         return new Promise(function (resolve, reject) {
             $.ajax({
                 url: `${serviceUrl}_GetLines/${sessionID}`,
@@ -120,7 +118,7 @@ let init = (function () {
         });
     }
 
-    function parseLines(string) {
+    function _parseLines(string) {
         let linesMas = string.split('|').map((line, lineNumber) => {
             return line.split('@').map((coords, index) => {
                 return coords.split(',');
@@ -129,51 +127,29 @@ let init = (function () {
         return linesMas;
     }
 
-    function getBalance() {
-        if (balance) {
-            return balance;
-        } else {
-            throw new Error('We have no balance!');
-        }
-    }
-
-    function getWheels() {
-        if (wheels) {
-            return wheels;
-        } else {
-            throw new Error('Wheels is undefined!');
-        }
-    }
-
-    function getLines() {
-        if (lines) {
-            return lines;
-        } else {
-            throw new Error('We have no lines coords!');
-        }
-    }
-
     function initGame(sessionID) {
-        startGame(sessionID)
+        _startGame(sessionID)
             .then((balanceData) => {
-                if (checkBalance(balanceData)) {
+                if (_checkBalance(balanceData)) {
+                    console.log('Balance is downloaded!');
+                    balance = balanceData;
                     /* eslint-disable */
                     events.trigger('initBalance', balanceData);
                     /* eslint-enable */
-                    return requestWheels(sessionID);
+                    return _requestWheels(sessionID);
                 }
             })
             .then((wheelsString) => {
                 console.log('Wheels are downloaded!');
-                wheels = parseWheels(wheelsString);
+                wheels = _parseWheels(wheelsString);
                 /* eslint-disable */
                 events.trigger('initWheels', wheels);
                 /* eslint-enable */
-                return requestLines(sessionID);
+                return _requestLines(sessionID);
             })
             .then((linesString) => {
                 console.log('Lines are downloaded!');
-                lines = parseLines(linesString);
+                lines = _parseLines(linesString);
                 /* eslint-disable */
                 events.trigger('initLines', lines);
                 /* eslint-enable */
@@ -181,14 +157,79 @@ let init = (function () {
             .catch(error => console.dir(error));
     }
 
+    function getWheels() {
+        if (typeof wheels !== 'undefined') {
+            return wheels;
+        } else {
+            throw new Error('Wheels is undefined!');
+        }
+    }
+
+    function getBalance() {
+        if (typeof balance !== 'undefined') {
+            return balance;
+        } else {
+            throw new Error('We have no balance!');
+        }
+    }
+
+    function getLines() {
+        if (typeof lines !== 'undefined') {
+            return lines;
+        } else {
+            throw new Error('We have no lines coords!');
+        }
+    }
+
+    function promiseWheels() {
+        return new Promise(function (resolve, reject) {
+            /* eslint-disable */
+            createjs.Ticker.on('tick', (event) => {
+                /* eslint-enable */
+                if (typeof wheels !== 'undefined') {
+                    event.remove();
+                    resolve(wheels);
+                }
+            });
+        });
+    }
+
+    function promiseBalance() {
+        return new Promise(function (resolve, reject) {
+            /* eslint-disable */
+            createjs.Ticker.on('tick', (event) => {
+                /* eslint-enable */
+                if (typeof balance !== 'undefined') {
+                    event.remove();
+                    resolve(balance);
+                }
+            });
+        });
+    }
+
+    function promiseLines() {
+        return new Promise(function (resolve, reject) {
+            /* eslint-disable */
+            createjs.Ticker.on('tick', (event) => {
+                /* eslint-enable */
+                if (typeof lines !== 'undefined') {
+                    event.remove();
+                    resolve(lines);
+                }
+            });
+        });
+    }
+
     /* eslint-disable */
-    events.on('logged', initGame);
+    events.on('initGame', initGame);
     /* eslint-enable */
+
     return {
-        initGame,
-        requestWheels,
         getWheels,
         getBalance,
-        getLines
+        getLines,
+        promiseWheels,
+        promiseBalance,
+        promiseLines
     };
 })();

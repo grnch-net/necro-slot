@@ -3,12 +3,13 @@
     "frames": {
         "width": 100,
         "height": 101,
-        "count": 3
+        "count": 4
     },
     "framerate": 12,
     "animations": {
         "out": 0,
         "over": 2,
-        "down": 1
+        "down": 1,
+        "fs": 3
     }
 }
