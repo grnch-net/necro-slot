@@ -1,0 +1,14 @@
+{
+    "images": ["static/img/content/menu/menuBack.png"],
+    "frames": {
+        "width": 104,
+        "height": 105,
+        "count": 3
+    },
+    "framerate": 12,
+    "animations": {
+        "out": [0],
+        "on": [1],
+        "over": [2]
+    }
+}
