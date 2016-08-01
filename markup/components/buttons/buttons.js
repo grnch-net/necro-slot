@@ -180,10 +180,11 @@ let buttons = (function () {
         autoText.text = newText;
     }
 
-    function startFSButtons(count, rest) {
+    function startFSButtons(data) {
         fsMode = true;
-        let level = rest[0];
-        let multi = rest[1];
+        let count = data.fsCount;
+        let level = data.fsLevel;
+        let multi = data.fsMulti;
         let fsLevel = new createjs.Text(level, "50px bold Arial", "#90fd5a").set({
             name: 'fsLevel',
             x: autoSprite.x,
@@ -211,6 +212,36 @@ let buttons = (function () {
         buttonsContainer.addChild(fsLevel, fsMulti, fsCount);
     }
 
+    function updateFSButtons(newData) {
+        if (buttonsContainer.getChildByName('fsCount')) {
+            if (typeof newData.fsCount !== 'undefined') {
+                var newCount = newData.fsCount;
+                let fsCountText = buttonsContainer.getChildByName('fsCount').text;
+                if (+fsCountText !== newCount) {
+                    buttonsContainer.getChildByName('fsCount').text = newCount;
+                }
+            } else {
+                buttonsContainer.getChildByName('fsCount').text = +buttonsContainer.getChildByName('fsCount').text - 1;
+            }
+            if (typeof newData.fsLevel !== 'undefined') {
+                var newLevel = newData.fsLevel;
+                let fsLevelText = buttonsContainer.getChildByName('fsLevel').text;
+                if (+fsLevelText !== newLevel) {
+                    console.warn('Level is Changed!');
+                    buttonsContainer.getChildByName('fsLevel').text = newLevel;
+                }
+            }
+            if (typeof newData.fsMulti !== 'undefined') {
+                var newMulti = newData.fsMulti;
+                let fsMultiText = buttonsContainer.getChildByName('fsMulti').text;
+                if (+fsMultiText !== newMulti) {
+                    console.warn('Multi is Changed!');
+                    buttonsContainer.getChildByName('fsMulti').text = newMulti;
+                }
+            }
+        }
+    }
+
     function stopFSButtons() {
         fsMode = false;
         let fsLevel = buttonsContainer.getChildByName('fsLevel');
@@ -222,8 +253,11 @@ let buttons = (function () {
     events.on('preloadComplete', drawButtons);
     events.on('initAutoplay', startAutoButtons);
     events.on('stopAutoplay', stopAutoButtons);
-    events.on('initFreeSpins', startFSButtons);
+    events.on('drawFreeSpins', startFSButtons);
     events.on('stopFreeSpins', stopFSButtons);
+    // events.on('newFreeSpin', updateFSButtons);
+    events.on('spinEnd', updateFSButtons);
+    events.on('spinStart', updateFSButtons);
     createjs.Ticker.on('tick', checkButtonsState);
     /* eslint-enable */
     return {
