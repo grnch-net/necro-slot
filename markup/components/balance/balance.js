@@ -1,27 +1,16 @@
 let balance = (function () {
 
-    let balanceContainer;
+    let balanceStage;
 
-    let coinsSteps;
-    let coinsValue;
-    let coinsValueText;
-    let coinsSum;
-    let coinsSumText;
-    let coinsCash;
-    let coinsCashText;
+    /* eslint-disable */
+    let balanceContainer = new createjs.Container().set({
+        name: 'balanceContainer'
+    });
+    /* eslint-enable */
 
-    let betSteps;
-    let betValue;
-    let betValueText;
-    let betSum;
-    let betSumText;
-    let betCash;
-    let betCashText;
+    let balanceText = {};
 
-    let winCash;
-    let winCashText;
-    let currency;
-    let currencyText;
+    let balanceData = {};
 
     let parameters = {
         font: 'bold 20px Arial',
@@ -78,82 +67,82 @@ let balance = (function () {
         }
     };
 
-    function initBalance(balanceData) {
+    function initBalance(allData) {
         /* eslint-disable */
-        init.promiseLines()
+        balanceStage = canvas.getStages().gameStaticStage;
         /* eslint-enable */
-            .then(arr => {
-                let linesLength = arr.length;
+        balanceData.linesLength = allData.lines.length;
+        let data = allData.balance;
 
-                coinsSteps = balanceData.CoinValue;
-                coinsValue = balanceData.CoinValue[0];
-                coinsSum = balanceData.ScoreCoins;
-                coinsCash = +(balanceData.ScoreCents / 100).toFixed(2);
+        balanceData.coinsSteps = data.CoinValue.map((element) => {
+            return +(element / 100).toFixed(2);
+        });
+        balanceData.betSteps = data.BetLevel;
 
-                betSteps = balanceData.BetLevel;
-                betValue = balanceData.BetLevel[0];
-                betSum = +(betValue * linesLength).toFixed(0);
-                betCash = +(betSum * coinsValue).toFixed(2);
+        balanceData.coinsValue = balanceData.coinsSteps[0];
+        balanceData.coinsSum = data.ScoreCoins;
+        balanceData.coinsCash = +(data.ScoreCents / 100).toFixed(2);
 
-                winCash = (0).toFixed(2);
-                currency = balanceData.Currency;
+        balanceData.betValue = balanceData.betSteps[0];
+        balanceData.betSum = +(balanceData.betValue * balanceData.linesLength).toFixed(0);
+        balanceData.betCash = +(balanceData.betSum * balanceData.coinsValue).toFixed(2);
 
-                /* eslint-disable */
-                writeBalance();
-                /* eslint-enable */
-            });
+        balanceData.winCash = (0).toFixed(2);
+        balanceData.currency = data.Currency;
+
+        /* eslint-disable */
+        writeBalance();
+        /* eslint-enable */
     }
 
     function writeBalance() {
         /* eslint-disable */
-        coinsValueText = new createjs.Text(coinsValue, parameters.font, parameters.color).set(parameters.coinsValue);
-        coinsSumText = new createjs.Text(coinsSum, parameters.font, parameters.color).set(parameters.coinsSum);
-        coinsCashText = new createjs.Text(coinsCash, parameters.font, parameters.color).set(parameters.coinsCash);
-        betValueText = new createjs.Text(betValue, parameters.font, parameters.color).set(parameters.betValue);
-        betSumText = new createjs.Text(betSum, parameters.font, parameters.color).set(parameters.betSum);
-        betCashText = new createjs.Text(betCash, parameters.font, parameters.color).set(parameters.betCash);
-        winCashText = new createjs.Text(winCash, parameters.font, parameters.color).set(parameters.winCash);
-        let stage = canvas.getStages().gameStaticStage;
-        balanceContainer = new createjs.Container().set({
-            name: 'balanceContainer'
-        });
-        balanceContainer.addChild(coinsSumText, coinsCashText, betSumText, betCashText, winCashText);
-        stage.addChild(balanceContainer);
-        stage.update();
+        balanceText.coinsSum = new createjs.Text(balanceData.coinsSum, parameters.font, parameters.color).set(parameters.coinsSum);
+        balanceText.coinsCash = new createjs.Text(balanceData.coinsCash, parameters.font, parameters.color).set(parameters.coinsCash);
+        balanceText.betSum = new createjs.Text(balanceData.betSum, parameters.font, parameters.color).set(parameters.betSum);
+        balanceText.betCash = new createjs.Text(balanceData.betCash, parameters.font, parameters.color).set(parameters.betCash);
+        balanceText.winCash = new createjs.Text(balanceData.winCash, parameters.font, parameters.color).set(parameters.winCash);
+
+        balanceContainer.addChild(
+            balanceText.coinsSum,
+            balanceText.coinsCash,
+            balanceText.betSum,
+            balanceText.betCash,
+            balanceText.winCash);
+
+        balanceStage.addChild(balanceContainer);
+        balanceStage.update();
         /* eslint-enable */
     }
 
     function updateBalance() {
         /* eslint-disable */
-        if (coinsValueText.text !== coinsValue) coinsValueText.text = coinsValue;
-        if (coinsSumText.text !== coinsSum) coinsSumText.text = coinsSum;
-        if (coinsCashText.text !== coinsCash) coinsCashText.text = coinsCash;
-        if (betValueText.text !== betValue) betValueText.text = betValue;
-        if (betSumText.text !== betSum) betSumText.text = betSum;
-        if (betCashText.text !== betCash) betCashText.text = betCash;
-        if (winCashText.text !== winCash) winCashText.text = winCash;
-        let stage = canvas.getStages().gameStaticStage;
+        if (balanceText.coinsSum.text !== balanceData.coinsSum) balanceText.coinsSum.text = balanceData.coinsSum;
+        if (balanceText.coinsCash.text !== balanceData.coinsCash) balanceText.coinsCash.text = balanceData.coinsCash;
+        if (balanceText.betSum.text !== balanceData.betSum) balanceText.betSum.text = balanceData.betSum;
+        if (balanceText.betCash.text !== balanceData.betCash) balanceText.betCash.text = balanceData.betCash;
+        if (balanceText.winCash.text !== balanceData.winCash) balanceText.winCash.text = balanceData.winCash;
         /* eslint-enable */
-        stage.update();
+        balanceStage.update();
     }
 
     function changeBet(moreOrLess, maxBet) {
         if (maxBet) {
-            betValue = betSteps[betSteps.length - 1];
-        } else if (moreOrLess === true && betValue !== betSteps[betSteps.length - 1]) {
-            let i = betSteps.length;
+            balanceData.betValue = balanceData.betSteps[balanceData.betSteps.length - 1];
+        } else if (moreOrLess === true && balanceData.betValue !== balanceData.betSteps[balanceData.betSteps.length - 1]) {
+            let i = balanceData.betSteps.length;
             while (i >= 0) {
-                if (betSteps[i] === betValue) {
-                    betValue = betSteps[i + 1];
+                if (balanceData.betSteps[i] === balanceData.betValue) {
+                    balanceData.betValue = balanceData.betSteps[i + 1];
                     i = -1;
                 }
                 i--;
             }
-        } else if (moreOrLess === false && betValue !== betSteps[0]) {
-            let i = betSteps.length;
+        } else if (moreOrLess === false && balanceData.betValue !== balanceData.betSteps[0]) {
+            let i = balanceData.betSteps.length;
             while (i >= 0) {
-                if (betSteps[i] === betValue) {
-                    betValue = betSteps[i - 1];
+                if (balanceData.betSteps[i] === balanceData.betValue) {
+                    balanceData.betValue = balanceData.betSteps[i - 1];
                     i = -1;
                 }
                 i--;
@@ -161,46 +150,34 @@ let balance = (function () {
         } else {
             console.error('Bet change is failed!');
         }
-        /* eslint-disable */
-        init.promiseLines()
-        /* eslint-enable */
-            .then(arr => {
-                let linesLength = arr.length;
-                betSum = +(betValue * linesLength).toFixed(0);
-                betCash = +(betSum * coinsValue).toFixed(2);
-                updateBalance();
-                console.log('Bet is changed:', betValue);
-                if (betValue === betSteps[betSteps.length - 1]) {
-                    console.error('This bet value is maximum!');
-                    /* eslint-disable */
-                    events.trigger('maxBet', false);
-                    /* eslint-disable */
-                } else if (betValue === betSteps[0]) {
-                    console.error('This bet value is minimum!');
-                    /* eslint-disable */
-                    events.trigger('minBet', false);
-                    /* eslint-disable */
-                }
-            });
+        balanceData.betSum = +(balanceData.betValue * balanceData.linesLength).toFixed(0);
+        balanceData.betCash = +(balanceData.betSum * balanceData.coinsValue).toFixed(2);
+        updateBalance();
+        console.log('Bet is changed:', balanceData.betValue);
+        if (balanceData.betValue === balanceData.betSteps[balanceData.betSteps.length - 1]) {
+            console.error('This bet value is maximum!');
+        } else if (balanceData.betValue === balanceData.betSteps[0]) {
+            console.error('This bet value is minimum!');
+        }
     }
 
     function changeCoins(moreOrLess, maxBet) {
         if (maxBet) {
-            coinsValue = coinsSteps[coinsSteps.length - 1];
-        } else if (moreOrLess === true && coinsValue !== coinsSteps[coinsSteps.length - 1]) {
-            let i = coinsSteps.length;
+            balanceData.coinsValue = balanceData.coinsSteps[balanceData.coinsSteps.length - 1];
+        } else if (moreOrLess === true && balanceData.coinsValue !== balanceData.coinsSteps[balanceData.coinsSteps.length - 1]) {
+            let i = balanceData.coinsSteps.length;
             while (i >= 0) {
-                if (coinsSteps[i] === coinsValue) {
-                    coinsValue = coinsSteps[i + 1];
+                if (balanceData.coinsSteps[i] === balanceData.coinsValue) {
+                    balanceData.coinsValue = balanceData.coinsSteps[i + 1];
                     i = -1;
                 }
                 i--;
             }
-        } else if (moreOrLess === false && coinsValue !== coinsSteps[0]) {
-            let i = coinsSteps.length;
+        } else if (moreOrLess === false && balanceData.coinsValue !== balanceData.coinsSteps[0]) {
+            let i = balanceData.coinsSteps.length;
             while (i >= 0) {
-                if (coinsSteps[i] === coinsValue) {
-                    coinsValue = coinsSteps[i - 1];
+                if (balanceData.coinsSteps[i] === balanceData.coinsValue) {
+                    balanceData.coinsValue = balanceData.coinsSteps[i - 1];
                     i = -1;
                 }
                 i--;
@@ -208,77 +185,56 @@ let balance = (function () {
         } else {
             console.error('Coins change is failed!');
         }
-        coinsSum = +Math.floor(coinsCash / coinsValue).toFixed(0);
-        betCash = +(coinsValue * betSum).toFixed(2);
+        balanceData.coinsSum = +Math.floor(balanceData.coinsCash / balanceData.coinsValue).toFixed(0);
+        balanceData.betCash = +(balanceData.coinsValue * balanceData.betSum).toFixed(2);
         updateBalance();
-        console.log('Coins value is changed:', coinsValue);
-        if (coinsValue === coinsSteps[coinsSteps.length - 1]) {
+        console.log('Coins value is changed:', balanceData.coinsValue);
+        if (balanceData.coinsValue === balanceData.coinsSteps[balanceData.coinsSteps.length - 1]) {
             console.error('This coins value is maximum!');
-            /* eslint-disable */
-            events.trigger('maxCoins', false);
-            /* eslint-disable */
-        } else if (coinsValue === coinsSteps[0]) {
+        } else if (balanceData.coinsValue === balanceData.coinsSteps[0]) {
             console.error('This coins value is minimum!');
-            /* eslint-disable */
-            events.trigger('minCoins', false);
-            /* eslint-disable */
         }
     }
 
     function spinStart() {
-        if (coinsSum >= betSum) {
-            coinsSum -= betSum;
-            coinsCash = ((coinsCash * 100 - betCash * 100) / 100).toFixed(2);
-            winCash = (0).toFixed(2);
+        if (balanceData.coinsSum >= balanceData.betSum) {
+            balanceData.coinsSum = (balanceData.coinsSum - balanceData.betSum).toFixed(0);
+            balanceData.coinsCash = ((balanceData.coinsCash * 100 - balanceData.betCash * 100) / 100).toFixed(2);
+            balanceData.winCash = (0).toFixed(2);
             updateBalance();
         } else {
             console.error('Too low cash for spin!');
         }
-        updateBalance();
     }
 
-    function spinEnd(autoMode, scoreArray) {
-        if (scoreArray[0] !== undefined) {
-            winCash = (+scoreArray[0]).toFixed(2);
-            coinsCash = (scoreArray[2] / 100).toFixed(2);
-            coinsSum = scoreArray[1];
+    function spinEnd(spinEndObject) {
+        if (typeof spinEndObject.winCash !== 'undefined') {
+            balanceData.winCash = (+spinEndObject.winCash).toFixed(2);
+            balanceData.coinsCash = (+spinEndObject.scoreCents / 100).toFixed(2);
+            balanceData.coinsSum = (+spinEndObject.scoreCoins).toFixed(0);
             updateBalance();
         } else {
-            console.error('WinValue is undefined!');
-        }
-    }
-
-    function getBalance() {
-        if (betValue && coinsValue) {
-            return {
-                coinsSteps,
-                coinsValue,
-                coinsSum,
-                coinsCash,
-                betSteps,
-                betValue,
-                betSum,
-                betCash,
-                winCash,
-                currency
-            };
-        } else {
-            throw new Error('We have no balance.');
+            console.error('WinCash is undefined!');
         }
     }
 
     /* eslint-disable */
-    events.on('initBalance', initBalance);
-    events.on('spinStart', spinStart);
-    events.on('spinEnd', spinEnd);
+    function getBalanceData() {
+        return utils.getData(balanceData);
+    }
+    /* eslint-enable */
+
+    /* eslint-disable */
+    events.on('dataDownloaded', initBalance);
     events.on('changeBet', changeBet);
     events.on('changeCoins', changeCoins);
-    // Еще будут какие-то события от бонусов и фри-спинов
+    events.on('spinStart', spinStart);
+    events.on('spinEnd', spinEnd);
     /* eslint-enable */
 
     return {
-        getBalance,
+        getBalanceData,
         changeBet,
-        changeCoins,
+        changeCoins
     };
 })();
