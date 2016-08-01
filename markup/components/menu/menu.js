@@ -1,34 +1,40 @@
 let menu = (function () {
-
+    /* eslint-disable no-undef */
+    /* eslint-disable no-use-before-define */
     function showMenu(name) {
         let loader = preloader.getLoadResult();
         let bonusStage = canvas.getStages().bonusStage;
         let bonusStaticStage = canvas.getStages().bonusStaticStage;
         bonusStage.alpha = 1;
-        bonusStaticStage.alpha = 1;
-        bonusStage.nextStage = bonusStaticStage;
-
-        let overlay = new createjs.Shape();
-        overlay.set({name: 'overlay'});
-        overlay.graphics.beginFill('rgba(0, 0, 0, 0.5)').drawRect(0, 0, 1280, 720);
-        overlay.on('click', function(event) {
-            createjs.Tween.get(menuContainer)
-            .to({x: 1280}, 300);
-            createjs.Tween.get(this)
-            .to({alpha: 0}, 300)
-            .call(hideMenu);
-        });
-        bonusStaticStage.addChild(overlay);
 
         let menuContainer = new createjs.Container().set({
             x: 1280,
             y: 0,
             name: 'menuContainer'
         });
-        menuContainer.on('click', function(event) {
+
+        menuContainer.on('click', function (event) {
             event.stopPropagation();
         });
+
+        let overlay = new createjs.Shape();
+        overlay.set({
+            name: 'overlay',
+            alpha: 0
+        });
+        overlay.graphics.beginFill('rgba(0, 0, 0, 0.5)').drawRect(0, 0, 1280, 720);
+        createjs.Tween.get(overlay)
+            .to({alpha: 1}, 300);
+        overlay.on('click', function (event) {
+            createjs.Tween.get(menuContainer)
+                .to({x: 1280}, 300);
+            createjs.Tween.get(overlay)
+                .to({alpha: 0}, 300)
+                .call(hideMenu);
+        });
+        bonusStage.addChildAt(overlay, 0);
         bonusStage.addChild(menuContainer);
+
         let menuBG = new createjs.Bitmap(loader.getResult('menuBG')).set({
             name: 'menuBG'
         });
@@ -67,8 +73,8 @@ let menu = (function () {
                 x: 208,
                 y: 326
             });
-            let betValue = balance.getBalance().betValue;
-            let coinsValue = balance.getBalance().coinsValue;
+            let betValue = balance.getBalanceData().betValue;
+            let coinsValue = balance.getBalanceData().coinsValue;
             let menuBetText = new createjs.Text(betValue, 'bold 60px Arial', '#90fd5a').set({
                 name: 'menuBetText',
                 textAlign: 'center',
@@ -95,27 +101,27 @@ let menu = (function () {
                 x: 208,
                 y: 485
             });
-            menuMaxBet.on('click', function() {
+            menuMaxBet.on('click', function () {
                 balance.changeBet(true, true);
                 balance.changeCoins(true, true);
-                menuBetText.text = balance.getBalance().betValue;
-                menuCoinsText.text = balance.getBalance().coinsValue;
+                menuBetText.text = balance.getBalanceData().betValue;
+                menuCoinsText.text = balance.getBalanceData().coinsValue;
             });
-            menuCoinPlus.on('click', function() {
+            menuCoinPlus.on('click', function () {
                 balance.changeCoins(true);
-                menuCoinsText.text = balance.getBalance().coinsValue;
+                menuCoinsText.text = balance.getBalanceData().coinsValue;
             });
-            menuCoinMinus.on('click', function() {
+            menuCoinMinus.on('click', function () {
                 balance.changeCoins(false);
-                menuCoinsText.text = balance.getBalance().coinsValue;
+                menuCoinsText.text = balance.getBalanceData().coinsValue;
             });
-            menuBetPlus.on('click', function() {
+            menuBetPlus.on('click', function () {
                 balance.changeBet(true);
-                menuBetText.text = balance.getBalance().betValue;
+                menuBetText.text = balance.getBalanceData().betValue;
             });
-            menuBetMinus.on('click', function() {
+            menuBetMinus.on('click', function () {
                 balance.changeBet(false);
-                menuBetText.text = balance.getBalance().betValue;
+                menuBetText.text = balance.getBalanceData().betValue;
             });
             let menuBetLevel = new createjs.Bitmap(loader.getResult('menuBetLevel')).set({
                 name: 'menuBetLevel',
@@ -276,10 +282,11 @@ let menu = (function () {
     }
 
     function _autoPlayClick() {
+        /* eslint-disable no-invalid-this */
         console.log('Amount autoPlay is:', this.amount);
         events.trigger('initAutoplay', this.amount);
         let menuContainer = canvas.getStages().bonusStage.getChildByName('menuContainer');
-        let overlay = canvas.getStages().bonusStaticStage.getChildByName('overlay');
+        let overlay = canvas.getStages().bonusStage.getChildByName('overlay');
         createjs.Tween.get(menuContainer)
         .to({x: 1280}, 300);
         createjs.Tween.get(overlay)
