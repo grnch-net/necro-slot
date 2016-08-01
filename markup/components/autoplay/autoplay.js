@@ -4,12 +4,14 @@ let autoplay = (function () {
     let autoCount;
     let autoEnd;
 
+    /* eslint-disable no-undef */
     function initAutoplay(count) {
         autoCount = count;
         autoEnd = false;
     }
 
     function startAutoplay() {
+        console.log('I am starting autoplay!');
         autoCount--;
         if (!autoEnd) {
             spin.spinStart(true);
@@ -22,6 +24,7 @@ let autoplay = (function () {
     }
 
     function stopAutoplay() {
+        console.log('I am stoping autoplay!');
         autoEnd = true;
         lines.clearAutoTimer();
     }
