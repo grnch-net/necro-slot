@@ -1,9 +1,9 @@
 const preloaderManifest = [
-    {id: 'preloaderBG', src: 'static/img/general/preloader/bg.png'},
-    {id: 'preloaderPlay', src: 'static/img/general/preloader/play.png'},
-    {id: 'preloaderLogo', src: 'static/img/general/preloader/logo.png'},
-    {id: 'preloaderSpriteSheet', src: 'static/img/general/preloader/sprite.json', type: 'spritesheet'},
-    {id: 'preloaderClockSpriteSheet', src: 'static/img/general/preloader/clock.json', type: 'spritesheet'}
+    {id: 'preloaderBG', src: 'static/img/content/preloader/bg.png'},
+    {id: 'preloaderPlay', src: 'static/img/content/preloader/play.png'},
+    {id: 'preloaderLogo', src: 'static/img/content/preloader/logo.png'},
+    {id: 'preloaderSprite', src: 'static/img/content/preloader/sprite.json', type: 'spritesheet'}
+    // {id: 'preloaderClockSpriteSheet', src: 'static/img/content/preloader/clock.json', type: 'spritesheet'}
 ];
 
 const mainManifest = [
@@ -56,168 +56,121 @@ const mainManifest = [
 
 let preloader = (function () {
 
-    let filesLoaded = 0;
+    // Stage
+    let stage;
+
+    // Data
     let loadResult;
 
-    let bonusStaticStage;
-    let bonusStage;
+    // Counter
+    let filesLoaded = 0;
 
     function downloadManifest() {
-        /* eslint-disable */
-        const queue = new createjs.LoadQueue(true);
-        queue.setMaxConnections(4);
-        queue.loadManifest(preloaderManifest);
-        queue.on('complete', showPreloader);
-        /* eslint-enable */
+        /* eslint-disable no-undef */
+        /* eslint-disable no-use-before-define */
+        const loader = new createjs.LoadQueue(true);
+        loader.setMaxConnections(4);
+        loader.loadManifest(preloaderManifest);
+        loader.on('complete', showPreloader);
     }
 
     function showPreloader(event) {
-        const queue = event.target;
-        /* eslint-disable */
-        const preloaderBG = new createjs.Bitmap(queue.getResult('preloaderBG'))
-            .set({name: 'preloaderBG'});
-        const preloaderLogo = new createjs.Bitmap(queue.getResult('preloaderLogo'))
-            .set({
-                x: 288,
-                y: 40,
-                name: 'preloaderLogo'
-            });
-        const preloaderPlay = new createjs.Bitmap(queue.getResult('preloaderPlay'))
-            .set({name: 'preloaderPlay'});
+        stage = canvas.getStages().bonusStage;
+        const loader = event.target;
 
-        const preloaderSpriteSheet = queue.getResult('preloaderSpriteSheet');
-        const preloaderClockSpriteSheet = queue.getResult('preloaderClockSpriteSheet');
+        const preloaderBG = new createjs.Bitmap(loader.getResult('preloaderBG')).set({
+            name: 'preloaderBG'
+        });
+        const preloaderLogo = new createjs.Bitmap(loader.getResult('preloaderLogo')).set({
+            x: (1280 - 545) / 2,
+            y: 75,
+            name: 'preloaderLogo'
+        });
+        const preloaderPlay = new createjs.Bitmap(loader.getResult('preloaderPlay')).set({
+            name: 'preloaderPlay',
+            x: (1280 - 220) / 2,
+            y: 310,
+            shadow: new createjs.Shadow('#C19433', 0, 0, 20)
+        });
+        const preloaderSprite = new createjs.Sprite(loader.getResult('preloaderSprite'), 'start').set({
+            name: 'preloaderSprite',
+            x: (1280 - 630) / 2 - 100,
+            y: 152,
+            framerate: 12
+        });
+        const preloaderContainer = new createjs.Container().set({
+            name: 'preloaderContainer'
+        });
 
-        const playButton = new createjs.Container()
-            .set({
-                name: 'playButton',
-                x: 530,
-                y: 310,
-                visible: false,
-                shadow: new createjs.Shadow('#C19433', 0, 0, 20)
-            });
-        const buttonTween = createjs.Tween.get(preloaderPlay, {loop: true, paused: true})
-            .to({alpha: 0.7}, 400)
-            .to({alpha: 1}, 400);
-        const preloaderSprite = new createjs.Sprite(preloaderSpriteSheet, "start")
-            .set({
-                name: 'preloaderSprite',
-                x: 485,
-                y: 200
-            });
-        const preloaderClock = new createjs.Sprite(preloaderClockSpriteSheet, "start")
-            .set({
-                name: 'preloaderClock',
-                x: 233,
-                y: 150
-            });
+        preloaderContainer.addChild(preloaderBG, preloaderLogo, preloaderPlay, preloaderSprite);
 
-        bonusStaticStage = canvas.getStages().bonusStaticStage;
-        bonusStage = canvas.getStages().bonusStage;
+        stage.addChild(preloaderContainer);
 
-        bonusStaticStage.addChild(preloaderBG, preloaderLogo);
-        bonusStaticStage.update();
-
-        playButton.addChild(preloaderPlay);
-        bonusStage.addChild(playButton, preloaderClock, preloaderSprite);
-
-        mainPreload(preloaderSprite, preloaderClock, buttonTween, playButton);
-        console.log('I am Preloader and I has started loading!');
-        /* eslint-enable */
+        mainPreload(preloaderContainer);
     }
 
-    function mainPreload(sprite, clock, buttonTween, playButton) {
-        /* eslint-disable */
-        const queue = new createjs.LoadQueue(true);
-        queue.setMaxConnections(20);
-        queue.loadManifest(mainManifest);
-        queue.on('fileload', _handleFileLoad, this, false, {
+    function mainPreload(container) {
+        const sprite = container.getChildByName('preloaderSprite');
+        const loader = new createjs.LoadQueue(true);
+
+        loader.setMaxConnections(20);
+        loader.loadManifest(mainManifest);
+
+        loader.on('fileload', handleFileLoad, loader, false, {
             sprite
         });
-        queue.on('complete', _handleLoadComplete, this, true, {
-            buttonTween,
-            playButton,
-            sprite,
-            clock
+        loader.on('complete', handleLoadComplete, loader, true, {
+            container
         });
     }
 
-    function _handleFileLoad(event, data) {
-        filesLoaded += 1;
+    function handleFileLoad(event, data) {
+        // Change counter of downloaded files
+        filesLoaded++;
 
         let sprite = data.sprite;
-        sprite.framerate = 12;
         let filesNumber = mainManifest.length;
-        let framesNumber = sprite.spriteSheet.getNumFrames();
+        let framesNumber = sprite.spriteSheet.getNumFrames('start');
         let currentFrame = Math.ceil((filesLoaded / filesNumber) * framesNumber) - 1;
 
         sprite.gotoAndStop(currentFrame);
     }
 
-    function _handleLoadComplete(event, data) {
-        let buttonTween = data.buttonTween;
-        let playButton = data.playButton;
-        let sprite = data.sprite;
-        let clock = data.clock;
-        clock.framerate = 12;
+    function handleLoadComplete(event, data) {
+        const container = data.container;
+        const sprite = container.getChildByName('preloaderSprite');
+        const play = container.getChildByName('preloaderPlay');
 
-        playButton.visible = true;
-        buttonTween.setPaused(false);
-        sprite.alpha = 0;
-        clock.gotoAndPlay("finish");
-        clock.on('animationend', (event) => {
-            clock.stop();
-            createjs.Tween.get(clock)
-                .to({alpha: 0}, 700);
-            createjs.Tween.get(sprite)
-                .to({alpha: 1}, 700);
-            sprite.gotoAndPlay('finish');
-        });
-
-        /* eslint-disable */
-        playButton.on('click', _handlePlayClick, this, true, {
-            playButton
-        });
+        sprite.gotoAndPlay('finish');
 
         loadResult = event.target;
+
         events.trigger('preloadComplete', loadResult);
-        /* eslint-enable */
+
+        play.on('click', handlePlayClick, this, true, {
+            container
+        });
     }
 
-    function _handlePlayClick(event, data) {
-        let game = document.querySelector('#game');
-        let playButton = data.playButton;
-        let preloaderPlay = playButton.getChildByName('preloaderPlay');
-        /* eslint-disable */
-        createjs.Tween.removeTweens(preloaderPlay);
-        createjs.Ticker.on('tick', bonusStaticStage);
-        createjs.Tween.get(bonusStage)
-            .to({alpha: 0}, 1000, createjs.Ease.circIn)
-            .call(function () {
-                bonusStage.removeAllChildren();
-            });
-            // .call(canvas.clearStage, [bonusStage]);
-        createjs.Tween.get(bonusStaticStage)
-            .to({alpha: 0}, 1000, createjs.Ease.circIn)
-            .call(function () {
-                bonusStaticStage.removeAllChildren();
-            });
-            // .call(canvas.clearStage, [bonusStaticStage]);
+    function handlePlayClick(event, data) {
+        const container = data.container;
+        const game = document.querySelector('#game');
         canvas.launchFullScreen(game);
-        /* eslint-enable */
+        createjs.Tween.get(container)
+        .to({alpha: 0}, 1000, createjs.Ease.circIn)
+        .call(function () {
+            stage.removeAllChildren();
+        });
     }
 
     function getLoadResult() {
-        if (loadResult) {
-            return loadResult;
-        } else {
-            console.error('We have not loaded assets!');
-        }
+        return utils.getData(loadResult);
     }
 
     /* eslint-disable */
     events.on('initPreloader', downloadManifest);
     /* eslint-enable */
+
     return {
         getLoadResult
     };
