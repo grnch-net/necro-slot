@@ -1,58 +1,8 @@
 let init = (function () {
 
-    // Consts
-    const serviceUrl = 'http://gameservice.bossgs.org/slot/SlotService.svc/';
-    const gameID = 6; // КОСТЫЛЬ! Должен получать от сервера инициализации.
+    let initData = {};
 
-    let wheels;
-    let balance;
-    let lines;
-
-    function _startGame(sessionID) {
-        return new Promise(function (resolve, reject) {
-            $.ajax({
-                url: `${serviceUrl}_Play/${sessionID}/${gameID}`,
-                dataType: 'JSONP',
-                type: 'GET',
-                success: resolve,
-                error: reject
-            });
-        });
-    }
-
-    function _checkBalance(balanceData) {
-        if (+balanceData.ScoreCents > 0 && +balanceData.ScoreCoins > 0) {
-            return true;
-        } else {
-            throw new Error('Low money(((');
-        }
-    }
-
-    function _requestWheels(sessionID, gameMode) {
-        return new Promise(function (resolve, reject) {
-            switch (gameMode) {
-                case 'fsMode':
-                    $.ajax({
-                        url: `${serviceUrl}_GetAllWheelsByMode/${sessionID}/${gameMode}`,
-                        dataType: 'JSONP',
-                        type: 'GET',
-                        success: resolve,
-                        error: reject
-                    });
-                    break;
-                default:
-                    $.ajax({
-                        url: `${serviceUrl}_GetAllWheels/${sessionID}`,
-                        dataType: 'JSONP',
-                        type: 'GET',
-                        success: resolve,
-                        error: reject
-                    });
-            }
-        });
-    }
-
-    function _parseWheels(string) {
+    function parseWheels(string) {
         let wheelsMas = string.split('|').map((column) => {
             return column.split('@');
         });
@@ -62,22 +12,22 @@ let init = (function () {
                     case 'j':
                         element = 1;
                         break;
-                    case 'q':
+                    case 'iJ':
                         element = 2;
                         break;
-                    case 'k':
+                    case 'q':
                         element = 3;
                         break;
-                    case 'a':
+                    case 'iQ':
                         element = 4;
                         break;
-                    case 'iJ':
+                    case 'k':
                         element = 5;
                         break;
-                    case 'iQ':
+                    case 'ik': // КОСТЫЛЬ! Попросить бек чтобы называли одинаково
                         element = 6;
                         break;
-                    case 'ik': // КОСТЫЛЬ! Попросить бек чтобы называли одинаково
+                    case 'a':
                         element = 7;
                         break;
                     case 'iA':
@@ -98,6 +48,9 @@ let init = (function () {
                     case 'sw3':
                         element = 13;
                         break;
+                    case 'card':
+                        element = 14;
+                        break;
                     default: console.error('Unknown symbol!');
                 }
                 column[rowIndex] = element;
@@ -105,20 +58,7 @@ let init = (function () {
         });
         return wheelsMas;
     }
-
-    function _requestLines(sessionID) {
-        return new Promise(function (resolve, reject) {
-            $.ajax({
-                url: `${serviceUrl}_GetLines/${sessionID}`,
-                dataType: 'JSONP',
-                type: 'GET',
-                success: resolve,
-                error: reject
-            });
-        });
-    }
-
-    function _parseLines(string) {
+    function parseLines(string) {
         let linesMas = string.split('|').map((line, lineNumber) => {
             return line.split('@').map((coords, index) => {
                 return coords.split(',');
@@ -128,108 +68,54 @@ let init = (function () {
     }
 
     function initGame(sessionID) {
-        _startGame(sessionID)
-            .then((balanceData) => {
-                if (_checkBalance(balanceData)) {
-                    console.log('Balance is downloaded!');
-                    balance = balanceData;
-                    /* eslint-disable */
-                    events.trigger('initBalance', balanceData);
-                    /* eslint-enable */
-                    return _requestWheels(sessionID);
-                }
-            })
-            .then((wheelsString) => {
-                console.log('Wheels are downloaded!');
-                wheels = _parseWheels(wheelsString);
-                /* eslint-disable */
-                events.trigger('initWheels', wheels);
-                /* eslint-enable */
-                return _requestLines(sessionID);
-            })
-            .then((linesString) => {
-                console.log('Lines are downloaded!');
-                lines = _parseLines(linesString);
-                /* eslint-disable */
-                events.trigger('initLines', lines);
-                /* eslint-enable */
+        /* eslint-disable */
+        const gameID = 6; // КОСТЫЛЬ! Должен получать от сервера инициализации.
+
+        let playPromise = utils.request('_Play', `/${sessionID}/${gameID}`);
+            playPromise.then((balanceData) => {
+                initData.balance = balanceData;
             })
             .catch(error => console.dir(error));
-    }
 
-    function getWheels() {
-        if (typeof wheels !== 'undefined') {
-            return wheels;
-        } else {
-            throw new Error('Wheels is undefined!');
-        }
-    }
+        Promise.all([playPromise]).then(() => {
 
-    function getBalance() {
-        if (typeof balance !== 'undefined') {
-            return balance;
-        } else {
-            throw new Error('We have no balance!');
-        }
-    }
+            let wheelsPromise = utils.request('_GetAllWheels', `/${sessionID}`)
+            .then((wheelsString) => {
+                initData.wheels = parseWheels(wheelsString);
+            })
+            .catch(error => console.dir(error));
 
-    function getLines() {
-        if (typeof lines !== 'undefined') {
-            return lines;
-        } else {
-            throw new Error('We have no lines coords!');
-        }
-    }
+             let freeWheelsPromise = utils.request('_GetAllWheelsByMode', `/${sessionID}/fsBonus`)
+            .then((freeWheelsString) => {
+                initData.freeWheels = parseWheels(freeWheelsString);
+            })
+            .catch(error => console.dir(error));
 
-    function promiseWheels() {
-        return new Promise(function (resolve, reject) {
-            /* eslint-disable */
-            createjs.Ticker.on('tick', (event) => {
-                /* eslint-enable */
-                if (typeof wheels !== 'undefined') {
-                    event.remove();
-                    resolve(wheels);
-                }
+            let linesPromise = utils.request('_GetLines', `/${sessionID}`)
+            .then((linesString) => {
+                initData.lines = parseLines(linesString);
+            })
+            .catch(error => console.dir(error));
+
+            Promise.all([wheelsPromise, freeWheelsPromise, linesPromise]).then(() => {
+                events.trigger('dataDownloaded', initData);
             });
+
         });
+        /* eslint-enable */
     }
 
-    function promiseBalance() {
-        return new Promise(function (resolve, reject) {
-            /* eslint-disable */
-            createjs.Ticker.on('tick', (event) => {
-                /* eslint-enable */
-                if (typeof balance !== 'undefined') {
-                    event.remove();
-                    resolve(balance);
-                }
-            });
-        });
+    /* eslint-disable */
+    function getInitData() {
+        return utils.getData(initData);
     }
-
-    function promiseLines() {
-        return new Promise(function (resolve, reject) {
-            /* eslint-disable */
-            createjs.Ticker.on('tick', (event) => {
-                /* eslint-enable */
-                if (typeof lines !== 'undefined') {
-                    event.remove();
-                    resolve(lines);
-                }
-            });
-        });
-    }
+    /* eslint-enable */
 
     /* eslint-disable */
     events.on('initGame', initGame);
     /* eslint-enable */
 
     return {
-        getWheels,
-        getBalance,
-        getLines,
-        promiseWheels,
-        promiseBalance,
-        promiseLines
+        getInitData
     };
 })();
