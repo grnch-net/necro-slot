@@ -354,6 +354,13 @@ let spin = (function () {
                     bonusOldValues = data.OldValues;
                     scoreCents = data.ScoreCents;
                     scoreCoins = data.ScoreCoins;
+                } else if (data.Type === 'MultiplierBonus') {
+                    console.error('It is MultiplierBonus');
+                    let multiData = {
+                        coins: data.ValueCoins,
+                        cents: data.ValueCents
+                    };
+                    events.trigger('multiplierBonus', multiData);
                 } else if (data.ErrorCode !== 0) {
                     console.error(data.ErrorMessage);
                 }
@@ -380,11 +387,13 @@ let spin = (function () {
                         autoSpinFlag,
                         freeSpinFlag,
                         winCash,
+                        winCoins,
                         scoreCoins,
                         scoreCents,
                         fsCount,
                         fsLevel,
-                        fsMulti
+                        fsMulti,
+                        mode
                     };
                     /* eslint-disable */
                     events.trigger('spinEnd', spinEndObject);
@@ -398,6 +407,7 @@ let spin = (function () {
                                 fsMulti
                             };
                             /* eslint-disable */
+                            events.trigger('stopAutoplay', fsDataObj);
                             events.trigger('initFreeSpins', fsDataObj);
                             /* eslint-enable */
                         }, 500);
@@ -458,11 +468,16 @@ let spin = (function () {
         console.log(`Win Lines is: ${lin}`);
     }
 
+    function stopFreeSpins() {
+        freeSpinFlag = false;
+    }
+
     /* eslint-disable */
     events.on('dataDownloaded', initWheels);
     events.on('initScreen', drawScreen);
 
     events.on('spinWin', logWinLines);
+    events.on('stopFreeSpins', stopFreeSpins);
     /* eslint-enable */
 
     return {

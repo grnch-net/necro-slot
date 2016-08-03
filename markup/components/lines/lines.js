@@ -273,6 +273,7 @@ let lines = (function () {
     }
 
     function drawTotalWin(win) {
+        console.log('I am called with:', win);
         /* eslint-disable */
         if (win) {
             let loader = preloader.getLoadResult();
@@ -370,6 +371,7 @@ let lines = (function () {
         flags.autoMode = spinEndObject.autoSpinFlag;
         flags.freeMode = spinEndObject.freeSpinFlag;
         flags.mode = spinEndObject.mode;
+        flags.fsCount = spinEndObject.fsCount;
         /* eslint-disable */
         let loader = preloader.getLoadResult();
         /* eslint-enable */
@@ -385,17 +387,23 @@ let lines = (function () {
             // Если мы в режиме автоплей или фриспин - через 1.5 секунды запустили следующую крутку
             if (flags.autoMode) {
                 startEventTimer('autoTimer', 'startAutoplay', 1500);
-            } else if (flags.freeMode && flags.mode === 'fsBonus') {
+            } else if (flags.freeMode && flags.mode === 'fsBonus' && flags.fsCount) {
                 startEventTimer('freeTimer', 'startFreeSpin', 1500);
+            } else if (flags.freeMode && flags.mode === 'fsBonus' && flags.fsCount === 0) {
+                console.error('I stoping Free Spins!');
+                events.trigger('finishFreeSpins');
             } else {
                 drawLineByLine();
             }
         // Если мы ничего не выиграли - то фриспины и автоспины начнутся раньше - через 200 мс.
         } else if (flags.autoMode) {
             startEventTimer('autoTimer', 'startAutoplay', 200);
-        } else if (flags.freeMode && flags.mode === 'fsBonus') {
+        } else if (flags.freeMode && flags.mode === 'fsBonus' && flags.fsCount) {
             console.warn('I AM DISPATCH startFreeSpin EVENT!');
             startEventTimer('freeTimer', 'startFreeSpin', 200);
+        } else if (flags.freeMode && flags.mode === 'fsBonus' && flags.fsCount === 0) {
+            console.error('I stoping Free Spins!');
+            events.trigger('finishFreeSpins');
         }
     }
 
@@ -569,8 +577,15 @@ let lines = (function () {
                             let element = column.getChildByName('gameElement' + j);
                             let animationName = element.currentAnimation;
                             let elementIndex = animationName.substr(animationName.indexOf('-') + 1);
-                            if (+elementIndex === 11 || +elementIndex === 12 || +elementIndex === 13) {
+                            if (+elementIndex === 11 || +elementIndex === 12 || +elementIndex === 13 || +elementIndex === 14) {
                                 element.gotoAndStop(`win-${elementIndex}`);
+                            }
+                            if (+elementIndex === 14) {
+                                element.gotoAndStop(`win-${elementIndex}`);
+                                createjs.Tween.get(element)
+                                .to({scaleX: 0.8, scaleY: 0.8}, 200)
+                                .to({scaleX: 1.1, scaleY: 1.1}, 700, createjs.Ease.bounceOut);
+                                winRectsContainer.addChild(drawTotalWin('+3').set({y: 385}));
                             }
                         }
                     }

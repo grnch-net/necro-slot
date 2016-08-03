@@ -196,19 +196,24 @@ let balance = (function () {
         }
     }
 
-    function spinStart() {
-        if (balanceData.coinsSum >= balanceData.betSum) {
-            balanceData.coinsSum = (balanceData.coinsSum - balanceData.betSum).toFixed(0);
-            balanceData.coinsCash = ((balanceData.coinsCash * 100 - balanceData.betCash * 100) / 100).toFixed(2);
-            balanceData.winCash = (0).toFixed(2);
-            updateBalance();
-        } else {
-            console.error('Too low cash for spin!');
+    function spinStart(data) {
+        if (data.Mode !== 'fsBonus') {
+            if (balanceData.coinsSum >= balanceData.betSum) {
+                balanceData.coinsSum = (balanceData.coinsSum - balanceData.betSum).toFixed(0);
+                balanceData.coinsCash = ((balanceData.coinsCash * 100 - balanceData.betCash * 100) / 100).toFixed(2);
+                balanceData.winCash = (0).toFixed(2);
+                updateBalance();
+            } else {
+                console.error('Too low cash for spin!');
+            }
         }
     }
 
     function spinEnd(spinEndObject) {
         if (typeof spinEndObject.winCash !== 'undefined') {
+            if (spinEndObject.mode === 'fsBonus') {
+                balanceData.totalWin = ((+balanceData.totalWin * 100) + (+(+spinEndObject.winCash).toFixed(2) * 100) / 100).toFixed(2);
+            }
             balanceData.winCash = (+spinEndObject.winCash).toFixed(2);
             balanceData.coinsCash = (+spinEndObject.scoreCents / 100).toFixed(2);
             balanceData.coinsSum = (+spinEndObject.scoreCoins).toFixed(0);
