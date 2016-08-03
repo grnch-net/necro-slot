@@ -577,7 +577,7 @@ let lines = (function () {
                             let element = column.getChildByName('gameElement' + j);
                             let animationName = element.currentAnimation;
                             let elementIndex = animationName.substr(animationName.indexOf('-') + 1);
-                            if (+elementIndex === 11 || +elementIndex === 12 || +elementIndex === 13 || +elementIndex === 14) {
+                            if (+elementIndex === 11 || +elementIndex === 12 || +elementIndex === 13) {
                                 element.gotoAndStop(`win-${elementIndex}`);
                             }
                             if (+elementIndex === 14) {
@@ -660,6 +660,8 @@ let lines = (function () {
     return {
         drawLinesNumbers,
         drawWinLine,
-        clearAutoTimer
+        clearAutoTimer,
+        removeWinLines,
+        removeWinScreen
     };
 })();

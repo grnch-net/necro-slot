@@ -12,6 +12,7 @@ let spin = (function () {
     let mode;
     let inProgress;
     let fastSpinFlag;
+    let bonusFlag;
     let locked;
     let fastSpinTimer;
     let autoSpinFlag;
@@ -316,7 +317,7 @@ let spin = (function () {
                     if (bonusLevelName === 'StagesSlotBonus') {
                         console.log('You are starting Bonus Level!');
                         /* eslint-disable */
-                        events.trigger('startBonus');
+                        bonusFlag = true;
                         /* eslint-enable */
                     } else if (bonusLevelName === 'FreeSpinBonus') {
                         console.log('You are starting Free Spins!');
@@ -411,6 +412,11 @@ let spin = (function () {
                             events.trigger('initFreeSpins', fsDataObj);
                             /* eslint-enable */
                         }, 500);
+                    }
+                    if (bonusFlag) {
+                        events.trigger('initBonusLevel');
+                        lines.removeWinScreen();
+                        lines.removeWinLines();
                     }
                 } else {
                     console.error(response.ErrorMessage);

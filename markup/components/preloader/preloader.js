@@ -47,7 +47,20 @@ const mainManifest = [
     {id: 'winLineRect', src: 'static/img/content/lines/winLineRect.png'},
     {id: 'winTotalRect', src: 'static/img/content/lines/winTotalRect.png'},
     // elements
-    {id: 'elements', src: 'static/img/content/elements/elements.json', type: 'spritesheet'}
+    {id: 'elements', src: 'static/img/content/elements/elements.json', type: 'spritesheet'},
+    // bonuses
+    {id: 'bonusBG_1', src: 'static/img/content/bonuses/bonusBG_1.png'},
+    {id: 'bonusBG_2', src: 'static/img/content/bonuses/bonusBG_2.png'},
+    {id: 'bonusWin_1', src: 'static/img/content/bonuses/bonusWin_1.png'},
+    {id: 'bonusFail_1', src: 'static/img/content/bonuses/bonusFail_1.png'},
+    {id: 'bonusWin_2', src: 'static/img/content/bonuses/bonusWin_2.png'},
+    {id: 'bonusFail_2', src: 'static/img/content/bonuses/bonusFail_2.png'},
+    {id: 'bonusDoor_1_1', src: 'static/img/content/bonuses/bonusDoor_1_1.png'},
+    {id: 'bonusDoor_1_2', src: 'static/img/content/bonuses/bonusDoor_1_2.png'},
+    {id: 'bonusDoor_1_3', src: 'static/img/content/bonuses/bonusDoor_1_3.png'},
+    {id: 'bonusDoor_1_4', src: 'static/img/content/bonuses/bonusDoor_1_4.png'},
+    {id: 'bonusDoor_1_5', src: 'static/img/content/bonuses/bonusDoor_1_5.png'},
+    {id: 'doorSprite_2', src: 'static/img/content/bonuses/doorSprite.json', type: 'spritesheet'}
     // {id: 'element2', src: 'static/img/content/elements/element2.json', type: 'spritesheet'},
     // {id: 'element1', src: 'static/img/content/elements/element1.json', type: 'spritesheet'},
     // {id: 'element3', src: 'static/img/content/elements/element3.json', type: 'spritesheet'},
