@@ -3,11 +3,10 @@ let bonuses = (function () {
     let currentLevel = 1;
 
     function initBonusLevel() {
-        let stage = canvas.getStages().bonusStage;
-        stage.nextStage = null;
-        console.log('I am here!');
-        stage.alpha = 1;
         let loader = preloader.getLoadResult();
+        let stage = canvas.getStages().bonusStage;
+        stage.alpha = 1;
+        stage.nextStage = null;
         let initContainer = new createjs.Container().set({
             name: 'initContainer',
             alpha: 0
@@ -22,6 +21,7 @@ let bonuses = (function () {
             textAlign: 'center',
             textBaseline: 'middle'
         });
+
         createjs.Tween.get(initContainer)
             .to({alpha: 1}, 500)
             .call(
@@ -38,6 +38,7 @@ let bonuses = (function () {
                 });
         });
         initContainer.addChild(initBG, initText);
+
         stage.addChild(initContainer);
     }
 
@@ -45,11 +46,11 @@ let bonuses = (function () {
         console.log('I am drawing level', level, 'with data:', data);
         let clickCounter = 0;
         let stage = canvas.getStages().bonusStage;
+        let loader = preloader.getLoadResult();
         if (stage.getChildByName('bonusContainer')) {
             stage.removeChild(stage.getChildByName('bonusContainer'));
             stage.removeChild(stage.getChildByName('winText'));
         }
-        let loader = preloader.getLoadResult();
         let bonusContainer = new createjs.Container().set({
             name: 'bonusContainer'
         });
@@ -77,44 +78,44 @@ let bonuses = (function () {
             let darkness = new createjs.Shape();
             darkness.graphics.beginFill('#000').drawRect(0, 0, 140, 400);
             door_1.set({
-                x: 270,
-                y: 225
+                x: 274,
+                y: 222
             });
             let darkness_1 = darkness.clone().set({
-                x: 270,
-                y: 225
+                x: door_1.x,
+                y: door_1.y
             });
             door_2.set({
                 x: 425,
-                y: 240
+                y: 236
             });
             let darkness_2 = darkness.clone().set({
-                x: 425,
-                y: 240
+                x: door_2.x,
+                y: door_2.y
             });
             door_3.set({
-                x: 565,
-                y: 260
+                x: 568,
+                y: 237
             });
             let darkness_3 = darkness.clone().set({
-                x: 565,
-                y: 260
+                x: door_3.x,
+                y: door_3.y
             });
             door_4.set({
-                x: 715,
-                y: 240
+                x: 718,
+                y: 238
             });
             let darkness_4 = darkness.clone().set({
-                x: 715,
-                y: 240
+                x: door_4.x,
+                y: door_4.y
             });
             door_5.set({
-                x: 870,
-                y: 225
+                x: 864,
+                y: 220
             });
             let darkness_5 = darkness.clone().set({
-                x: 870,
-                y: 225
+                x: door_5.x,
+                y: door_5.y
             });
 
             function setClickEvent(door, darkness) {
@@ -124,18 +125,14 @@ let bonuses = (function () {
                         createjs.Tween.get(door)
                         .to({y: door.y - 250}, 400);
                         createjs.Tween.get(darkness)
-                        .to({alpha: 0}, 500)
-                        .call(
-                            function () {
-                                if (data.CurrentValue !== 'Exit') {
-                                    showBonusWin(data.CurrentValue);
-                                } else {
-                                    setTimeout(function () {
-                                        events.trigger('finishBonusLevel')
-                                    }, 750)
-                                }
-                            }
-                        );
+                        .to({alpha: 0}, 500);
+                        if (data.CurrentValue !== 'Exit') {
+                            showBonusWin(data.CurrentValue);
+                        } else {
+                            setTimeout(function () {
+                                events.trigger('finishBonusLevel')
+                            }, 750)
+                        }
                     }
                 })
             }
@@ -146,34 +143,44 @@ let bonuses = (function () {
             setClickEvent(door_4, darkness_4);
             setClickEvent(door_5, darkness_5);
             doorsContainer.addChild(darkness_1, door_1, darkness_2, door_2, darkness_3, door_3, darkness_4, door_4, darkness_5, door_5);
-        } else if (level === 2) {
-            let doorSprite = new createjs.Sprite(loader.getResult('doorSprite_' + level));
-            console.log('Doors Sprite is:', loader.getResult('doorSprite_' + level));
-            let door_1 = doorSprite.clone().set({
+
+        } else if (level === 2 || level === 3 || level === 4) {
+
+            let ss = loader.getResult('doorSprite_' + level);
+            let door_1 = new createjs.Sprite(ss, 'door_1').set({
                 x: 270,
-                y: 225
+                y: 227
             });
-            door_1.gotoAndStop('door_1');
-            let door_2 = doorSprite.clone().set({
-                x: 425,
-                y: 240
+            let door_2 = new createjs.Sprite(ss, 'door_2').set({
+                x: 422,
+                y: 237,
+                scaleX: 0.96,
+                scaleY: 0.94
             });
-            door_2.gotoAndStop('door_2');
-            let door_3 = doorSprite.clone().set({
-                x: 565,
-                y: 260
+            let door_3 = new createjs.Sprite(ss, 'door_3').set({
+                x: 572,
+                y: 238,
+                scaleX: 0.93,
+                scaleY: 0.93
             });
-            door_3.gotoAndStop('door_3');
-            let door_4 = doorSprite.clone().set({
-                x: 715,
-                y: 240
+            let door_4 = new createjs.Sprite(ss, 'door_4').set({
+                x: 716,
+                y: 232,
+                scaleX: 0.98,
+                scaleY: 0.96
             });
-            door_4.gotoAndStop('door_4');
-            let door_5 = doorSprite.clone().set({
-                x: 870,
-                y: 225
+            let door_5 = new createjs.Sprite(ss, 'door_5').set({
+                x: 858,
+                y: 217,
+                scaleX: 1.02,
+                scaleY: 1.05
             });
-            door_5.gotoAndStop('door_5');
+
+            door_1.stop();
+            door_2.stop();
+            door_3.stop();
+            door_4.stop();
+            door_5.stop();
 
             doorSpriteClick(door_1);
             doorSpriteClick(door_2);
@@ -183,14 +190,24 @@ let bonuses = (function () {
 
             function doorSpriteClick(door) {
                 door.on('click', function () {
-                    door.play();
-                    door.on('animationend', function functionName() {
-                        door.stop();
-                    });
+                    if (clickCounter < 1) {
+                        clickCounter++;
+                        door.play();
+                        if (data.CurrentValue !== 'Exit') {
+                            showBonusWin(data.CurrentValue);
+                        } else {
+                            setTimeout(function () {
+                                events.trigger('finishBonusLevel')
+                            }, 750)
+                        }
+                        door.on('animationend', function functionName() {
+                            door.stop();
+                        });
+                    }
                 });
             }
 
-            let doorsContainer = new createjs.Container();
+            doorsContainer.removeAllChildren();
             doorsContainer.addChild(door_1, door_2, door_3, door_4, door_5);
 
         }
@@ -216,7 +233,7 @@ let bonuses = (function () {
         .call(
             setTimeout(function () {
                 callNextBonusLevel();
-            }, 2500)
+            }, 1000)
         );
     }
 
@@ -237,11 +254,11 @@ let bonuses = (function () {
         stage.addChild(darkness);
         createjs.Tween.get(darkness)
         .to({alpha: 1}, 500)
-        .wait(500)
         .call(function () {
             currentLevel++;
             getBonusLevel();
         })
+        .wait(500)
         .to({alpha: 0}, 500)
         .call(function () {
             stage.removeChild(darkness);
