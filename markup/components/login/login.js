@@ -32,4 +32,4 @@ let login = (function () {
 
 })();
 
-login.enter();
+// login.enter();

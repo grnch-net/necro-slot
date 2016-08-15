@@ -1,67 +1,76 @@
-let canvas = (function () {
+/* eslint-disable no-undef */
+const canvas = (function () {
 
-    let stages;
-
-    function initStages() {
-        /* eslint-disable */
-        const bgStaticStage = new createjs.Stage('bgStaticCanvas').set({name: 'bgStaticStage'});
-        const gameStaticStage = new createjs.Stage('gameStaticCanvas').set({name: 'gameStaticStage'});
-        const bonusStaticStage = new createjs.Stage('bonusStaticCanvas').set({name: 'bonusStaticStage'});
-        const bgStage = new createjs.Stage('bgCanvas').set({name: 'bgStage'});
-        const gameStage = new createjs.Stage('gameCanvas').set({name: 'gameStage'});
-        const bonusStage = new createjs.Stage('bonusCanvas').set({name: 'bonusStage'});
-        gameStage.snapToPixelEnabled = true;
-        bonusStage.nextStage = gameStage;
-        bonusStage.enableMouseOver(10);
-
+    function initStage() {
+        const stage = new createjs.Stage('stage');
+        stage.snapToPixelEnabled = true;
+        stage.enableMouseOver(10);
+        // При использовании Green Sock будет по другому.
         createjs.Ticker.timingMode = createjs.Ticker.RAF;
-        createjs.Ticker.on('tick', bgStage);
-        createjs.Ticker.on('tick', gameStage);
-        createjs.Ticker.on('tick', bonusStage);
-
-        stages = {
-            bgStage,
-            bgStaticStage,
-            gameStage,
-            gameStaticStage,
-            bonusStage,
-            bonusStaticStage
-        };
-
-        events.trigger('stagesCreated', stages);
-        /* eslint-enable */
+        createjs.Ticker.on('tick', stage);
+        // Запишем холст в Storage
+        storage.write('stage', stage);
+        storage.changeState('stage', true);
     }
 
-    function launchFullScreen(e) {
-        /* eslint-disable */
+    function fullScreen(e) {
+        /* eslint-disable no-nested-ternary */
+        /* eslint-disable no-unused-expressions */
         e.requestFullScreen ? e.requestFullScreen() : e.mozRequestFullScreen ? e.mozRequestFullScreen() : e.webkitRequestFullScreen && e.webkitRequestFullScreen();
-        /* eslint-enable */
     }
 
-    function getStages() {
-        if (typeof stages !== 'undefined') {
-            return stages;
+    function changeGamePosition(side) {
+        const stage = storage.read('stage');
+        const fg = stage.getChildByName('fgContainer');
+        const bg = stage.getChildByName('bgContainer');
+        const gameBG = bg.getChildByName('gameBG');
+        const game = stage.getChildByName('gameContainer');
+        const gameMask = game.mask;
+        const balance = stage.getChildByName('balanceContainer');
+        let delta;
+        if (side === 'right' && storage.readState('side') !== 'right') {
+            if (storage.readState('side') === 'left') {
+                delta = '+=150';
+            } else if (storage.readState('side') === 'center') {
+                delta = '+=75';
+            }
+            storage.changeState('side', 'right');
+        } else if (side === 'left' && storage.readState('side') !== 'left') {
+            if (storage.readState('side') === 'right') {
+                delta = '-=150';
+            } else if (storage.readState('side') === 'center') {
+                delta = '-=75';
+            }
+            storage.changeState('side', 'left');
+        } else if (side === 'center' && storage.readState('side') !== 'center') {
+            if (storage.readState('side') === 'left') {
+                delta = '+=75';
+            } else if (storage.readState('side') === 'right') {
+                delta = '-=75';
+            }
+            storage.changeState('side', 'center');
         } else {
-            throw new Error('Stages are not created.');
+            return;
+        }
+        TweenMax.to([fg, game, gameMask, gameBG, balance], 0.5, {x: delta,
+        onStart: function () {
+            bg.uncache();
+        },
+        onComplete: function () {
+            bg.cache(0, 0, utils.width, utils.height);
+        }});
+    }
+
+    function checkState(state) {
+        if (state === 'logged' && storage.readState('logged')) {
+            initStage();
         }
     }
 
-    function clearStage(stage) {
-        /* eslint-disable */
-        stage.removeAllChildren();
-        stage.off("tick", stage.handleEvent);
-        createjs.Tween.removeTweens(stage);
-        console.log(`I have cleared ${stage.toString()}!`);
-        /* eslint-enable */
-    }
-
-    /* eslint-disable */
-    events.on('initStages', initStages);
-    /* eslint-enable */
+    events.on('changeState', checkState);
 
     return {
-        getStages,
-        clearStage,
-        launchFullScreen
+        fullScreen,
+        changeGamePosition
     };
 })();

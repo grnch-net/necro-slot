@@ -1,31 +1,9 @@
-let lines = (function () {
+/* eslint-disable no-undef */
+/* eslint-disable no-use-before-define */
+const win = (function () {
 
-    /* eslint-disable */
-    createjs.MotionGuidePlugin.install(createjs.Tween);
-    /* eslint-enable */
-
-    // Stages
-    let frontStage;
-    let backStage;
-
-    // Containers
-    let winNumbersContainer;
-    let winLinesContainer;
-    let winRectsContainer;
-
-    let linesEls = {
-        linesDiscs: [],
-        linesNumbers: [],
-        winLines: [],
-        winRects: []
-    };
-
-    let linesData = {};
-
-    let winData = [];
-    let winFinishData = [];
-
-    let parameters = {
+    const c = createjs;
+    const parameters = {
         font: 'normal 15px Arial',
         color: 'gold',
         1: {
@@ -139,89 +117,32 @@ let lines = (function () {
             textBaseline: 'middle'
         }
     };
+    let winData = {};
+    let stage;
+    let winLinesContainer;
+    let winRectsContainer;
+    let winElements;
 
-    let flags = {};
+    // // Stages
+    // let frontStage;
+    // let backStage;
+    //
+    // // Containers
+    // let winNumbersContainer;
+    //
+    // let linesEls = {
+    //     linesDiscs: [],
+    //     linesNumbers: [],
+    //     winLines: [],
+    //     winRects: []
+    // };
+    //
+    // let linesData = {};
+    //
+    // // let winData = [];
+    // let winFinishData = [];
 
-    function parseLinesResult(arr) {
-        let result = [];
-        arr.forEach((line) => {
-            let amount = +parseInt(line, 10);
-            let number = +parseInt(line.substr(line.indexOf('#') + 1), 10);
-            let win = +parseInt(line.substr(line.indexOf(':') + 1), 10);
-            let lineObj = {
-                amount,
-                number,
-                win
-            };
-            result.push(lineObj);
-        });
-        return result;
-    }
 
-    function parseLinesCoords(arr) {
-        let result = [];
-        arr.forEach((line, number) => {
-            result[number] = [];
-            line.forEach((point, index) => {
-                let x = +point[0];
-                let y = +point[1];
-                let resultX = 192 * (x + 0.5);
-                let resultY = 180 * (y + 0.5);
-                let resultCoords = {
-                    x: resultX,
-                    y: resultY
-                };
-                result[number][index] = resultCoords;
-            });
-        });
-        return result;
-    }
-
-    function parseLinesPaths(arr) {
-        let result = [];
-        arr.forEach((line, number) => {
-            result[number] = [];
-            line.forEach((point) => {
-                result[number].push(point.x, point.y);
-            });
-        });
-        return result;
-    }
-
-    function initLines(data) {
-
-        linesData.linesArray = data.lines;
-        linesData.linesCoords = parseLinesCoords(linesData.linesArray);
-        linesData.linesPaths = parseLinesPaths(linesData.linesCoords);
-        /* eslint-disable */
-        spin.getGamePosition()
-            .then((result) => {
-
-                winLinesContainer = new createjs.Container().set({
-                    name: 'winLinesContainer',
-                    x: result.x,
-                    y: result.y
-                });
-                winRectsContainer = new createjs.Container().set({
-                    name: 'winRectsContainer',
-                    x: result.x,
-                    y: result.y
-                });
-                winNumbersContainer = new createjs.Container().set({
-                    name: 'winNumbersContainer'
-                });
-
-                backStage = canvas.getStages().bgStage;
-                frontStage = canvas.getStages().gameStage;
-
-                backStage.addChildAt(winLinesContainer, 0);
-                frontStage.addChildAt(winNumbersContainer, winRectsContainer, 0);
-
-                drawLinesNumbers();
-
-            });
-        /* eslint-enable */
-    }
 
     function drawLinesNumbers() {
         /* eslint-disable */
@@ -272,40 +193,40 @@ let lines = (function () {
         }, time);
     }
 
-    function drawTotalWin(win) {
-        console.log('I am called with:', win);
-        /* eslint-disable */
-        if (win) {
-            let loader = preloader.getLoadResult();
-            let totalWin = new createjs.Container().set({
-                /* eslint-enable */
-                name: 'totalWin',
-                x: (960 - 176) / 2 + 3,
-                y: (540 - 150) / 2
-            });
-            /* eslint-disable */
-            let totalWinText = new createjs.Text(win, 'bold 75px Arial', '#f0e194').set({
-                /* eslint-enable */
-                x: 88,
-                y: 75,
-                name: 'totalWinText',
-                textAlign: 'center',
-                textBaseline: 'middle',
-                /* eslint-disable */
-                shadow: new createjs.Shadow('#C19433', 0, 0, 8)
-                /* eslint-enable */
-            });
-            /* eslint-disable */
-            let totalWinRect = new createjs.Bitmap(loader.getResult('winTotalRect')).set({
-                /* eslint-enable */
-                name: 'totalWinRect'
-            });
-            totalWin.addChild(totalWinRect, totalWinText);
-            return totalWin;
-        } else {
-            return;
-        }
-    }
+    // function drawTotalWin(win) {
+    //     console.log('I am called with:', win);
+    //     /* eslint-disable */
+    //     if (win) {
+    //         let loader = preloader.getLoadResult();
+    //         let totalWin = new createjs.Container().set({
+    //             /* eslint-enable */
+    //             name: 'totalWin',
+    //             x: (960 - 176) / 2 + 3,
+    //             y: (540 - 150) / 2
+    //         });
+    //         /* eslint-disable */
+    //         let totalWinText = new createjs.Text(win, 'bold 75px Arial', '#f0e194').set({
+    //             /* eslint-enable */
+    //             x: 88,
+    //             y: 75,
+    //             name: 'totalWinText',
+    //             textAlign: 'center',
+    //             textBaseline: 'middle',
+    //             /* eslint-disable */
+    //             shadow: new createjs.Shadow('#C19433', 0, 0, 8)
+    //             /* eslint-enable */
+    //         });
+    //         /* eslint-disable */
+    //         let totalWinRect = new createjs.Bitmap(loader.getResult('winTotalRect')).set({
+    //             /* eslint-enable */
+    //             name: 'totalWinRect'
+    //         });
+    //         totalWin.addChild(totalWinRect, totalWinText);
+    //         return totalWin;
+    //     } else {
+    //         return;
+    //     }
+    // }
 
     function drawLineByLine() {
         if (winData.length === 1 && +winData[0].number === -1) {
@@ -645,23 +566,157 @@ let lines = (function () {
         }
     }
 
-    function clearAutoTimer() {
-        flags.autoMode = false;
-        clearTimeout(flags.autoTimer);
+
+    // function clearAutoTimer() {
+    //     flags.autoMode = false;
+    //     clearTimeout(flags.autoTimer);
+    // }
+
+    // /* eslint-disable */
+    // events.on('dataDownloaded', initLines);
+    // events.on('spinStart', removeWinLines);
+    // events.on('spinEnd', drawWinLines);
+    // events.on('spinWin', saveWinLines);
+    // /* eslint-enable *
+
+    function initWin() {
+        stage = storage.read('stage');
+        const gameContainer = stage.getChildByName('gameContainer');
+        winLinesContainer = new c.Container().set({
+            name: 'winLinesContainer',
+            x: gameContainer.x,
+            y: gameContainer.y
+        });
+        winRectsContainer = new c.Container().set({
+            name: 'winRectsContainer',
+            x: gameContainer.x,
+            y: gameContainer.y
+        });
+        stage.addChildAt(winLinesContainer, 1);
+        stage.addChild(winRectsContainer);
+        winElements = findWinElements();
+        drawWinDiscs();
     }
 
-    /* eslint-disable */
-    events.on('dataDownloaded', initLines);
-    events.on('spinStart', removeWinLines);
-    events.on('spinEnd', drawWinLines);
-    events.on('spinWin', saveWinLines);
-    /* eslint-enable */
+    function findWinElements() {
+        const result = [];
+        const columns = [];
+        const winLines = storage.read('lines');
+        const gameContainer = stage.getChildByName('gameContainer');
+        for (let i = 0; i < 5; i++) {
+            const column = gameContainer.getChildByName(`gameColumn${i}`);
+            columns.push(column);
+        }
+        winLines.forEach((line, number) => {
+            result[number] = [];
+            line.forEach((point, position) => {
+                const x = +point[0];
+                const y = +point[1];
+                const element = columns[position].getChildByName(`gameElement${y + 1}`);
+                result[number].push(element);
+            });
+        });
+        return result;
+    }
+
+    function drawWinDiscs() {
+
+    }
+
+    function fireWinLine(number, amount) {
+        for (let i = 0; i < amount; i++) {
+            const element = winElements[number - 1][i];
+            const animationName = element.currentAnimation;
+            const elementIndex = animationName.substr(animationName.indexOf('-') + 1);
+            element.gotoAndStop(`win-${elementIndex}`);
+        }
+    }
+
+    function fireAllScatters() {
+        winElements.forEach((winLine) => {
+            winLine.forEach((element) => {
+                const animationName = element.currentAnimation;
+                const elementIndex = animationName.substr(animationName.indexOf('-') + 1);
+                if (+elementIndex === 10 || +elementIndex === 14) {
+                    element.gotoAndStop(`win-${elementIndex}`);
+                }
+            });
+        });
+    }
+
+    function fireScatterWild() {
+        winElements.forEach((winLine) => {
+            winLine.forEach((element) => {
+                const animationName = element.currentAnimation;
+                const elementIndex = animationName.substr(animationName.indexOf('-') + 1);
+                if (+elementIndex === 11 || +elementIndex === 12 || +elementIndex === 13) {
+                    element.gotoAndStop(`win-${elementIndex}`);
+                }
+            });
+        });
+    }
+
+    function drawTotalWin(lines) {
+        lines.forEach((line) => {
+            const lineNumber = line.lineNumber;
+            const lineAmount = line.lineAmount;
+            const lineWin = line.lineWin;
+            if (+lineNumber !== -1) {
+                fireWinLine(lineNumber, lineAmount);
+            } else if (+lineWin !== 0) {
+                fireAllScatters();
+            } else {
+                fireScatterWild();
+            }
+        });
+    }
+
+    function parseWinResult(arr) {
+        const result = [];
+        arr.forEach((line) => {
+            const lineAmount = +parseInt(line, 10);
+            const lineNumber = +parseInt(line.substr(line.indexOf('#') + 1), 10);
+            const lineWin = +parseInt(line.substr(line.indexOf(':') + 1), 10);
+            const lineObj = {
+                lineAmount,
+                lineNumber,
+                lineWin
+            };
+            result.push(lineObj);
+        });
+        return result;
+    }
+
+    function showWin() {
+        const rollData = storage.read('rollResponse');
+        winData.winCoins = rollData.TotalWinCoins;
+        winData.winCents = rollData.TotalWinCents;
+        winData.winLines = parseWinResult(rollData.LinesResult);
+        if (winData.winLines.length) {
+            drawTotalWin(winData.winLines);
+        }
+    }
+
+    function cleanWin() {
+        winLinesContainer.removeAllChildren();
+        winRectsContainer.removeAllChildren();
+    }
+
+    function checkState(state) {
+        if (state === 'roll' && storage.readState(state) === 'ended') {
+            showWin();
+        }
+        if (state === 'roll' && storage.readState(state) === 'started') {
+            cleanWin();
+        }
+        if (state === 'firstScreen' && storage.readState(state) === 'done') {
+            initWin();
+        }
+    }
+
+    events.on('changeState', checkState);
 
     return {
-        drawLinesNumbers,
-        drawWinLine,
-        clearAutoTimer,
-        removeWinLines,
-        removeWinScreen
+        fireWinLine
     };
 })();

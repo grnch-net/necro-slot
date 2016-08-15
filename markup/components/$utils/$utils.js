@@ -1,9 +1,15 @@
-let utils = (function () {
+const utils = (function () {
 
-    let serviceUrl = 'http://gameservice.bossgs.org/slot/SlotService.svc/';
+    const serviceUrl = 'http://gameservice.bossgs.org/slot/SlotService.svc/';
+    const canvasWidth = 1280;
+    const canvasHeight = 720;
+    const gameWidth = 960;
+    const gameHeight = 540;
+    const elementHeight = 180;
+    const elementWidth = 192;
 
     function request(name, path) {
-        console.log(`Full path of request is: ${serviceUrl}${name}${path}`);
+        console.log(`Request: ${serviceUrl}${name}${path}`);
         return new Promise(function (resolve, reject) {
             $.ajax({
                 url: `${serviceUrl}${name}${path}`,
@@ -15,16 +21,13 @@ let utils = (function () {
         });
     }
 
-    function getData(data) {
-        if (typeof data !== 'undefined') {
-            return data;
-        } else {
-            throw new Error('Data is undefined!');
-        }
-    }
-
     return {
         request,
-        getData
+        width: canvasWidth,
+        height: canvasHeight,
+        gameWidth,
+        gameHeight,
+        elementWidth,
+        elementHeight
     };
 })();

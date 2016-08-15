@@ -1,18 +1,20 @@
-let balance = (function () {
+/* eslint-disable no-undef */
+/* eslint-disable no-use-before-define */
 
-    let balanceStage;
+const balance = (function () {
 
-    /* eslint-disable */
-    let balanceContainer = new createjs.Container().set({
+    const c = createjs;
+    const w = utils.width;
+    const h = utils.height;
+    const balanceContainer = new c.Container().set({
         name: 'balanceContainer'
     });
-    /* eslint-enable */
+    let stage;
 
-    let balanceText = {};
+    const balanceText = {};
+    const balanceData = {};
 
-    let balanceData = {};
-
-    let parameters = {
+    const parameters = {
         font: 'bold 20px Arial',
         color: '#dddddd',
         coinsValue: {
@@ -67,15 +69,13 @@ let balance = (function () {
         }
     };
 
-    function initBalance(allData) {
-        /* eslint-disable */
-        balanceStage = canvas.getStages().gameStaticStage;
-        /* eslint-enable */
-        balanceData.linesLength = allData.lines.length;
-        let data = allData.balance;
+    function initBalance() {
+        stage = storage.read('stage');
+        balanceData.linesLength = storage.read('lines').length;
+        const data = storage.read('balance');
 
-        balanceData.coinsSteps = data.CoinValue.map((element) => {
-            return +(element / 100).toFixed(2);
+        balanceData.coinsSteps = data.CoinValue.map((value) => {
+            return +(value / 100).toFixed(2);
         });
         balanceData.betSteps = data.BetLevel;
 
@@ -90,18 +90,15 @@ let balance = (function () {
         balanceData.winCash = (0).toFixed(2);
         balanceData.currency = data.Currency;
 
-        /* eslint-disable */
         writeBalance();
-        /* eslint-enable */
     }
 
     function writeBalance() {
-        /* eslint-disable */
-        balanceText.coinsSum = new createjs.Text(balanceData.coinsSum, parameters.font, parameters.color).set(parameters.coinsSum);
-        balanceText.coinsCash = new createjs.Text(balanceData.coinsCash, parameters.font, parameters.color).set(parameters.coinsCash);
-        balanceText.betSum = new createjs.Text(balanceData.betSum, parameters.font, parameters.color).set(parameters.betSum);
-        balanceText.betCash = new createjs.Text(balanceData.betCash, parameters.font, parameters.color).set(parameters.betCash);
-        balanceText.winCash = new createjs.Text(balanceData.winCash, parameters.font, parameters.color).set(parameters.winCash);
+        balanceText.coinsSum = new c.Text(balanceData.coinsSum, parameters.font, parameters.color).set(parameters.coinsSum);
+        balanceText.coinsCash = new c.Text(balanceData.coinsCash, parameters.font, parameters.color).set(parameters.coinsCash);
+        balanceText.betSum = new c.Text(balanceData.betSum, parameters.font, parameters.color).set(parameters.betSum);
+        balanceText.betCash = new c.Text(balanceData.betCash, parameters.font, parameters.color).set(parameters.betCash);
+        balanceText.winCash = new c.Text(balanceData.winCash, parameters.font, parameters.color).set(parameters.winCash);
 
         balanceContainer.addChild(
             balanceText.coinsSum,
@@ -110,20 +107,30 @@ let balance = (function () {
             balanceText.betCash,
             balanceText.winCash);
 
-        balanceStage.addChild(balanceContainer);
-        balanceStage.update();
-        /* eslint-enable */
+        const fg = stage.getChildByName('fgContainer');
+        stage.addChildAt(balanceContainer, stage.getChildIndex(fg) + 1);
+        balanceContainer.cache(0, 500, w, h - 500);
+        storage.write('currentBalance', balanceData);
     }
 
     function updateBalance() {
-        /* eslint-disable */
-        if (balanceText.coinsSum.text !== balanceData.coinsSum) balanceText.coinsSum.text = balanceData.coinsSum;
-        if (balanceText.coinsCash.text !== balanceData.coinsCash) balanceText.coinsCash.text = balanceData.coinsCash;
-        if (balanceText.betSum.text !== balanceData.betSum) balanceText.betSum.text = balanceData.betSum;
-        if (balanceText.betCash.text !== balanceData.betCash) balanceText.betCash.text = balanceData.betCash;
-        if (balanceText.winCash.text !== balanceData.winCash) balanceText.winCash.text = balanceData.winCash;
-        /* eslint-enable */
-        balanceStage.update();
+        if (balanceText.coinsSum.text !== balanceData.coinsSum) {
+            balanceText.coinsSum.text = balanceData.coinsSum;
+        }
+        if (balanceText.coinsCash.text !== balanceData.coinsCash) {
+            balanceText.coinsCash.text = balanceData.coinsCash;
+        }
+        if (balanceText.betSum.text !== balanceData.betSum) {
+            balanceText.betSum.text = balanceData.betSum;
+        }
+        if (balanceText.betCash.text !== balanceData.betCash) {
+            balanceText.betCash.text = balanceData.betCash;
+        }
+        if (balanceText.winCash.text !== balanceData.winCash) {
+            balanceText.winCash.text = balanceData.winCash;
+        }
+        balanceContainer.updateCache();
+        storage.write('currentBalance', balanceData);
     }
 
     function changeBet(moreOrLess, maxBet) {
@@ -196,8 +203,8 @@ let balance = (function () {
         }
     }
 
-    function spinStart(data) {
-        if (data.Mode !== 'fsBonus') {
+    function startRoll() {
+        if (storage.readState('mode') === 'normal') {
             if (balanceData.coinsSum >= balanceData.betSum) {
                 balanceData.coinsSum = (balanceData.coinsSum - balanceData.betSum).toFixed(0);
                 balanceData.coinsCash = ((balanceData.coinsCash * 100 - balanceData.betCash * 100) / 100).toFixed(2);
@@ -209,36 +216,33 @@ let balance = (function () {
         }
     }
 
-    function spinEnd(spinEndObject) {
-        if (typeof spinEndObject.winCash !== 'undefined') {
-            if (spinEndObject.mode === 'fsBonus') {
-                balanceData.totalWin = ((+balanceData.totalWin * 100) + (+(+spinEndObject.winCash).toFixed(2) * 100) / 100).toFixed(2);
-            }
-            balanceData.winCash = (+spinEndObject.winCash).toFixed(2);
-            balanceData.coinsCash = (+spinEndObject.scoreCents / 100).toFixed(2);
-            balanceData.coinsSum = (+spinEndObject.scoreCoins).toFixed(0);
+    function endRoll() {
+        if (storage.readState('mode') === 'normal') {
+            const data = storage.read('rollResponse');
+            balanceData.winCash = (+data.TotalWinCents / 100).toFixed(2);
+            balanceData.coinsCash = (+data.ScoreCents / 100).toFixed(2);
+            balanceData.coinsSum = (+data.ScoreCoins).toFixed(0);
             updateBalance();
-        } else {
-            console.error('WinCash is undefined!');
         }
     }
 
-    /* eslint-disable */
-    function getBalanceData() {
-        return utils.getData(balanceData);
-    }
-    /* eslint-enable */
-
-    /* eslint-disable */
-    events.on('dataDownloaded', initBalance);
+    events.on('changeState', checkState);
     events.on('changeBet', changeBet);
     events.on('changeCoins', changeCoins);
-    events.on('spinStart', spinStart);
-    events.on('spinEnd', spinEnd);
-    /* eslint-enable */
+
+    function checkState(state) {
+        if (state === 'bgDraw' && storage.readState('bgDraw')) {
+            initBalance();
+        }
+        if (state === 'roll' && storage.readState('roll') === 'started') {
+            startRoll();
+        }
+        if (state === 'roll' && storage.readState('roll') === 'ended') {
+            endRoll();
+        }
+    }
 
     return {
-        getBalanceData,
         changeBet,
         changeCoins
     };

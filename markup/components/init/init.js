@@ -1,9 +1,9 @@
-let init = (function () {
-
-    let initData = {};
+/* eslint-disable no-undef */
+/* eslint-disable no-use-before-define */
+const init = (function () {
 
     function parseWheels(string) {
-        let wheelsMas = string.split('|').map((column) => {
+        const wheelsMas = string.split('|').map((column) => {
             return column.split('@');
         });
         wheelsMas.map((column, columnIndex) => {
@@ -59,63 +59,96 @@ let init = (function () {
         return wheelsMas;
     }
     function parseLines(string) {
-        let linesMas = string.split('|').map((line, lineNumber) => {
+        const linesMas = string.split('|').map((line, lineNumber) => {
             return line.split('@').map((coords, index) => {
                 return coords.split(',');
             });
         });
         return linesMas;
     }
+    function parseLinesCoords(arr) {
+        const result = [];
+        arr.forEach((line, number) => {
+            result[number] = [];
+            line.forEach((point, index) => {
+                const x = +point[0];
+                const y = +point[1];
+                const resultX = 192 * (x + 0.5);
+                const resultY = 180 * (y + 0.5);
+                const resultCoords = {
+                    x: resultX,
+                    y: resultY
+                };
+                result[number][index] = resultCoords;
+            });
+        });
+        return result;
+    }
+    function parseLinesPaths(arr) {
+        const result = [];
+        arr.forEach((line, number) => {
+            result[number] = [];
+            line.forEach((point) => {
+                result[number].push(point.x, point.y);
+            });
+        });
+        return result;
+    }
+
+    function login(userID, casinoID) {
+        userID = userID || 1; // КОСТЫЛЬ! Должен получать от сервера инициализации.
+        casinoID = casinoID || 1; // КОСТЫЛЬ! Должен получать от сервера инициализации.
+        utils.request('_Login', `/${userID}/${casinoID}`)
+            .then(sessionID => {
+                // Запишем sessionID в Storage
+                storage.write('sessionID', sessionID);
+                // Запишем изменение состояния в Storage
+                storage.changeState('logged', true);
+                // Запустим инициализацию
+                initGame(sessionID);
+            })
+            .catch(error => console.error(error));
+    }
 
     function initGame(sessionID) {
-        /* eslint-disable */
-        const gameID = 6; // КОСТЫЛЬ! Должен получать от сервера инициализации.
+        const gameID = 1; // КОСТЫЛЬ! Должен получать от сервера инициализации.
 
-        let playPromise = utils.request('_Play', `/${sessionID}/${gameID}`);
-            playPromise.then((balanceData) => {
-                initData.balance = balanceData;
+        utils.request('_Play', `/${sessionID}/${gameID}`)
+            .then((balanceData) => {
+                if (balanceData.SavedResult === 'None') {
+                    storage.changeState('mode', 'normal');
+                }
+                // Запишем balance в Storage
+                storage.write('balance', balanceData);
+                return utils.request('_GetAllWheels', `/${sessionID}`);
             })
-            .catch(error => console.dir(error));
-
-        Promise.all([playPromise]).then(() => {
-
-            let wheelsPromise = utils.request('_GetAllWheels', `/${sessionID}`)
             .then((wheelsString) => {
-                initData.wheels = parseWheels(wheelsString);
+                // Запишем wheels в Storage
+                storage.write('wheels', parseWheels(wheelsString));
+                return utils.request('_GetAllWheelsByMode', `/${sessionID}/fsBonus`);
             })
-            .catch(error => console.dir(error));
-
-             let freeWheelsPromise = utils.request('_GetAllWheelsByMode', `/${sessionID}/fsBonus`)
             .then((freeWheelsString) => {
-                initData.freeWheels = parseWheels(freeWheelsString);
+                // Запишем freeWheels в Storage
+                storage.write('freeWheels', parseWheels(freeWheelsString));
+                return utils.request('_GetLines', `/${sessionID}`);
             })
-            .catch(error => console.dir(error));
-
-            let linesPromise = utils.request('_GetLines', `/${sessionID}`)
             .then((linesString) => {
-                initData.lines = parseLines(linesString);
+                // Запишем lines в Storage
+                const lines = parseLines(linesString);
+                const linesCoords = parseLinesCoords(lines);
+                const linesPaths = parseLinesPaths(linesCoords);
+                storage.write('lines', lines);
+                storage.write('linesCoords', linesCoords);
+                storage.write('linesPaths', linesPaths);
+                // Запишем состояние в Storage
+                storage.changeState('inited', true);
             })
-            .catch(error => console.dir(error));
-
-            Promise.all([wheelsPromise, freeWheelsPromise, linesPromise]).then(() => {
-                events.trigger('dataDownloaded', initData);
-            });
-
-        });
-        /* eslint-enable */
+            .catch(error => console.error(error));
     }
-
-    /* eslint-disable */
-    function getInitData() {
-        return utils.getData(initData);
-    }
-    /* eslint-enable */
-
-    /* eslint-disable */
-    events.on('initGame', initGame);
-    /* eslint-enable */
 
     return {
-        getInitData
+        login
     };
 })();
+
+init.login();

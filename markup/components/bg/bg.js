@@ -1,36 +1,49 @@
-let bg = (function () {
+/* eslint-disable no-undef*/
+const bg = (function () {
 
-    function drawBG(queue) {
-        /* eslint-disable */
-        let bgStaticStage = canvas.getStages().bgStaticStage;
-        let gameStaticStage = canvas.getStages().gameStaticStage;
-        let mainBG = new createjs.Bitmap(queue.getResult('mainBG')).set({
+    const c = createjs;
+    const w = utils.width;
+    const h = utils.height;
+
+    function drawBG() {
+        const stage = storage.read('stage');
+        const loader = storage.read('loadResult');
+        const bgSS = loader.getResult('bg');
+        const mainBG = new c.Sprite(bgSS, 'mainBG').set({
             name: 'mainBG'
         });
-        let gameBG = new createjs.Bitmap(queue.getResult('gameBG')).set({
-            x: 95,
-            y: 85,
+        const gameBG = new c.Sprite(bgSS, 'gameBG').set({
             name: 'gameBG'
         });
-        let gameMachine = new createjs.Bitmap(queue.getResult('gameMachine')).set({
-            x: 80,
-            y: 7,
+        const gameMachine = new c.Sprite(bgSS, 'gameMachine').set({
             name: 'gameMachine'
         });
-        let footerBG = new createjs.Bitmap(queue.getResult('footerBG')).set({
-            y: 720 - 40,
+        const footerBG = new c.Shape().set({
             name: 'footerBG'
         });
-        bgStaticStage.addChildAt(mainBG, gameBG, 0);
-        gameStaticStage.addChildAt(gameMachine, footerBG, 0);
-        bgStaticStage.update();
-        gameStaticStage.update();
+        footerBG.graphics.beginFill('rgba(0, 0, 0, 0.6)').drawRect(0, h - 40, w, 40);
+        const bgContainer = new c.Container().set({
+            name: 'bgContainer'
+        });
+        const fgContainer = new c.Container().set({
+            name: 'fgContainer'
+        });
+
+        bgContainer.addChild(mainBG, gameBG, footerBG);
+        fgContainer.addChild(gameMachine);
+        stage.addChildAt(bgContainer, fgContainer, 0);
+        bgContainer.cache(0, 0, w, h);
+        fgContainer.cache(0, 0, w, h);
+
+        storage.changeState('bgDraw', 'main');
+        storage.changeState('side', 'left');
     }
 
-    events.on('preloadComplete', drawBG);
-    /* eslint-enable */
+    function checkState(state) {
+        if (state === 'loaded' && storage.readState('loaded')) {
+            drawBG();
+        }
+    }
 
-    return {
-
-    };
+    events.on('changeState', checkState);
 })();
