@@ -1,10 +1,10 @@
-let autoplay = (function () {
+/* eslint-disable no-undef */
+const autoplay = (function () {
 
     let autoTimer;
     let autoCount;
     let autoEnd;
 
-    /* eslint-disable no-undef */
     function initAutoplay(count) {
         autoCount = count;
         autoEnd = false;
@@ -32,6 +32,15 @@ let autoplay = (function () {
     events.on('initAutoplay', initAutoplay);
     events.on('startAutoplay', startAutoplay);
     events.on('stopAutoplay', stopAutoplay);
+
+
+    function checkState(state) {
+        if (state === 'autoplay' && storage.readState(state) === 'started') {
+            startAutoplay();
+        }
+    }
+
+    events.on('changeState', checkState);
 
     return {
         initAutoplay,

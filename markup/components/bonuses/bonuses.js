@@ -1,7 +1,8 @@
 let bonuses = (function () {
 
     let currentLevel = 1;
-
+    let bonusData;
+    /* eslint-disable */
     function initBonusLevel() {
         let loader = preloader.getLoadResult();
         let stage = canvas.getStages().bonusStage;
@@ -143,6 +144,7 @@ let bonuses = (function () {
             setClickEvent(door_4, darkness_4);
             setClickEvent(door_5, darkness_5);
             doorsContainer.addChild(darkness_1, door_1, darkness_2, door_2, darkness_3, door_3, darkness_4, door_4, darkness_5, door_5);
+            bonusContainer.addChild(bonusWall, doorsContainer, bonusBG);
 
         } else if (level === 2 || level === 3 || level === 4) {
 
@@ -209,13 +211,106 @@ let bonuses = (function () {
 
             doorsContainer.removeAllChildren();
             doorsContainer.addChild(door_1, door_2, door_3, door_4, door_5);
+            bonusContainer.addChild(bonusWall, doorsContainer, bonusBG);
 
+        } else if ( level === 5 ) {
+            let ss1 = loader.getResult('doorSprite_5_1');
+            let ss3 = loader.getResult('doorSprite_5_3');
+            let ss5 = loader.getResult('doorSprite_5_5');
+            let door_1 = new createjs.Sprite(ss1, 'open').set({
+                x: 270,
+                y: 355
+            });
+            let door_2 = new createjs.Sprite(ss1).set({
+                x: 415,
+                y: 355
+            });
+            let door_3 = new createjs.Sprite(ss3).set({
+                x: 564,
+                y: 355
+            });
+            let door_4 = new createjs.Sprite(ss5).set({
+                x: 715,
+                y: 355
+            });
+            let door_5 = new createjs.Sprite(ss5).set({
+                x: 865,
+                y: 355
+            });
+
+            door_1.stop();
+            door_2.stop();
+            door_3.stop();
+            door_4.stop();
+            door_5.stop();
+
+            handleLastDoor(door_1);
+            handleLastDoor(door_2);
+            handleLastDoor(door_3);
+            handleLastDoor(door_4);
+            handleLastDoor(door_5);
+
+            function handleLastDoor(door) {
+                door.on('click', function () {
+                    if (clickCounter < 1) {
+                        clickCounter++;
+                        door.play();
+                        if (data.CurrentValue) {
+                            let light = new createjs.Bitmap(loader.getResult('bonusLight')).set({
+                                x: door.x,
+                                y: door.y,
+                                regX: 0,
+                                regY: 550,
+                                alpha: 0
+                            });
+                            let coins = new createjs.Bitmap(loader.getResult('bonusCoins')).set({
+                                x: door.x,
+                                y: door.y,
+                                regX: -20,
+                                regY: 592,
+                                alpha: 0
+                            });
+                            bonusContainer.addChild(light, coins);
+                            door.on('animationend', function () {
+                                door.gotoAndStop(4);
+                                door.paused = true;
+                                createjs.Tween.get(light)
+                                .to({alpha: 1}, 400);
+                                createjs.Tween.get(coins)
+                                .to({alpha: 1}, 400);
+                            });
+                            showBonusWin(data.CurrentValue, true, 3000)
+                        } else {
+                            setTimeout(function () {
+                                events.trigger('finishBonusLevel')
+                            }, 1000);
+                            // let fly = new createjs.Sprite(loader.getResult('bonusFly')).set({
+                            //     x: door.x,
+                            //     y: door.y
+                            // });
+                            // fly.on('animationend', function () {
+                            //     createjs.Tween.get(fly)
+                            //     .to({alpha: 0}, 100);
+                            // })
+                            // bonusContainer.addChild(fly);
+                            // door.on('animationend', function () {
+                            //     door.gotoAndStop(4);
+                            //     door.paused = true;
+                            // });
+                        }
+                    }
+                });
+            }
+
+            doorsContainer.removeAllChildren();
+            doorsContainer.addChild(door_1, door_2, door_3, door_4, door_5);
+            bonusContainer.addChild(bonusBG, doorsContainer);
         }
-        bonusContainer.addChild(bonusWall, doorsContainer, bonusBG);
         stage.addChildAt(bonusContainer, 0);
     }
 
-    function showBonusWin(win) {
+    function showBonusWin(win, last, timer) {
+        let time = timer || 1000;
         console.log('I must show win:', win);
         let stage = canvas.getStages().bonusStage;
         let winText = new createjs.Text(win, '175px bold Arial', '#fff').set({
@@ -227,21 +322,59 @@ let bonuses = (function () {
             scaleX: 0.1,
             scaleY: 0.1
         });
-        stage.addChild(winText);
+        let bonusContainer = stage.getChildByName('bonusContainer');
+        bonusContainer.addChild(winText);
         createjs.Tween.get(winText)
         .to({scaleX: 1, scaleY: 1}, 1000, createjs.Ease.bounceOut)
         .call(
             setTimeout(function () {
-                callNextBonusLevel();
-            }, 1000)
+                if (!last) {
+                    callNextBonusLevel();
+                } else {
+                    events.trigger('finishBonusLevel');
+                }
+            }, time)
         );
     }
 
     function finishBonusLevel() {
         let stage = canvas.getStages().bonusStage;
-        stage.removeAllChildren();
-        stage.nextStage = canvas.getStages().gameStage;
-        readyAfterBonus();
+        let loader = preloader.getLoadResult();
+        console.warn('I am finishing Bonuses!');
+        let finishContainer = new createjs.Container().set({
+            name: 'finishContainer',
+            alpha: 0
+        });
+        let finishBG = new createjs.Bitmap(loader.getResult('multiBG')).set({
+            name: 'finishBG'
+        });
+        let finishText = new createjs.Text(`You win ${bonusData.CurrentWinCoins} coins!!!`, '80px bold Arial', '#fff').set({
+            name: 'finishText',
+            x: 1280 / 2,
+            y: 720 / 2,
+            textAlign: 'center',
+            textBaseline: 'middle'
+        });
+        createjs.Tween.get(finishContainer)
+            .to({alpha: 1}, 500)
+            .call(
+                function () {
+                    stage.removeChild(stage.getChildByName('bonusContainer'));
+                }
+            );
+        finishBG.on('click', function () {
+            createjs.Tween.get(finishContainer)
+                .to({alpha: 0}, 500)
+                .call(function () {
+                    stage.removeAllChildren();
+                    stage.nextStage = canvas.getStages().gameStage;
+                    readyAfterBonus();
+                });
+        });
+        finishContainer.addChild(finishBG, finishText);
+
+        stage.addChild(finishContainer);
+
     }
 
     function callNextBonusLevel() {
@@ -269,6 +402,7 @@ let bonuses = (function () {
         let sessionID = login.getSessionID();
         utils.request('_Roll/', `${sessionID}/1/1`)
         .then((data) => {
+            bonusData = data;
             drawBonusLevel(currentLevel, data)
             console.log('This is bonus data:', data);
         });

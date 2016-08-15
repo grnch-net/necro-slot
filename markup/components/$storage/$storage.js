@@ -37,7 +37,7 @@ const storage = (function () {
         if (typeof store[key] !== 'undefined') {
             return store[key];
         } else {
-            console.error('There is no such data in store!');
+            return false;
         }
     }
 
