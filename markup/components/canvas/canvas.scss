@@ -2,9 +2,22 @@ html, body {
     height: 100%;
 }
 
+body {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    background: #000;
+}
+
 #game {
     position: relative;
     max-width: 100%;
+    flex-basis: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: #000;
 }
 
 canvas {

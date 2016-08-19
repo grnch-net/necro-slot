@@ -111,9 +111,9 @@ const init = (function () {
     }
 
     function initGame(sessionID) {
-        const gameID = 1; // КОСТЫЛЬ! Должен получать от сервера инициализации.
+        const gameID = 8; // КОСТЫЛЬ! Должен получать от сервера инициализации.
 
-        utils.request('_Play', `/${sessionID}/${gameID}`)
+        utils.request('_PlayDemo', `/${sessionID}/${gameID}`)
             .then((balanceData) => {
                 if (balanceData.SavedResult === 'None') {
                     storage.changeState('mode', 'normal');

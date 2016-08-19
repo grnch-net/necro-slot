@@ -1,50 +1,48 @@
 /* eslint-disable no-undef */
 const autoplay = (function () {
 
-    let autoTimer;
     let autoCount;
+    let autoTimer;
     let autoEnd;
 
-    function initAutoplay(count) {
-        autoCount = count;
+    function initAutoplay() {
+        autoCount = storage.read('autoCount');
         autoEnd = false;
+        startAutoplay();
     }
 
     function startAutoplay() {
-        console.log('I am starting autoplay!');
+        console.log('AutoCount', autoCount);
         autoCount--;
         if (!autoEnd) {
-            spin.spinStart(true);
+            roll.startRoll();
         }
         if (autoCount > 0) {
-            buttons.changeAutoText(autoCount);
+            storage.write('autoCount', autoCount);
+            storage.changeState('autoCount', autoCount);
         } else {
-            events.trigger('stopAutoplay');
+            storage.changeState('autoplay', 'ended');
         }
     }
 
     function stopAutoplay() {
-        console.log('I am stoping autoplay!');
         autoEnd = true;
-        lines.clearAutoTimer();
+        const autoTimeout = storage.read('autoTimeout');
+        clearTimeout(autoTimeout);
     }
-
-    events.on('initAutoplay', initAutoplay);
-    events.on('startAutoplay', startAutoplay);
-    events.on('stopAutoplay', stopAutoplay);
-
 
     function checkState(state) {
         if (state === 'autoplay' && storage.readState(state) === 'started') {
-            startAutoplay();
+            initAutoplay();
+        }
+        if (state === 'autoplay' && storage.readState(state) === 'ended') {
+            stopAutoplay();
         }
     }
 
     events.on('changeState', checkState);
 
     return {
-        initAutoplay,
-        startAutoplay,
-        stopAutoplay
+        startAutoplay
     };
 })();

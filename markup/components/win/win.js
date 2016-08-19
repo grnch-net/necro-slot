@@ -187,20 +187,30 @@ const win = (function () {
     function drawLineLight(number) {
         let completeCounter = 0;
         const lightMas = [];
-        const amount = Math.round(Math.random() * 40) + 10;
+        const amount = Math.round(Math.random() * 80) + 20;
         const linesCoords = storage.read('linesCoords');
         const loader = storage.read('loadResult');
-        const ss = loader.getResult('linesSprite');
+        // const ss = loader.getResult('linesSprite');
         for (let i = 0; i < amount; i++) {
             const timeout = (Math.random() * 700) / 1000;
-            const light = new c.Sprite(ss, 'light').set({
+            let scale;
+            let endsAmount = Math.round(amount / 4);
+            let scalePart = 0.7 / endsAmount;
+            if (i < endsAmount) {
+                scale = i * scalePart;
+            } else if (i > (amount - endsAmount)) {
+                scale = scalePart * (amount - i);
+            } else {
+                scale = 0.7;
+            }
+            const light = new c.Bitmap(loader.getResult('newLight')).set({
                 name: 'winLight',
                 x: linesCoords[number - 1][0].x,
                 y: linesCoords[number - 1][0].y,
-                scaleX: 0.5,
-                scaleY: 0.5,
-                regX: 25,
-                regY: 10
+                regX: 24,
+                regY: 24,
+                scaleX: scale,
+                scaleY: scale
             });
             lightMas.push(light);
             winLinesContainer.addChild(light);
@@ -210,7 +220,7 @@ const win = (function () {
             ease: Power1.easeOut,
             onComplete: function () {
                 winLinesContainer.removeChild(this.target);
-            }}, 0.025, function () {
+            }}, 0.003, function () {
                 storage.changeState('lineLight', 'done');
             }
         );
@@ -232,20 +242,20 @@ const win = (function () {
             scaleX: 1.8,
             scaleY: 1.8
         });
-        const winLineText = new c.Text(lineWin, 'bold 35px Arial', '#f0e194').set({
+        const winLineText = new c.Text(lineWin, '35px Helvetica', '#f0e194').set({
             x: 30,
-            y: 23,
+            y: 22,
             textAlign: 'center',
             textBaseline: 'middle',
             name: 'winLineText',
             shadow: new c.Shadow('#C19433', 0, 0, 8)
         });
         if ((winLineText.text + '').length > 3) {
-            winLineText.font = 'bold 20px Arial';
+            winLineText.font = '20px Helvetica';
         } else if ((winLineText.text + '').length > 2) {
-            winLineText.font = 'bold 25px Arial';
+            winLineText.font = '25px Helvetica';
         } else if ((winLineText.text + '').length > 1) {
-            winLineText.font = 'bold 30px Arial';
+            winLineText.font = '30px Helvetica';
         }
         winText.addChild(winLineRect, winLineText);
         winRectsContainer.addChild(winText);
@@ -258,7 +268,7 @@ const win = (function () {
             x: (utils.gameWidth - 176) / 2 + 3,
             y: (utils.gameHeight - 150) / 2
         });
-        const totalWinText = new c.Text(totalWinNumber, 'bold 75px Arial', '#f0e194').set({
+        const totalWinText = new c.Text(totalWinNumber, '75px Helvetica', '#f0e194').set({
             x: 88,
             y: 75,
             name: 'totalWinText',
@@ -273,6 +283,17 @@ const win = (function () {
         winRectsContainer.addChild(totalWin);
     }
 
+    function drawLineFire(number) {
+        const loader = storage.read('loadResult');
+        const ss = loader.getResult('lineFire');
+        const lineFire = new c.Sprite(ss, 'go').set({
+            name: 'lineFire',
+            x: parameters[number].x - winRectsContainer.x - 3,
+            y: parameters[number].y - winRectsContainer.y + 5
+        });
+        winRectsContainer.addChild(lineFire);
+    }
+
     function fireWinLine(number, amount) {
         for (let i = 0; i < amount; i++) {
             const element = winElements[number - 1][i];
@@ -280,8 +301,9 @@ const win = (function () {
             const elementIndex = animationName.substr(animationName.indexOf('-') + 1);
             element.gotoAndStop(`win-${elementIndex}`);
         }
-        drawLineShape(number);
+        // drawLineShape(number);
         drawLineLight(number);
+        drawLineFire(number);
     }
 
     function drawAnotherLine(index) {
@@ -302,6 +324,7 @@ const win = (function () {
     }
 
     function fireAllScatters() {
+        const gameContainer = stage.getChildByName('gameContainer');
         winElements.forEach((winLine) => {
             winLine.forEach((element) => {
                 const animationName = element.currentAnimation;
@@ -311,6 +334,11 @@ const win = (function () {
                 }
             });
         });
+        if (storage.read('rollResponse').BonusResults[0] === 'StagesSlotBonus') {
+            setTimeout(function () {
+                events.trigger('initBonusLevel');
+            }, 1000);
+        }
     }
 
     function fireScatterWild() {
@@ -323,6 +351,11 @@ const win = (function () {
                 }
             });
         });
+        if (storage.read('rollResponse').BonusResults[0] === 'FreeSpinBonus') {
+            setTimeout(function () {
+                events.trigger('initFreeSpins');
+            }, 1000);
+        }
     }
 
     function drawTotalWin(lines) {
@@ -340,7 +373,9 @@ const win = (function () {
             }
         });
         const totalWin = storage.read('rollResponse').TotalWinCoins;
-        showTotalWin(totalWin);
+        if (totalWin > 0) {
+            showTotalWin(totalWin);
+        }
     }
 
     function parseWinResult(arr) {
@@ -390,6 +425,12 @@ const win = (function () {
     function checkState(state) {
         if (state === 'roll' && storage.readState(state) === 'ended') {
             showWin();
+            if (storage.readState('autoplay') === 'started') {
+                const autoTimeout = setTimeout(function () {
+                    autoplay.startAutoplay();
+                }, 1000);
+                storage.write('autoTimeout', autoTimeout);
+            }
         }
         if (state === 'roll' && storage.readState(state) === 'started') {
             cleanWin();
@@ -403,7 +444,11 @@ const win = (function () {
         if (state === 'lineLight' && storage.readState(state) === 'done') {
             lightDoneCounter++;
             if (lightDoneCounter === lightLinesCounter && storage.readState('mode') === 'normal') {
-                storage.changeState('lineByLine', 'started');
+                if (storage.readState('autoplay') !== 'started') {
+                    if (storage.read('rollResponse').BonusResults.length === 0) {
+                        storage.changeState('lineByLine', 'started');
+                    }
+                }
             }
         }
         if (state === 'lineByLine' && storage.readState(state) === 'started') {
@@ -418,4 +463,8 @@ const win = (function () {
     }
 
     events.on('changeState', checkState);
+
+    return {
+        cleanWin
+    };
 })();

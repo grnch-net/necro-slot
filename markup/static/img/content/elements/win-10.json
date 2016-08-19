@@ -1,0 +1,14 @@
+{
+    "images": ["static/img/content/elements/win-10.png"],
+    "frames": {
+        "width": 255,
+        "height": 225,
+        "count": 32,
+        "regX": 127,
+        "regY": 112
+    },
+    "framerate": 12,
+    "animations": {
+        "win-10": [0, 31]
+    }
+}

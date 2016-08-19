@@ -7,21 +7,26 @@ const mainManifest = [
     {id: 'bg', src: 'static/img/content/bg/bg.json', type: 'spritesheet'},
     {id: 'buttons', src: 'static/img/content/buttons/buttons.json', type: 'spritesheet'},
     {id: 'elements', src: 'static/img/content/elements/elements.json', type: 'spritesheet'},
+    {id: 'win-10', src: 'static/img/content/elements/win-10.json', type: 'spritesheet'},
     {id: 'menu', src: 'static/img/content/menu/menu.json', type: 'spritesheet'},
-    // {id: 'fsBG', src: 'static/img/content/bg/fsBG.png'},
+    {id: 'fsBG', src: 'static/img/content/bg/fsBG.png'},
     // {id: 'mainBG', src: 'static/img/content/bg/mainBG.png'},
     // {id: 'gameBG', src: 'static/img/content/bg/gameBG.png'},
     // {id: 'footerBG', src: 'static/img/content/bg/footerBG.png'},
-    // {id: 'transitionBG', src: 'static/img/content/bg/transitionBG.png'},
+    {id: 'transitionBG', src: 'static/img/content/bg/transitionBG.png'},
     // {id: 'gameMachine', src: 'static/img/content/bg/gameMachine.png'},
     {id: 'gameShadow', src: 'static/img/content/bg/gameShadow.png'},
     {id: 'liza', src: 'static/img/content/bg/liza.png'},
+    {id: 'But', src: 'static/img/content/bg/But.png'},
+    {id: 'youWin', src: 'static/img/content/bg/youWin.png'},
+    {id: 'freeSpins', src: 'static/img/content/bg/freeSpins.png'},
     {id: 'freeSpinsText', src: 'static/img/content/bg/freeSpinsText.png'},
     {id: 'bigWinText', src: 'static/img/content/bg/bigWinText.png'},
     {id: 'totalWinText', src: 'static/img/content/bg/totalWinText.png'},
     {id: 'multiBG', src: 'static/img/content/bg/multiBG.png'},
     {id: 'multiTitle', src: 'static/img/content/bg/multiTitle.png'},
     {id: 'multiCoins', src: 'static/img/content/bg/multiCoins.png'},
+    {id: 'firstRules', src: 'static/img/content/bg/firstRules.png'},
     // buttons
     // {id: 'autoButton', src: 'static/img/content/buttons/auto.json', type: 'spritesheet'},
     // {id: 'betButton', src: 'static/img/content/buttons/bet.json', type: 'spritesheet'},
@@ -40,40 +45,51 @@ const mainManifest = [
     // {id: 'menuMinusPlus', src: 'static/img/content/menu/menuMinusPlus.json', type: 'spritesheet'},
     // {id: 'menuBack', src: 'static/img/content/menu/menuBack.json', type: 'spritesheet'},
     // lines
-    {id: 'linesDisc', src: 'static/img/content/lines/linesDisc.json', type: 'spritesheet'},
-    {id: 'linesSprite', src: 'static/img/content/lines/linesSprite.json', type: 'spritesheet'},
+    // {id: 'linesDisc', src: 'static/img/content/lines/linesDisc.json', type: 'spritesheet'},
+    // {id: 'linesSprite', src: 'static/img/content/lines/linesSprite.json', type: 'spritesheet'},
     {id: 'winLineRect', src: 'static/img/content/lines/winLineRect.png'},
     {id: 'winTotalRect', src: 'static/img/content/lines/winTotalRect.png'},
+    {id: 'newBG', src: 'static/img/content/new/bg.png'},
+    {id: 'newBGLight', src: 'static/img/content/bg/newBGLight.png'},
+    {id: 'fonar', src: 'static/img/content/bg/fonar.png'},
+    {id: 'newGameMachine', src: 'static/img/content/new/gamemachine.png'},
+    {id: 'home', src: 'static/img/content/new/home.png'},
+    {id: 'gear-1', src: 'static/img/content/new/gear-1.png'},
+    {id: 'gear-2', src: 'static/img/content/new/gear-2.png'},
+    {id: 'lineFire', src: 'static/img/content/new/newLight.json', type: 'spritesheet'},
+    {id: 'newLight', src: 'static/img/content/new/newLight_yellow.png'},
+
     // elements
     // bonuses
-    {id: 'bonusBG_1', src: 'static/img/content/bonuses/bg/bonusBG_1.png'},
-    {id: 'bonusBG_2', src: 'static/img/content/bonuses/bg/bonusBG_2.png'},
-    {id: 'bonusBG_3', src: 'static/img/content/bonuses/bg/bonusBG_3.png'},
-    {id: 'bonusBG_4', src: 'static/img/content/bonuses/bg/bonusBG_4.png'},
-    {id: 'bonusBG_5', src: 'static/img/content/bonuses/bg/bonusBG_5.png'},
-    {id: 'bonusWin_1', src: 'static/img/content/bonuses/win/bonusWin_1.png'},
-    {id: 'bonusWin_2', src: 'static/img/content/bonuses/win/bonusWin_2.png'},
-    {id: 'bonusWin_3', src: 'static/img/content/bonuses/win/bonusWin_3.png'},
-    {id: 'bonusWin_4', src: 'static/img/content/bonuses/win/bonusWin_4.png'},
-    {id: 'bonusFail_1', src: 'static/img/content/bonuses/fail/bonusFail_1.png'},
-    {id: 'bonusFail_2', src: 'static/img/content/bonuses/fail/bonusFail_2.png'},
-    {id: 'bonusFail_3', src: 'static/img/content/bonuses/fail/bonusFail_3.png'},
-    {id: 'bonusFail_4', src: 'static/img/content/bonuses/fail/bonusFail_4.png'},
-    {id: 'bonusDoor_1_1', src: 'static/img/content/bonuses/doors/bonusDoor_1_1.png'},
-    {id: 'bonusDoor_1_2', src: 'static/img/content/bonuses/doors/bonusDoor_1_2.png'},
-    {id: 'bonusDoor_1_3', src: 'static/img/content/bonuses/doors/bonusDoor_1_3.png'},
-    {id: 'bonusDoor_1_4', src: 'static/img/content/bonuses/doors/bonusDoor_1_4.png'},
-    {id: 'bonusDoor_1_5', src: 'static/img/content/bonuses/doors/bonusDoor_1_5.png'},
-    {id: 'doorSprite_2', src: 'static/img/content/bonuses/doors/doorSprite_2.json', type: 'spritesheet'},
-    {id: 'doorSprite_3', src: 'static/img/content/bonuses/doors/doorSprite_3.json', type: 'spritesheet'},
-    {id: 'doorSprite_4', src: 'static/img/content/bonuses/doors/doorSprite_4.json', type: 'spritesheet'},
-    {id: 'doorSprite_5_1', src: 'static/img/content/bonuses/doors/doorSprite_5_1.json', type: 'spritesheet'},
-    {id: 'doorSprite_5_3', src: 'static/img/content/bonuses/doors/doorSprite_5_3.json', type: 'spritesheet'},
-    {id: 'doorSprite_5_5', src: 'static/img/content/bonuses/doors/doorSprite_5_5.json', type: 'spritesheet'},
-    {id: 'bonusFly', src: 'static/img/content/bonuses/win/bonusFly.json', type: 'spritesheet'},
-    {id: 'bonusCoins', src: 'static/img/content/bonuses/win/bonusCoins.png'},
-    {id: 'bonusLight', src: 'static/img/content/bonuses/win/bonusLight.png'},
-    {id: 'bonusBackLight', src: 'static/img/content/bonuses/win/bonusBackLight.png'}
+    {id: 'bonusBG_1', src: 'static/img/content/bonuses/bonusBG_1.png'},
+    {id: 'bonusBG_2', src: 'static/img/content/bonuses/bonusBG_2.png'},
+    {id: 'bonusBG_3', src: 'static/img/content/bonuses/bonusBG_3.png'},
+    {id: 'bonusBG_4', src: 'static/img/content/bonuses/bonusBG_4.png'},
+    {id: 'bonusBG_5', src: 'static/img/content/bonuses/bonusBG_5.png'},
+    {id: 'bonusWin_1', src: 'static/img/content/bonuses/bonusWin_1.png'},
+    {id: 'bonusWin_2', src: 'static/img/content/bonuses/bonusWin_2.png'},
+    {id: 'bonusWin_3', src: 'static/img/content/bonuses/bonusWin_3.png'},
+    {id: 'bonusWin_4', src: 'static/img/content/bonuses/bonusWin_4.png'},
+    {id: 'bonusFail_1', src: 'static/img/content/bonuses/bonusFail_1.png'},
+    {id: 'bonusFail_2', src: 'static/img/content/bonuses/bonusFail_2.png'},
+    {id: 'bonusFail_3', src: 'static/img/content/bonuses/bonusFail_3.png'},
+    {id: 'bonusFail_4', src: 'static/img/content/bonuses/bonusFail_4.png'},
+    {id: 'bonusDoor_1_1', src: 'static/img/content/bonuses/bonusDoor_1_1.png'},
+    {id: 'bonusDoor_1_2', src: 'static/img/content/bonuses/bonusDoor_1_2.png'},
+    {id: 'bonusDoor_1_3', src: 'static/img/content/bonuses/bonusDoor_1_3.png'},
+    {id: 'bonusDoor_1_4', src: 'static/img/content/bonuses/bonusDoor_1_4.png'},
+    {id: 'bonusDoor_1_5', src: 'static/img/content/bonuses/bonusDoor_1_5.png'},
+    {id: 'doorSprite_2', src: 'static/img/content/bonuses/doorSprite_2.json', type: 'spritesheet'},
+    {id: 'doorSprite_3', src: 'static/img/content/bonuses/doorSprite_3.json', type: 'spritesheet'},
+    {id: 'doorSprite_4', src: 'static/img/content/bonuses/doorSprite_4.json', type: 'spritesheet'},
+    {id: 'doorSprite_5_1', src: 'static/img/content/bonuses/doorSprite_5_1.json', type: 'spritesheet'},
+    {id: 'doorSprite_5_3', src: 'static/img/content/bonuses/doorSprite_5_3.json', type: 'spritesheet'},
+    {id: 'doorSprite_5_5', src: 'static/img/content/bonuses/doorSprite_5_5.json', type: 'spritesheet'},
+    {id: 'numbers', src: 'static/img/content/bonuses/numbers.json', type: 'spritesheet'},
+    // {id: 'bonusFly', src: 'static/img/content/bonuses/win/bonusFly.json', type: 'spritesheet'},
+    {id: 'bonusCoins', src: 'static/img/content/bonuses/bonusCoins.png'},
+    {id: 'bonusLight', src: 'static/img/content/bonuses/bonusLight.png'},
+    {id: 'bonusBackLight', src: 'static/img/content/bonuses/bonusBackLight.png'}
 ];
 
 /* eslint-disable no-undef */
@@ -109,8 +125,8 @@ const preloader = (function () {
         const preloaderPlay = new c.Sprite(ss, 'play').set({
             name: 'preloaderPlay',
             x: (w - 220) / 2,
-            y: 310,
-            shadow: new c.Shadow('#C19433', 0, 0, 20)
+            y: 310
+            // shadow: new c.Shadow('#C19433', 0, 0, 20)
         });
         const preloaderSprite = new c.Sprite(clock, 'start').set({
             name: 'preloaderSprite',
@@ -182,6 +198,9 @@ const preloader = (function () {
         animation.fadeOut(container, function () {
             stage.removeChild(container);
         });
+        if ($('html').hasClass('ios') || $('html').hasClass('iphone')) {
+            $(document).bind('touchmove', false);
+        }
     }
 
     function checkState(state) {
@@ -192,3 +211,9 @@ const preloader = (function () {
 
     events.on('changeState', checkState);
 })();
+
+$(function () {
+    if (!$('html').hasClass('ios') || !$('html').hasClass('iphone')) {
+        $('h1').hide();
+    }
+});

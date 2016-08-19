@@ -283,7 +283,9 @@ const menu = (function () {
     }
 
     function handleAutoClick(e) {
-        console.log('AutoClick is Fired:', this.amount);
+        const that = this;
+        storage.write('autoCount', that.amount);
+        storage.changeState('autoplay', 'started');
         hideMenu();
     }
 

@@ -50,8 +50,11 @@ const buttons = (function () {
     }
 
     function handleAutoClick() {
-        if (storage.readState('roll') !== 'started') {
+        if (storage.readState('roll') !== 'started' && autoButton.currentAnimation !== 'autoStop') {
             storage.changeState('menu', 'auto');
+        }
+        if (autoButton.currentAnimation === 'autoStop') {
+            storage.changeState('autoplay', 'ended');
         }
     }
 
@@ -111,22 +114,53 @@ const buttons = (function () {
 
     function changeButtonsPosition(side) {
         const tl = new TimelineMax();
-        if (side === 'right') {
-            tl
-                .to(buttonsContainer, 0.25, {x: 1280})
-                .to(buttonsContainer, 0, {x: -300})
-                .to(buttonsContainer, 0.25, {x: 14});
-        }
+        // if (side === 'right') {
+        //     tl
+        //         .to(buttonsContainer, 0.25, {x: 1280})
+        //         .to(buttonsContainer, 0, {x: -300})
+        //         .to(buttonsContainer, 0.25, {x: 14});
+        // }
         if (side === 'left') {
             tl
                 .to(buttonsContainer, 0.25, {x: -300})
                 .to(buttonsContainer, 0, {x: 1280})
                 .to(buttonsContainer, 0.25, {x: 1080});
         }
-        if (side === 'center') {
+        if (side === 'center' || side === 'right') {
             const end = (buttonsContainer.x > 1000) ? 1300 : -300;
             tl
                 .to(buttonsContainer, 0.25, {x: end});
+        }
+    }
+
+    function writeAutoplay() {
+        console.log('Я перехожу на режим автоигры)');
+        spinButton.gotoAndStop('spinAuto');
+        autoButton.gotoAndStop('autoStop');
+        buttonsCache.updateCache();
+        const autoCount = storage.read('autoCount');
+        const autoText = new c.Text(autoCount, '70px Helvetica', '#90fd5a').set({
+            name: 'autoText',
+            textAlign: 'center',
+            textBaseline: 'middle',
+            x: spinButton.x,
+            y: spinButton.y,
+            shadow: new c.Shadow('#90fd5a', 0, 0, 8)
+        });
+        buttonsContainer.addChild(autoText);
+    }
+    function removeAutoplay() {
+        spinButton.gotoAndStop('spinOut');
+        autoButton.gotoAndStop('autoOut');
+        buttonsCache.updateCache();
+        const autoText = buttonsContainer.getChildByName('autoText');
+        buttonsContainer.removeChild(autoText);
+    }
+    function updateAutoplay() {
+        const autoCount = storage.read('autoCount');
+        if (buttonsContainer.getChildByName('autoText')) {
+            const autoText = buttonsContainer.getChildByName('autoText');
+            autoText.text = autoCount;
         }
     }
 
@@ -137,10 +171,10 @@ const buttons = (function () {
         if (state === 'side') {
             changeButtonsPosition(storage.readState(state));
         }
-        if (state === 'fastRoll' && storage.readState(state) === true) {
+        if (state === 'fastRoll' && storage.readState(state) === true && storage.readState('autoplay') !== 'started') {
             spinButton.gotoAndStop('spinOn');
         }
-        if (state === 'roll') {
+        if (state === 'roll' && storage.readState('autoplay') !== 'started') {
             if (storage.readState(state) === 'ended') {
                 spinButton.gotoAndStop('spinOut');
                 menuButton.gotoAndStop('menuOut');
@@ -155,6 +189,16 @@ const buttons = (function () {
                 betButton.gotoAndStop('betOff');
                 buttonsCache.updateCache();
             }
+        }
+        if (state === 'autoplay') {
+            if (storage.readState(state) === 'started') {
+                writeAutoplay();
+            } else {
+                removeAutoplay();
+            }
+        }
+        if (state === 'autoCount') {
+            updateAutoplay();
         }
     }
 

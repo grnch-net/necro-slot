@@ -1,21 +1,20 @@
+/* eslint-disable */
 let bonuses = (function () {
 
     let currentLevel = 1;
     let bonusData;
-    /* eslint-disable */
+    const c = createjs;
     function initBonusLevel() {
-        let loader = preloader.getLoadResult();
-        let stage = canvas.getStages().bonusStage;
-        stage.alpha = 1;
-        stage.nextStage = null;
-        let initContainer = new createjs.Container().set({
+        const loader = storage.read('loadResult');
+        const stage = storage.read('stage');
+        let initContainer = new c.Container().set({
             name: 'initContainer',
             alpha: 0
         });
-        let initBG = new createjs.Bitmap(loader.getResult('multiBG')).set({
+        let initBG = new c.Bitmap(loader.getResult('multiBG')).set({
             name: 'initBG'
         });
-        let initText = new createjs.Text('You are starting Bonus Level!!!', '80px bold Arial', '#fff').set({
+        let initText = new c.Text('You starting Bonus Level!!!', '80px bold Arial', '#fff').set({
             name: 'initText',
             x: 1280 / 2,
             y: 720 / 2,
@@ -23,17 +22,18 @@ let bonuses = (function () {
             textBaseline: 'middle'
         });
 
-        createjs.Tween.get(initContainer)
+        c.Tween.get(initContainer)
             .to({alpha: 1}, 500)
             .call(
                 function () {
                     currentLevel = 1;
+                    win.cleanWin();
                     getBonusLevel();
                 }
             );
-        initBG.on('click', function () {
-            createjs.Tween.get(initContainer)
-                .to({alpha: 0}, 500)
+        initContainer.on('click', function () {
+            c.Tween.get(initContainer)
+                .to({alpha: 0}, 300)
                 .call(function () {
                     stage.removeChild(initContainer);
                 });
@@ -44,10 +44,9 @@ let bonuses = (function () {
     }
 
     function drawBonusLevel(level, data) {
-        console.log('I am drawing level', level, 'with data:', data);
         let clickCounter = 0;
-        let stage = canvas.getStages().bonusStage;
-        let loader = preloader.getLoadResult();
+        const loader = storage.read('loadResult');
+        const stage = storage.read('stage');
         if (stage.getChildByName('bonusContainer')) {
             stage.removeChild(stage.getChildByName('bonusContainer'));
             stage.removeChild(stage.getChildByName('winText'));
@@ -143,10 +142,12 @@ let bonuses = (function () {
             setClickEvent(door_3, darkness_3);
             setClickEvent(door_4, darkness_4);
             setClickEvent(door_5, darkness_5);
+
             doorsContainer.addChild(darkness_1, door_1, darkness_2, door_2, darkness_3, door_3, darkness_4, door_4, darkness_5, door_5);
             bonusContainer.addChild(bonusWall, doorsContainer, bonusBG);
 
         } else if (level === 2 || level === 3 || level === 4) {
+            console.log('Я пытаюсь нарисовать второй уровень!', bonusBG);
 
             let ss = loader.getResult('doorSprite_' + level);
             let door_1 = new createjs.Sprite(ss, 'door_1').set({
@@ -212,6 +213,7 @@ let bonuses = (function () {
             doorsContainer.removeAllChildren();
             doorsContainer.addChild(door_1, door_2, door_3, door_4, door_5);
             bonusContainer.addChild(bonusWall, doorsContainer, bonusBG);
+            stage.addChild(bonusContainer);
 
         } else if ( level === 5 ) {
             let ss1 = loader.getResult('doorSprite_5_1');
@@ -305,23 +307,33 @@ let bonuses = (function () {
             doorsContainer.removeAllChildren();
             doorsContainer.addChild(door_1, door_2, door_3, door_4, door_5);
             bonusContainer.addChild(bonusBG, doorsContainer);
+            stage.addChild(bonusContainer);
         }
-        stage.addChildAt(bonusContainer, 0);
+        if (stage.getChildIndex(stage.getChildByName('initContainer'))) {
+            stage.addChildAt(bonusContainer, stage.getChildIndex(stage.getChildByName('initContainer')));
+        } else {
+            stage.addChild(bonusContainer);
+        }
     }
 
     function showBonusWin(win, last, timer) {
+        const loader = storage.read('loadResult');
+        const numberSS = loader.getResult('numbers');
         let time = timer || 1000;
         console.log('I must show win:', win);
-        let stage = canvas.getStages().bonusStage;
-        let winText = new createjs.Text(win, '175px bold Arial', '#fff').set({
+        let stage = storage.read('stage');
+        let winText = new createjs.BitmapText(win, numberSS).set({
             name: 'winText',
-            x: 1280 / 2,
-            y: 760 / 2,
-            textAlign: 'center',
-            textBaseline: 'middle',
+            // x: 1280 / 2,
+            // y: 760 / 2,
+            // textAlign: 'center',
+            // textBaseline: 'middle',
             scaleX: 0.1,
             scaleY: 0.1
         });
+        var bounds = winText.getBounds();
+			winText.x = stage.canvas.width - bounds.width >> 1;
+			winText.y = stage.canvas.height - bounds.height >> 1;
         let bonusContainer = stage.getChildByName('bonusContainer');
         bonusContainer.addChild(winText);
         createjs.Tween.get(winText)
@@ -338,8 +350,8 @@ let bonuses = (function () {
     }
 
     function finishBonusLevel() {
-        let stage = canvas.getStages().bonusStage;
-        let loader = preloader.getLoadResult();
+        let stage = storage.read('stage');
+        let loader = storage.read('loadResult');
         console.warn('I am finishing Bonuses!');
         let finishContainer = new createjs.Container().set({
             name: 'finishContainer',
@@ -366,8 +378,7 @@ let bonuses = (function () {
             createjs.Tween.get(finishContainer)
                 .to({alpha: 0}, 500)
                 .call(function () {
-                    stage.removeAllChildren();
-                    stage.nextStage = canvas.getStages().gameStage;
+                    stage.removeChild(stage.getChildByName('bonusContainer'));
                     readyAfterBonus();
                 });
         });
@@ -380,38 +391,40 @@ let bonuses = (function () {
     function callNextBonusLevel() {
         console.log('I am calling next Level');
         readyAfterBonus();
-        let stage = canvas.getStages().bonusStage;
+        const stage = storage.read('stage');
         let darkness = new createjs.Shape();
         darkness.graphics.beginFill('#000').drawRect(0, 0, 1280, 720);
         darkness.alpha = 0;
         stage.addChild(darkness);
         createjs.Tween.get(darkness)
-        .to({alpha: 1}, 500)
-        .call(function () {
-            currentLevel++;
-            getBonusLevel();
-        })
-        .wait(500)
-        .to({alpha: 0}, 500)
-        .call(function () {
-            stage.removeChild(darkness);
-        });
+            .to({alpha: 1}, 500)
+            .call(function () {
+                currentLevel++;
+                getBonusLevel();
+            })
+            .wait(500)
+            .to({alpha: 0}, 500)
+            .call(function () {
+                stage.removeChild(darkness);
+            });
     }
 
     function getBonusLevel() {
-        let sessionID = login.getSessionID();
-        utils.request('_Roll/', `${sessionID}/1/1`)
-        .then((data) => {
-            bonusData = data;
-            drawBonusLevel(currentLevel, data)
-            console.log('This is bonus data:', data);
-        });
+        const sessionID = storage.read('sessionID');
+        const currentBalance = storage.read('currentBalance');
+        const betValue = currentBalance.betValue;
+        const coinsValue = currentBalance.coinsValue * 100;
+        utils.request('_Roll/', `${sessionID}/${betValue}/${coinsValue}`)
+            .then((data) => {
+                bonusData = data;
+                drawBonusLevel(currentLevel, data)
+            });
     }
 
     function readyAfterBonus() {
-        let sessionID = login.getSessionID();
+        const sessionID = storage.read('sessionID');
         utils.request('_Ready/', `${sessionID}`).then((data) => {
-            console.log('ready data:', data);
+            console.log('Ready data:', data);
         });
     }
 

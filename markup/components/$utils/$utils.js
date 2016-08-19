@@ -1,6 +1,6 @@
 const utils = (function () {
 
-    const serviceUrl = 'http://gameservice.bossgs.org/slot/SlotService.svc/';
+    const serviceUrl = 'http://stablegameservice.bossgs.org/slot/SlotService.svc/';
     const canvasWidth = 1280;
     const canvasHeight = 720;
     const gameWidth = 960;

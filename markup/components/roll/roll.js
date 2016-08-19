@@ -185,7 +185,7 @@ const roll = (function () {
                     if (storage.readState('mode') !== 'fsBonus') {
                         storage.changeState('mode', 'fsBonus');
                     }
-                    rollData.nextScreen = getScreenData(response.Indexes, storage.read('fsWheels'));
+                    rollData.nextScreen = getScreenData(response.Indexes, storage.read('freeWheels'));
                     drawScreen(rollData.currentScreen, rollData.nextScreen);
                     animateSpin();
                     rollData.currentScreen = rollData.nextScreen;

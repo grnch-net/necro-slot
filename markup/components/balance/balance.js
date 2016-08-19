@@ -15,7 +15,7 @@ const balance = (function () {
     const balanceData = {};
 
     const parameters = {
-        font: 'bold 20px Arial',
+        font: 'normal 18px Helvetica',
         color: '#dddddd',
         coinsValue: {
             x: 50,
@@ -24,15 +24,16 @@ const balance = (function () {
             name: 'coinsValue'
         },
         coinsSum: {
-            x: 295,
-            y: 630,
+            x: 550,
+            y: 655,
             textAlign: 'center',
-            font: 'bold 25px Arial',
-            name: 'coinsSum'
+            font: 'normal 25px Helvetica',
+            name: 'coinsSum',
+            shadow: new c.Shadow('#e8b075', 0, 0, 15)
         },
         coinsCash: {
-            x: 470,
-            y: 690,
+            x: 460,
+            y: 693,
             textAlign: 'center',
             name: 'coinsCash'
         },
@@ -43,21 +44,22 @@ const balance = (function () {
             name: 'betValue'
         },
         betSum: {
-            x: 1005,
-            y: 630,
+            x: 700,
+            y: 655,
             textAlign: 'center',
-            font: 'bold 25px Arial',
-            name: 'betSum'
+            font: 'normal 25px Helvetica',
+            name: 'betSum',
+            shadow: new c.Shadow('#e8b075', 0, 0, 15)
         },
         betCash: {
-            x: 637,
-            y: 690,
+            x: 610,
+            y: 693,
             textAlign: 'center',
             name: 'betCash'
         },
         winCash: {
-            x: 810,
-            y: 690,
+            x: 760,
+            y: 693,
             textAlign: 'center',
             name: 'winCash'
         },
@@ -94,21 +96,48 @@ const balance = (function () {
     }
 
     function writeBalance() {
-        balanceText.coinsSum = new c.Text(balanceData.coinsSum, parameters.font, parameters.color).set(parameters.coinsSum);
-        balanceText.coinsCash = new c.Text(balanceData.coinsCash, parameters.font, parameters.color).set(parameters.coinsCash);
-        balanceText.betSum = new c.Text(balanceData.betSum, parameters.font, parameters.color).set(parameters.betSum);
-        balanceText.betCash = new c.Text(balanceData.betCash, parameters.font, parameters.color).set(parameters.betCash);
-        balanceText.winCash = new c.Text(balanceData.winCash, parameters.font, parameters.color).set(parameters.winCash);
+        balanceText.coinsSum = new c.Text(balanceData.coinsSum, '18px Helvetica', '#e8b075').set(parameters.coinsSum);
+        balanceText.betSum = new c.Text(balanceData.betSum, '18px Helvetica', '#e8b075').set(parameters.betSum);
+        balanceText.coinsCash = new c.Text('€ ' + balanceData.coinsCash, '18px Helvetica', parameters.color).set(parameters.coinsCash);
+        balanceText.betCash = new c.Text('€ ' + balanceData.betCash, '18px Helvetica', parameters.color).set(parameters.betCash);
+        balanceText.winCash = new c.Text('€ ' + balanceData.winCash, '18px Helvetica', parameters.color).set(parameters.winCash);
+
+        balanceText.coinsCashText = new c.Text('Cash:', '18px Helvetica', '#888').set({
+            x: 375,
+            y: 693
+        });
+        balanceText.betCashText = new c.Text('Bet:', '18px Helvetica', '#888').set({
+            x: 535,
+            y: 693
+        });
+        balanceText.winCashText = new c.Text('Win:', '18px Helvetica', '#888').set({
+            x: 680,
+            y: 693
+        });
+        balanceText.coinsSumText = new c.Text('Coins:', '24px Helvetica', parameters.color).set({
+            x: 435,
+            y: 655
+        });
+        balanceText.betSumText = new c.Text('Bet:', '24px Helvetica', parameters.color).set({
+            x: 625,
+            y: 655
+        });
 
         balanceContainer.addChild(
             balanceText.coinsSum,
             balanceText.coinsCash,
             balanceText.betSum,
             balanceText.betCash,
-            balanceText.winCash);
+            balanceText.winCash,
+            balanceText.coinsCashText,
+            balanceText.betCashText,
+            balanceText.winCashText,
+            balanceText.coinsSumText,
+            balanceText.betSumText
+        );
 
-        const fg = stage.getChildByName('fgContainer');
-        stage.addChildAt(balanceContainer, stage.getChildIndex(fg) + 1);
+        const fg = stage.getChildByName('fgRules');
+        stage.addChildAt(balanceContainer, stage.getChildIndex(fg) - 1);
         balanceContainer.cache(0, 500, w, h - 500);
         storage.write('currentBalance', balanceData);
     }
@@ -117,17 +146,17 @@ const balance = (function () {
         if (balanceText.coinsSum.text !== balanceData.coinsSum) {
             balanceText.coinsSum.text = balanceData.coinsSum;
         }
-        if (balanceText.coinsCash.text !== balanceData.coinsCash) {
-            balanceText.coinsCash.text = balanceData.coinsCash;
+        if (balanceText.coinsCash.text.toString().slice(1) !== balanceData.coinsCash) {
+            balanceText.coinsCash.text = '€ ' + balanceData.coinsCash;
         }
         if (balanceText.betSum.text !== balanceData.betSum) {
             balanceText.betSum.text = balanceData.betSum;
         }
-        if (balanceText.betCash.text !== balanceData.betCash) {
-            balanceText.betCash.text = balanceData.betCash;
+        if (balanceText.betCash.text.toString().slice(1) !== balanceData.betCash) {
+            balanceText.betCash.text = '€ ' + balanceData.betCash;
         }
-        if (balanceText.winCash.text !== balanceData.winCash) {
-            balanceText.winCash.text = balanceData.winCash;
+        if (balanceText.winCash.text.toString().slice(1) !== balanceData.winCash) {
+            balanceText.winCash.text = '€ ' + balanceData.winCash;
         }
         balanceContainer.updateCache();
         storage.write('currentBalance', balanceData);
