@@ -8,7 +8,7 @@ const roll = (function () {
     const elementHeight = utils.elementHeight; // Может поменяться от игры к игре
     const columnsNumber = 5; // Может поменяться от игры к игре
     const rowsNumber = 5; // Может поменяться от игры к игре
-    const longRowsNumber = 40; // Может поменяться от игры к игре
+    const longRowsNumber = 30; // Может поменяться от игры к игре
 
     // Container
     const gameContainer = new c.Container();
@@ -67,39 +67,39 @@ const roll = (function () {
 
     function createColumn(startArray, endArray) {
         const loader = storage.read('loadResult');
-        const ss = loader.getResult('elements');
+        const ss = loader.getResult('new_elements');
         const column = new c.SpriteContainer(ss);
         for (let i = 0; i < longRowsNumber; i++) {
             if (i < rowsNumber) {
                 const elementNumber = endArray[i];
-                const element = new c.Sprite(ss, `normal-${elementNumber}`).set({
+                const element = new c.Sprite(ss, `${elementNumber}-n`).set({
                     name: 'gameElement' + i,
                     x: elementWidth / 2,
                     y: elementHeight * i + elementHeight / 2,
-                    regX: elementWidth / 2,
-                    regY: elementHeight / 2
+                    regX: 163 + 5,
+                    regY: 145
                 });
                 element.snapToPixel = true;
                 column.addChild(element);
             } else if (i >= longRowsNumber - rowsNumber) {
                 const elementNumber = startArray[i - longRowsNumber + rowsNumber];
-                const element = new c.Sprite(ss, `normal-${elementNumber}`).set({
+                const element = new c.Sprite(ss, `${elementNumber}-n`).set({
                     name: 'gameElement' + i,
                     x: elementWidth / 2,
                     y: elementHeight * i + elementHeight / 2,
-                    regX: elementWidth / 2,
-                    regY: elementHeight / 2
+                    regX: 163 + 5,
+                    regY: 145
                 });
                 element.snapToPixel = true;
                 column.addChild(element);
             } else {
                 const elementNumber = Math.ceil(Math.random() * 10);
-                const element = new c.Sprite(ss, `blur-${elementNumber}`).set({
+                const element = new c.Sprite(ss, `${elementNumber}-b`).set({
                     name: 'gameElement' + i,
                     x: elementWidth / 2,
                     y: elementHeight * i + elementHeight / 2,
-                    regX: elementWidth / 2,
-                    regY: elementHeight / 2
+                    regX: 163 + 5,
+                    regY: 145
                 });
                 element.snapToPixel = true;
                 column.addChild(element);
@@ -113,20 +113,20 @@ const roll = (function () {
 
     function updateColumn(startArray, endArray, column) {
         const loader = storage.read('loadResult');
-        const ss = loader.getResult('elements');
+        const ss = loader.getResult('new_elements');
         for (let i = 0; i < longRowsNumber; i++) {
             if (i < rowsNumber) {
                 const elementNumber = endArray[i];
                 const element = column.getChildByName(`gameElement${i}`);
-                element.gotoAndStop(`normal-${elementNumber}`);
+                element.gotoAndStop(`${elementNumber}-n`);
             } else if (i >= longRowsNumber - rowsNumber) {
                 const elementNumber = startArray[i - longRowsNumber + rowsNumber];
                 const element = column.getChildByName(`gameElement${i}`);
-                element.gotoAndStop(`normal-${elementNumber}`);
+                element.gotoAndStop(`${elementNumber}-n`);
             } else {
                 const elementNumber = Math.ceil(Math.random() * 10);
                 const element = column.getChildByName(`gameElement${i}`);
-                element.gotoAndStop(`blur-${elementNumber}`);
+                element.gotoAndStop(`${elementNumber}-b`);
             }
             column.set({
                 y: -elementHeight * (longRowsNumber - 4)
@@ -162,6 +162,7 @@ const roll = (function () {
     }
 
     function startRoll() {
+        const loader = storage.read('loadResult');
         const currentBalance = storage.read('currentBalance');
         const sessionID = storage.read('sessionID');
         const betValue = currentBalance.betValue;
@@ -172,11 +173,18 @@ const roll = (function () {
                     if (storage.readState('mode') !== 'normal') {
                         storage.changeState('mode', 'normal');
                     }
+                    createjs.Sound.play('spinSound');
+                    createjs.Sound.play('barabanSound');
                     rollData.nextScreen = getScreenData(response.Indexes, storage.read('wheels'));
                     drawScreen(rollData.currentScreen, rollData.nextScreen);
-                    rollAnimation = animation.roll(columns, shadows, endRoll);
+                    rollAnimation = new TimelineMax();
+                    rollAnimation.staggerTo(columns, 2, {y: -utils.elementHeight, ease: Back.easeInOut.config(0.75)}, 0.1, '+=0', endRoll)
+                        .staggerTo(shadows, 1, {alpha: 1, ease: Power1.easeOut}, 0.1, 0)
+                        .staggerTo(shadows, 1, {alpha: 0, ease: Power1.easeIn}, 0.1, '-=1');
+                    if (storage.readState('fastSpinSetting')) {
+                        rollAnimation.timeScale(2);
+                    }
                     rollData.currentScreen = rollData.nextScreen;
-                    storage.write('rollResponse', response);
                     storage.changeState('roll', 'started');
                     setTimeout(function () {
                         storage.changeState('fastRoll', true);
@@ -185,11 +193,22 @@ const roll = (function () {
                     if (storage.readState('mode') !== 'fsBonus') {
                         storage.changeState('mode', 'fsBonus');
                     }
-                    rollData.nextScreen = getScreenData(response.Indexes, storage.read('freeWheels'));
+                    rollData.nextScreen = getScreenData(response.Indexes, storage.read('fsWheels'));
                     drawScreen(rollData.currentScreen, rollData.nextScreen);
-                    animateSpin();
+                    rollAnimation = new TimelineMax();
+                    rollAnimation.staggerTo(columns, 2, {y: -utils.elementHeight, ease: Back.easeInOut.config(0.75)}, 0.1, '+=0', endRoll)
+                        .staggerTo(shadows, 1, {alpha: 1, ease: Power1.easeOut}, 0.1, 0)
+                        .staggerTo(shadows, 1, {alpha: 0, ease: Power1.easeIn}, 0.1, '-=1');
+                    if (storage.readState('fastSpinSetting')) {
+                        rollAnimation.timeScale(2);
+                    }
                     rollData.currentScreen = rollData.nextScreen;
-                    events.trigger('startRoll');
+                    storage.changeState('roll', 'started');
+                    storage.write('freeRollResponse', response);
+                }
+                if (response.Type === 'MultiplierBonus') {
+                    storage.changeState('fsMultiplier', true);
+                    storage.write('fsMultiplierResponse', response);
                 }
                 storage.write('rollResponse', response);
             });
@@ -217,6 +236,9 @@ const roll = (function () {
         }
         if (state === 'fastRoll' && storage.readState('fastRoll') === 'enabled') {
             fastRoll();
+        }
+        if (state === 'lowBalance' && storage.readState('lowBalance')) {
+            rollAnimation.stop();
         }
     }
 

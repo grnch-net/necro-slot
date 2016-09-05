@@ -1,20 +1,17 @@
 {
 
 "images": [
-    "static/img/content/bg/bg-0.png",
-    "static/img/content/bg/bg-1.png"
+    "static/img/content/bg/bg-0.png"
 ],
 
 "frames": [
     [1, 1, 1280, 720, 0, 0, 0],
-    [1, 723, 1280, 720, 0, 0, 0],
-    [1, 1, 1280, 720, 1, 0, 0]
+    [1, 723, 1280, 720, 0, 0, 0]
 ],
 
 "animations": {
     "gameBG": { "frames": [0] },
-    "gameMachine": { "frames": [1] },
-    "mainBG": { "frames": [2] }
+    "gameMachine": { "frames": [1] }
 },
 
 "texturepacker": [

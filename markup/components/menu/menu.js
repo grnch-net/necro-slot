@@ -27,32 +27,37 @@ const menu = (function () {
 
         stage.addChild(overlay, menuContainer);
 
-        const menuBG = new createjs.Shape().set({
-            name: 'menuBG'
-        });
+        const menuBG = new createjs.Shape().set({name: 'menuBG'});
         menuBG.graphics.beginFill('#000').drawRect(0, 0, menuWidth, utils.height);
-        const menuBorder = new createjs.Shape().set({
-            name: 'menuBorder'
-        });
+
+        const menuBorder = new createjs.Shape().set({name: 'menuBorder'});
         menuBorder.graphics.beginFill('rgba(255, 255, 255, 0.3)').drawRect(0, 0, 2, utils.height);
+
         if (storage.readState('side') === 'right') {
             menuBorder.x = menuWidth - 2;
         } else {
             menuBorder.x = 0;
         }
+
         const menuBack = new c.Sprite(loader.getResult('buttons'), 'backOut').set({
             name: 'menuBack',
             x: (menuWidth - 105) / 2,
             y: 584
         });
-        menuBack.on('click', function () {
-            hideMenu();
-        });
+        menuBack.on('click', hideMenu);
+
         menuContainer.addChild(menuBG, menuBorder, menuBack);
 
+        if (storage.readState('side') === 'right') {
+            menuContainer.x = -menuWidth;
+        } else {
+            menuContainer.x = utils.width;
+        }
+
         tl = new TimelineMax();
-        tl
-            .to(overlay, 0.5, {alpha: 1})
+        console.log('Delta is:', delta);
+        console.log('menuContainer', menuContainer.x);
+        tl.to(overlay, 0.5, {alpha: 1})
             .to(menuContainer, 0.5, {x: delta}, 0);
 
         if (name === 'bet') {
@@ -105,24 +110,29 @@ const menu = (function () {
                 y: 485
             });
             menuMaxBet.on('click', function () {
+                createjs.Sound.play('buttonClickSound');
                 balance.changeBet(true, true);
-                balance.changeCoins(true, true);
+                // balance.changeCoins(true, true);
                 menuBetText.text = storage.read('currentBalance').betValue;
                 menuCoinsText.text = storage.read('currentBalance').coinsValue;
             });
             menuCoinPlus.on('click', function () {
+                createjs.Sound.play('buttonClickSound');
                 balance.changeCoins(true);
                 menuCoinsText.text = storage.read('currentBalance').coinsValue;
             });
             menuCoinMinus.on('click', function () {
+                createjs.Sound.play('buttonClickSound');
                 balance.changeCoins(false);
                 menuCoinsText.text = storage.read('currentBalance').coinsValue;
             });
             menuBetPlus.on('click', function () {
+                createjs.Sound.play('buttonClickSound');
                 balance.changeBet(true);
                 menuBetText.text = storage.read('currentBalance').betValue;
             });
             menuBetMinus.on('click', function () {
+                createjs.Sound.play('buttonClickSound');
                 balance.changeBet(false);
                 menuBetText.text = storage.read('currentBalance').betValue;
             });
@@ -278,15 +288,174 @@ const menu = (function () {
                 x: (305 - 219) / 2,
                 y: 35
             });
-            menuContainer.addChild(menuSettingsTitle);
+            const setSS = loader.getResult('settings');
+            const soundButton = new c.Sprite(setSS, 'sound_on').set({
+                name: 'soundButton',
+                x: 82,
+                y: 190 - 30
+            });
+            if (!storage.readState('sound')) {
+                soundButton.gotoAndStop('sound_off');
+            }
+            soundButton.on('click', handleSoundClick);
+            utils.getCenterPoint(soundButton);
+            const soundText = new c.Sprite(setSS, 'sound').set({
+                name: 'soundText',
+                x: 82 - 16,
+                y: 190 + 70 - 30
+            });
+            utils.getCenterPoint(soundText);
+            const musicButton = new c.Sprite(setSS, 'music_on').set({
+                name: 'musicButton',
+                x: 217,
+                y: 190 - 30
+            });
+            if (!storage.readState('music')) {
+                musicButton.gotoAndStop('music_off');
+            }
+            musicButton.on('click', handleMusicClick);
+            utils.getCenterPoint(musicButton);
+            const musicText = new c.Sprite(setSS, 'music').set({
+                name: 'musicText',
+                x: 217 - 23,
+                y: 190 + 70 - 30
+            });
+            utils.getCenterPoint(musicText);
+            const fastSpinButton = new c.Sprite(setSS, 'fastSpin_off').set({
+                name: 'fastSpinButton',
+                x: 82,
+                y: 335 - 20
+            });
+            if (storage.readState('fastSpinSetting')) {
+                fastSpinButton.gotoAndStop('fastSpin_on');
+            }
+            fastSpinButton.on('click', handleFastSpinClick);
+            utils.getCenterPoint(fastSpinButton);
+            const fastSpinText = new c.Sprite(setSS, 'fastSpin').set({
+                name: 'fastSpinText',
+                x: 82 - 3,
+                y: 335 + 70 - 20
+            });
+            utils.getCenterPoint(fastSpinText);
+            const handModeButton = new c.Sprite(setSS, 'handMode_on').set({
+                name: 'handModeButton',
+                x: 217,
+                y: 335 - 20
+            });
+            if (storage.readState('side') === 'left') {
+                handModeButton.gotoAndStop('handMode_off');
+            }
+            handModeButton.on('click', handleHandModeClick);
+            utils.getCenterPoint(handModeButton);
+            const handModeText = new c.Sprite(setSS, 'handMode').set({
+                name: 'handModeText',
+                x: 217,
+                y: 335 + 70 - 20
+            });
+            utils.getCenterPoint(handModeText);
+            const infoButton = new c.Sprite(setSS, 'info_off').set({
+                name: 'infoButton',
+                x: 82,
+                y: 480
+            });
+            infoButton.on('click', handleInfoClick);
+            utils.getCenterPoint(infoButton);
+            const infoText = new c.Sprite(setSS, 'info').set({
+                name: 'infoText',
+                x: 82 - 24,
+                y: 480 + 70
+            });
+            utils.getCenterPoint(infoText);
+            const historyButton = new c.Sprite(setSS, 'history_off').set({
+                name: 'historyButton',
+                x: 217,
+                y: 480
+            });
+            historyButton.on('click', handleHistoryClick);
+            utils.getCenterPoint(historyButton);
+            const historyText = new c.Sprite(setSS, 'history').set({
+                name: 'historyText',
+                x: 217 - 13,
+                y: 480 + 70
+            });
+            utils.getCenterPoint(historyText);
+
+            menuContainer.addChild(menuSettingsTitle, soundButton, soundText, musicButton, musicText, fastSpinButton, fastSpinText, handModeButton, handModeText, infoButton, infoText, historyButton, historyText);
         }
     }
 
     function handleAutoClick(e) {
+        createjs.Sound.play('buttonClickSound');
         const that = this;
         storage.write('autoCount', that.amount);
         storage.changeState('autoplay', 'started');
         hideMenu();
+    }
+
+    function handleSoundClick() {
+        const stage = storage.read('stage');
+        const buttonsContainer = stage.getChildByName('buttonsContainer');
+        const buttonsCache = buttonsContainer.getChildByName('buttonsCache');
+        const soundButton = buttonsCache.getChildByName('soundButton');
+        if (storage.readState('sound')) {
+            storage.changeState('sound', false);
+            createjs.Sound.muted = true;
+            this.gotoAndStop('sound_off');
+            soundButton.gotoAndStop('soundOff');
+            buttonsCache.updateCache();
+        } else {
+            storage.changeState('sound', true);
+            createjs.Sound.muted = false;
+            this.gotoAndStop('sound_on');
+            soundButton.gotoAndStop('soundOut');
+            buttonsCache.updateCache();
+        }
+    }
+
+    function handleMusicClick() {
+        if (storage.readState('music')) {
+            storage.changeState('music', false);
+            this.gotoAndStop('music_off');
+            const ambient = storage.read('ambient');
+            ambient.volume = 0;
+        } else {
+            storage.changeState('music', true);
+            this.gotoAndStop('music_on');
+            const ambient = storage.read('ambient');
+            ambient.volume = 1;
+        }
+    }
+
+    function handleFastSpinClick() {
+        if (storage.readState('fastSpinSetting')) {
+            storage.changeState('fastSpinSetting', false);
+            this.gotoAndStop('fastSpin_off');
+        } else {
+            storage.changeState('fastSpinSetting', true);
+            this.gotoAndStop('fastSpin_on');
+        }
+    }
+
+    function handleHandModeClick() {
+        if (storage.readState('side') === 'left') {
+            // storage.changeState('side', 'right');
+            canvas.changeGamePosition('right');
+            this.gotoAndStop('handMode_on');
+            hideMenu();
+        } else {
+            // storage.changeState('side', 'left');
+            canvas.changeGamePosition('left');
+            this.gotoAndStop('handMode_off');
+            hideMenu();
+        }
+    }
+
+    function handleInfoClick() {
+        utils.showPopup('Coming soon!');
+    }
+
+    function handleHistoryClick() {
+        utils.showPopup('Coming soon!');
     }
 
     function hideMenu() {

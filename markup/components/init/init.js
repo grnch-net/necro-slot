@@ -2,6 +2,9 @@
 /* eslint-disable no-use-before-define */
 const init = (function () {
 
+    const savedFS = {};
+    const savedBonus = {};
+
     function parseWheels(string) {
         const wheelsMas = string.split('|').map((column) => {
             return column.split('@');
@@ -95,56 +98,73 @@ const init = (function () {
         return result;
     }
 
-    function login(userID, casinoID) {
-        userID = userID || 1; // КОСТЫЛЬ! Должен получать от сервера инициализации.
-        casinoID = casinoID || 1; // КОСТЫЛЬ! Должен получать от сервера инициализации.
-        utils.request('_Login', `/${userID}/${casinoID}`)
-            .then(sessionID => {
-                // Запишем sessionID в Storage
-                storage.write('sessionID', sessionID);
-                // Запишем изменение состояния в Storage
-                storage.changeState('logged', true);
-                // Запустим инициализацию
-                initGame(sessionID);
-            })
-            .catch(error => console.error(error));
-    }
+    // qo2 - двери, qo4 - фри-спины, qo5 - фри-спины всегда заканчиваются, qos - стандартный режим
+    function login(userID = 555003, casinoID = 555, gameID = 'qos') {
+        if (localStorage.getItem('userID')) {
+            userID = localStorage.getItem('userID');
+        }
+        if (localStorage.getItem('casinoID')) {
+            casinoID = localStorage.getItem('casinoID');
+        }
+        utils.request('_Initialise', `/${userID}/${casinoID}/${gameID}`)
+            .then(initData => {
 
-    function initGame(sessionID) {
-        const gameID = 8; // КОСТЫЛЬ! Должен получать от сервера инициализации.
+                storage.write('initData', initData);
+                storage.write('initState', initData.PlayerState);
+                storage.write('sessionID', initData.SessionID);
 
-        utils.request('_PlayDemo', `/${sessionID}/${gameID}`)
-            .then((balanceData) => {
-                if (balanceData.SavedResult === 'None') {
-                    storage.changeState('mode', 'normal');
-                }
-                // Запишем balance в Storage
-                storage.write('balance', balanceData);
-                return utils.request('_GetAllWheels', `/${sessionID}`);
-            })
-            .then((wheelsString) => {
-                // Запишем wheels в Storage
+                const wheelsString = initData.SlotWheels.filter(obj => obj.Mode === 'root')[0].WheelsContent;
+                const fsWheelsString = initData.SlotWheels.filter(obj => obj.Mode === 'fsBonus')[0].WheelsContent;
                 storage.write('wheels', parseWheels(wheelsString));
-                return utils.request('_GetAllWheelsByMode', `/${sessionID}/fsBonus`);
-            })
-            .then((freeWheelsString) => {
-                // Запишем freeWheels в Storage
-                storage.write('freeWheels', parseWheels(freeWheelsString));
-                return utils.request('_GetLines', `/${sessionID}`);
-            })
-            .then((linesString) => {
-                // Запишем lines в Storage
+                storage.write('fsWheels', parseWheels(fsWheelsString));
+
+                const linesString = initData.Lines;
                 const lines = parseLines(linesString);
                 const linesCoords = parseLinesCoords(lines);
                 const linesPaths = parseLinesPaths(linesCoords);
                 storage.write('lines', lines);
                 storage.write('linesCoords', linesCoords);
                 storage.write('linesPaths', linesPaths);
-                // Запишем состояние в Storage
+
                 storage.changeState('inited', true);
+
+                if (!initData.PlayerState.Saved) {
+                    storage.changeState('mode', 'normal');
+                } else if (initData.PlayerState.Saved.ResultType === 'Freespin') {
+                    // Обработка оборванных фри-спинов
+                    savedFS.count = initData.PlayerState.Saved.RemainSpins;
+                    savedFS.multi = initData.PlayerState.Saved.Multiplier.MultiplierValue;
+                    savedFS.level = initData.PlayerState.Saved.Multiplier.MultiplierStep;
+                    // savedFS.totalWin
+                } else if (initData.PlayerState.Saved.ResultType === 'MultiplierBonus') {
+                    // Обработка оборванных бонусов
+                    storage.log();
+                    // savedBonus.totalWin
+                    // savedBonus.level
+                }
+
+                $(window).unload(function () {
+                    utils.request('_Logout/', storage.read('sessionID'))
+                    .then((response) => {
+                        console.log('Logout response:', response);
+                    });
+                });
             })
             .catch(error => console.error(error));
     }
+
+    function checkState(state) {
+        if (state === 'preloader' && storage.readState(state) === 'done') {
+            if (typeof savedFS.count !== 'undefined') {
+                events.trigger('initFreeSpins', savedFS);
+            }
+            if (typeof savedBonus.level !== 'undefined') {
+                events.trigger('initBonusLevel', savedBonus);
+            }
+        }
+    }
+
+    events.on('changeState', checkState);
 
     return {
         login

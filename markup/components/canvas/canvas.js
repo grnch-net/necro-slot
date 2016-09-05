@@ -25,9 +25,12 @@ const canvas = (function () {
         const bg = stage.getChildByName('bgContainer');
         const gameBG = bg.getChildByName('gameBG');
         const game = stage.getChildByName('gameContainer');
+        const winLinesContainer = stage.getChildByName('winLinesContainer');
+        const winRectsContainer = stage.getChildByName('winRectsContainer');
         const gameMask = game.mask;
         const balance = stage.getChildByName('balanceContainer');
         let delta;
+        console.log('I am called with:', side);
         if (side === 'right' && storage.readState('side') !== 'right') {
             if (storage.readState('side') === 'left') {
                 delta = '+=150';
@@ -35,12 +38,12 @@ const canvas = (function () {
                 delta = '+=75';
             }
             storage.changeState('side', 'right');
-        } else if (side === 'left' && storage.readState('side') !== 'left') {
-            if (storage.readState('side') === 'right') {
+        } else if (side === 'left') {
+            // if (storage.readState('side') === 'right') {
                 delta = '-=150';
-            } else if (storage.readState('side') === 'center') {
-                delta = '-=75';
-            }
+            // } else if (storage.readState('side') === 'center') {
+            //     delta = '-=75';
+            // }
             storage.changeState('side', 'left');
         } else if (side === 'center' && storage.readState('side') !== 'center') {
             if (storage.readState('side') === 'left') {
@@ -52,9 +55,9 @@ const canvas = (function () {
         } else {
             return;
         }
-        TweenMax.to([fg, game, gameMask, gameBG, balance], 0.5, {x: delta,
+        TweenMax.to([fg, game, gameMask, gameBG, balance, winRectsContainer, winLinesContainer], 0.5, {x: delta,
         onStart: function () {
-            bg.uncache();
+            // bg.uncache();
         },
         onComplete: function () {
             bg.cache(0, 0, utils.width, utils.height);
@@ -62,7 +65,7 @@ const canvas = (function () {
     }
 
     function checkState(state) {
-        if (state === 'logged' && storage.readState('logged')) {
+        if (state === 'inited' && storage.readState('inited')) {
             initStage();
         }
     }

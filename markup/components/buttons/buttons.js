@@ -12,6 +12,12 @@ const buttons = (function () {
     });
 
     function handleSpinClick() {
+        if (storage.readState('lockedMenu')) return;
+        if (balance.lowBalance()) {
+            utils.showPopup('Low balance!');
+            return;
+        }
+
         const rollState = storage.readState('roll');
         const fastRoll = storage.readState('fastRoll');
         const lockedRoll = storage.readState('lockedRoll');
@@ -30,36 +36,50 @@ const buttons = (function () {
     }
 
     function handleSoundClick() {
+        if (storage.readState('lockedMenu')) return;
+
         if (storage.readState('roll') !== 'started') {
             const sound = storage.readState('sound');
             if (sound) {
                 soundButton.gotoAndStop('soundOff');
                 storage.changeState('sound', false);
+                createjs.Sound.muted = true;
             } else {
                 soundButton.gotoAndStop('soundOut');
                 storage.changeState('sound', true);
+                createjs.Sound.muted = false;
             }
             buttonsCache.updateCache();
         }
     }
 
     function handleMenuClick() {
+        if (storage.readState('lockedMenu')) return;
+
         if (storage.readState('roll') !== 'started') {
+            createjs.Sound.play('buttonClickSound');
             storage.changeState('menu', 'settings');
         }
     }
 
     function handleAutoClick() {
+        if (storage.readState('lockedMenu')) return;
+
         if (storage.readState('roll') !== 'started' && autoButton.currentAnimation !== 'autoStop') {
+            createjs.Sound.play('buttonClickSound');
             storage.changeState('menu', 'auto');
         }
         if (autoButton.currentAnimation === 'autoStop') {
+            createjs.Sound.play('buttonClickSound');
             storage.changeState('autoplay', 'ended');
         }
     }
 
     function handleBetClick() {
+        if (storage.readState('lockedMenu')) return;
+
         if (storage.readState('roll') !== 'started') {
+            createjs.Sound.play('buttonClickSound');
             storage.changeState('menu', 'bet');
         }
     }
@@ -98,14 +118,14 @@ const buttons = (function () {
             y: 70
         });
         menuButton.on('click', handleMenuClick);
-        soundButton = new c.Sprite(ss, 'soundOff').set({
+        soundButton = new c.Sprite(ss, 'soundOut').set({
             x: 60,
             y: 570,
             name: 'soundButton'
         });
         soundButton.on('click', handleSoundClick);
 
-        storage.changeState('sound', false);
+        storage.changeState('sound', true);
         buttonsCache.addChild(autoButton, betButton, menuButton, soundButton);
         buttonsContainer.addChild(spinButton, buttonsCache);
         stage.addChildAt(buttonsContainer, 1);
@@ -114,27 +134,26 @@ const buttons = (function () {
 
     function changeButtonsPosition(side) {
         const tl = new TimelineMax();
-        // if (side === 'right') {
-        //     tl
-        //         .to(buttonsContainer, 0.25, {x: 1280})
-        //         .to(buttonsContainer, 0, {x: -300})
-        //         .to(buttonsContainer, 0.25, {x: 14});
-        // }
+        if (side === 'right') {
+            tl
+                .to(buttonsContainer, 0.25, {x: 1280})
+                .to(buttonsContainer, 0, {x: -300})
+                .to(buttonsContainer, 0.25, {x: 14});
+        }
         if (side === 'left') {
             tl
                 .to(buttonsContainer, 0.25, {x: -300})
                 .to(buttonsContainer, 0, {x: 1280})
                 .to(buttonsContainer, 0.25, {x: 1080});
         }
-        if (side === 'center' || side === 'right') {
-            const end = (buttonsContainer.x > 1000) ? 1300 : -300;
-            tl
-                .to(buttonsContainer, 0.25, {x: end});
-        }
+        // if (side === 'center' || side === 'right') {
+        //     const end = (buttonsContainer.x > 1000) ? 1300 : -300;
+        //     tl
+        //         .to(buttonsContainer, 0.25, {x: end});
+        // }
     }
 
     function writeAutoplay() {
-        console.log('Я перехожу на режим автоигры)');
         spinButton.gotoAndStop('spinAuto');
         autoButton.gotoAndStop('autoStop');
         buttonsCache.updateCache();
@@ -199,6 +218,13 @@ const buttons = (function () {
         }
         if (state === 'autoCount') {
             updateAutoplay();
+        }
+        if (state === 'mode') {
+            if (storage.readState(state) === 'fsBonus') {
+                buttonsContainer.visible = false;
+            } else {
+                buttonsContainer.visible = true;
+            }
         }
     }
 

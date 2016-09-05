@@ -3,26 +3,23 @@
 
 const balance = (function () {
 
+    let stage;
     const c = createjs;
     const w = utils.width;
     const h = utils.height;
     const balanceContainer = new c.Container().set({
         name: 'balanceContainer'
     });
-    let stage;
 
     const balanceText = {};
     const balanceData = {};
+    let currencySymbol;
 
     const parameters = {
-        font: 'normal 18px Helvetica',
+        font: '18px Helvetica',
+        bigFont: '24px Helvetica',
         color: '#dddddd',
-        coinsValue: {
-            x: 50,
-            y: 50,
-            textAlign: 'center',
-            name: 'coinsValue'
-        },
+        orangeColor: '#e8b075',
         coinsSum: {
             x: 550,
             y: 655,
@@ -36,12 +33,6 @@ const balance = (function () {
             y: 693,
             textAlign: 'center',
             name: 'coinsCash'
-        },
-        betValue: {
-            x: 50,
-            y: 50,
-            textAlign: 'center',
-            name: 'betValue'
         },
         betSum: {
             x: 700,
@@ -62,19 +53,13 @@ const balance = (function () {
             y: 693,
             textAlign: 'center',
             name: 'winCash'
-        },
-        currency: {
-            x: 50,
-            y: 50,
-            textAlign: 'center',
-            name: 'currency'
         }
     };
 
     function initBalance() {
         stage = storage.read('stage');
         balanceData.linesLength = storage.read('lines').length;
-        const data = storage.read('balance');
+        const data = storage.read('initState');
 
         balanceData.coinsSteps = data.CoinValue.map((value) => {
             return +(value / 100).toFixed(2);
@@ -91,37 +76,35 @@ const balance = (function () {
 
         balanceData.winCash = (0).toFixed(2);
         balanceData.currency = data.Currency;
+        if (balanceData.currency === 'USD') {
+            currencySymbol = '$ ';
+        } else if (balanceData.currency === 'EUR') {
+            currencySymbol = '€ ';
+        } else if (balanceData.currency === 'UAH') {
+            currencySymbol = '₴ ';
+        } else if (balanceData.currency === 'RUB') {
+            currencySymbol = '₽ ';
+        }
 
         writeBalance();
     }
 
     function writeBalance() {
-        balanceText.coinsSum = new c.Text(balanceData.coinsSum, '18px Helvetica', '#e8b075').set(parameters.coinsSum);
-        balanceText.betSum = new c.Text(balanceData.betSum, '18px Helvetica', '#e8b075').set(parameters.betSum);
-        balanceText.coinsCash = new c.Text('€ ' + balanceData.coinsCash, '18px Helvetica', parameters.color).set(parameters.coinsCash);
-        balanceText.betCash = new c.Text('€ ' + balanceData.betCash, '18px Helvetica', parameters.color).set(parameters.betCash);
-        balanceText.winCash = new c.Text('€ ' + balanceData.winCash, '18px Helvetica', parameters.color).set(parameters.winCash);
+        balanceText.coinsSum = new c.Text(balanceData.coinsSum, parameters.font, parameters.orangeColor).set(parameters.coinsSum);
+        balanceText.betSum = new c.Text(balanceData.betSum, parameters.font, parameters.orangeColor).set(parameters.betSum);
+        balanceText.coinsCash = new c.Text(currencySymbol + balanceData.coinsCash, parameters.font, parameters.color).set(parameters.coinsCash);
+        balanceText.betCash = new c.Text(currencySymbol + balanceData.betCash, parameters.font, parameters.color).set(parameters.betCash);
+        balanceText.winCash = new c.Text(currencySymbol + balanceData.winCash, parameters.font, parameters.color).set(parameters.winCash);
 
-        balanceText.coinsCashText = new c.Text('Cash:', '18px Helvetica', '#888').set({
-            x: 375,
-            y: 693
-        });
-        balanceText.betCashText = new c.Text('Bet:', '18px Helvetica', '#888').set({
-            x: 535,
-            y: 693
-        });
-        balanceText.winCashText = new c.Text('Win:', '18px Helvetica', '#888').set({
-            x: 680,
-            y: 693
-        });
-        balanceText.coinsSumText = new c.Text('Coins:', '24px Helvetica', parameters.color).set({
-            x: 435,
-            y: 655
-        });
-        balanceText.betSumText = new c.Text('Bet:', '24px Helvetica', parameters.color).set({
-            x: 625,
-            y: 655
-        });
+        balanceText.coinsCashText = new c.Text('Cash:', parameters.font, '#888').set({x: 375, y: 693});
+        balanceText.betCashText = new c.Text('Bet:', parameters.font, '#888').set({x: 535, y: 693});
+        balanceText.winCashText = new c.Text('Win:', parameters.font, '#888').set({x: 680, y: 693});
+        balanceText.coinsSumText = new c.Text('Coins:', parameters.bigFont, parameters.color).set({name: 'coinsSumText', x: 435, y: 655});
+        balanceText.betSumText = new c.Text('Bet:', parameters.bigFont, parameters.color).set({name: 'betSumText', x: 625, y: 655});
+
+        balanceText.coinsSumText.x = balanceText.coinsSum.x - balanceText.coinsSum.getMeasuredWidth() / 2 - 20 - balanceText.coinsSumText.getMeasuredWidth();
+
+        balanceText.coinsCashText.x = balanceText.coinsCash.x - balanceText.coinsCash.getMeasuredWidth() / 2 - 20 - balanceText.coinsCashText.getMeasuredWidth();
 
         balanceContainer.addChild(
             balanceText.coinsSum,
@@ -136,10 +119,40 @@ const balance = (function () {
             balanceText.betSumText
         );
 
-        const fg = stage.getChildByName('fgRules');
-        stage.addChildAt(balanceContainer, stage.getChildIndex(fg) - 1);
+        const preloader = stage.getChildByName('preloaderContainer');
+        stage.addChildAt(balanceContainer, stage.getChildIndex(preloader) - 1);
         balanceContainer.cache(0, 500, w, h - 500);
         storage.write('currentBalance', balanceData);
+        setTimeout(updateBalance, 500);
+        storage.write('fun', true);
+        if (storage.read('fun')) {
+            setInterval(function () {
+                runingWords('You are playing for fun!!!');
+            }, 25000);
+        }
+    }
+
+    function runingWords(text) {
+        const runingContainer = new c.Container().set({
+            name: 'runingContainer'
+        });
+        const runingMask = new createjs.Shape();
+        runingMask.graphics.drawRect(270, h - 30, w - 270, 30);
+        runingContainer.mask = runingMask;
+        const blackLine = new c.Shape();
+        blackLine.graphics.beginFill('#000').drawRect(0, h - 30, w, 30);
+        const runingText = new c.Text(text, parameters.font, parameters.color).set({
+            y: h - 15,
+            x: w,
+            textAlign: 'center',
+            textBaseline: 'middle'
+        });
+        TweenMax.to(runingText, 8, {x: 0, onComplete: function () {
+            stage.removeChild(runingContainer);
+        }});
+        runingText.regX = runingText.getMeasuredWidth() / 2;
+        runingContainer.addChild(blackLine, runingText);
+        stage.addChild(runingContainer);
     }
 
     function updateBalance() {
@@ -147,17 +160,22 @@ const balance = (function () {
             balanceText.coinsSum.text = balanceData.coinsSum;
         }
         if (balanceText.coinsCash.text.toString().slice(1) !== balanceData.coinsCash) {
-            balanceText.coinsCash.text = '€ ' + balanceData.coinsCash;
+            balanceText.coinsCash.text = currencySymbol + balanceData.coinsCash;
         }
         if (balanceText.betSum.text !== balanceData.betSum) {
             balanceText.betSum.text = balanceData.betSum;
         }
         if (balanceText.betCash.text.toString().slice(1) !== balanceData.betCash) {
-            balanceText.betCash.text = '€ ' + balanceData.betCash;
+            balanceText.betCash.text = currencySymbol + balanceData.betCash;
         }
         if (balanceText.winCash.text.toString().slice(1) !== balanceData.winCash) {
-            balanceText.winCash.text = '€ ' + balanceData.winCash;
+            balanceText.winCash.text = currencySymbol + balanceData.winCash;
         }
+
+        balanceText.coinsSumText.x = balanceText.coinsSum.x - balanceText.coinsSum.getMeasuredWidth() / 2 - 20 - balanceText.coinsSumText.getMeasuredWidth();
+
+        balanceText.coinsCashText.x = balanceText.coinsCash.x - balanceText.coinsCash.getMeasuredWidth() / 2 - 20 - balanceText.coinsCashText.getMeasuredWidth();
+
         balanceContainer.updateCache();
         storage.write('currentBalance', balanceData);
     }
@@ -184,16 +202,16 @@ const balance = (function () {
                 i--;
             }
         } else {
-            console.error('Bet change is failed!');
+            console.warn('Bet change is failed!');
         }
         balanceData.betSum = +(balanceData.betValue * balanceData.linesLength).toFixed(0);
         balanceData.betCash = +(balanceData.betSum * balanceData.coinsValue).toFixed(2);
         updateBalance();
         console.log('Bet is changed:', balanceData.betValue);
         if (balanceData.betValue === balanceData.betSteps[balanceData.betSteps.length - 1]) {
-            console.error('This bet value is maximum!');
+            console.warn('This bet value is maximum!');
         } else if (balanceData.betValue === balanceData.betSteps[0]) {
-            console.error('This bet value is minimum!');
+            console.warn('This bet value is minimum!');
         }
     }
 
@@ -219,16 +237,16 @@ const balance = (function () {
                 i--;
             }
         } else {
-            console.error('Coins change is failed!');
+            console.warn('Coins change is failed!');
         }
         balanceData.coinsSum = +Math.floor(balanceData.coinsCash / balanceData.coinsValue).toFixed(0);
         balanceData.betCash = +(balanceData.coinsValue * balanceData.betSum).toFixed(2);
         updateBalance();
         console.log('Coins value is changed:', balanceData.coinsValue);
         if (balanceData.coinsValue === balanceData.coinsSteps[balanceData.coinsSteps.length - 1]) {
-            console.error('This coins value is maximum!');
+            console.warn('This coins value is maximum!');
         } else if (balanceData.coinsValue === balanceData.coinsSteps[0]) {
-            console.error('This coins value is minimum!');
+            console.warn('This coins value is minimum!');
         }
     }
 
@@ -240,7 +258,9 @@ const balance = (function () {
                 balanceData.winCash = (0).toFixed(2);
                 updateBalance();
             } else {
-                console.error('Too low cash for spin!');
+                storage.changeState('lowBalance', true);
+                console.warn('Too low cash for spin!');
+                utils.showPopup('Low money!');
             }
         }
     }
@@ -253,6 +273,10 @@ const balance = (function () {
             balanceData.coinsSum = (+data.ScoreCoins).toFixed(0);
             updateBalance();
         }
+    }
+
+    function lowBalance() {
+        return balanceData.betSum > balanceData.coinsSum;
     }
 
     events.on('changeState', checkState);
@@ -273,6 +297,8 @@ const balance = (function () {
 
     return {
         changeBet,
-        changeCoins
+        changeCoins,
+        lowBalance
     };
+
 })();

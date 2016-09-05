@@ -1,4 +1,5 @@
 /* eslint-disable no-undef */
+/* eslint-disable no-use-before-define */
 const autoplay = (function () {
 
     let autoCount;
@@ -12,9 +13,13 @@ const autoplay = (function () {
     }
 
     function startAutoplay() {
-        console.log('AutoCount', autoCount);
         autoCount--;
         if (!autoEnd) {
+            if (balance.lowBalance()) {
+                autoEnd = true;
+                storage.changeState('autoplay', 'ended');
+                utils.showPopup('Low balance!');
+            }
             roll.startRoll();
         }
         if (autoCount > 0) {
@@ -27,8 +32,10 @@ const autoplay = (function () {
 
     function stopAutoplay() {
         autoEnd = true;
-        const autoTimeout = storage.read('autoTimeout');
-        clearTimeout(autoTimeout);
+        clearTimeout(storage.read('autoTimeout'));
+        if (storage.readState('autoplay') !== 'ended') {
+            storage.changeState('autoplay', 'ended');
+        }
     }
 
     function checkState(state) {
@@ -41,8 +48,11 @@ const autoplay = (function () {
     }
 
     events.on('changeState', checkState);
+    events.on('initBonusLevel', stopAutoplay);
+    events.on('initFreeSpins', stopAutoplay);
 
     return {
         startAutoplay
     };
+
 })();

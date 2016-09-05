@@ -291,6 +291,9 @@ const win = (function () {
             x: parameters[number].x - winRectsContainer.x - 3,
             y: parameters[number].y - winRectsContainer.y + 5
         });
+        if (storage.readState('side') === 'right') {
+            lineFire.x += 150;
+        }
         winRectsContainer.addChild(lineFire);
     }
 
@@ -298,8 +301,8 @@ const win = (function () {
         for (let i = 0; i < amount; i++) {
             const element = winElements[number - 1][i];
             const animationName = element.currentAnimation;
-            const elementIndex = animationName.substr(animationName.indexOf('-') + 1);
-            element.gotoAndStop(`win-${elementIndex}`);
+            const elementIndex = animationName.substr(animationName.indexOf('-') - 1, 1);
+            element.gotoAndPlay(`${elementIndex}-w`);
         }
         // drawLineShape(number);
         drawLineLight(number);
@@ -328,9 +331,16 @@ const win = (function () {
         winElements.forEach((winLine) => {
             winLine.forEach((element) => {
                 const animationName = element.currentAnimation;
-                const elementIndex = animationName.substr(animationName.indexOf('-') + 1);
-                if (+elementIndex === 10 || +elementIndex === 14) {
-                    element.gotoAndStop(`win-${elementIndex}`);
+                const elementIndex = animationName.substr(animationName.indexOf('-') - 2, 2);
+                if (+elementIndex === 10) {
+                    if (animationName == '10-n') {
+                        element.gotoAndPlay(`${elementIndex}-w`);
+                    }
+                }
+                if (+elementIndex === 14) {
+                    element.gotoAndPlay(`${elementIndex}-w`);
+                    let totalFreeSpins = storage.read('rollResponse').TotalFreeSpins;
+                    freeSpins.showTotalFreeSpins(totalFreeSpins);
                 }
             });
         });
@@ -342,20 +352,96 @@ const win = (function () {
     }
 
     function fireScatterWild() {
+        let currentRow;
+        storage.changeState('autoplay', 'ended');
         winElements.forEach((winLine) => {
-            winLine.forEach((element) => {
+            winLine.forEach((element, index) => {
                 const animationName = element.currentAnimation;
-                const elementIndex = animationName.substr(animationName.indexOf('-') + 1);
+                const elementIndex = animationName.substr(animationName.indexOf('-') - 2, 2);
                 if (+elementIndex === 11 || +elementIndex === 12 || +elementIndex === 13) {
-                    element.gotoAndStop(`win-${elementIndex}`);
+                    if (!currentRow) {
+                        currentRow = index;
+                    }
                 }
             });
         });
-        if (storage.read('rollResponse').BonusResults[0] === 'FreeSpinBonus') {
-            setTimeout(function () {
+        fireLizaAndCards(currentRow);
+    }
+
+    function fireLizaAndCards(rowNumber) {
+        const loader = storage.read('loadResult');
+        const gameContainer = stage.getChildByName('gameContainer');
+        const lizaWin = new c.Sprite(loader.getResult('lizaWin'), 'win').set({
+            name: 'lizaWin',
+            x: gameContainer.x + rowNumber * utils.elementWidth - 23,
+            y: gameContainer.y - 29
+        });
+        lizaWin.on('animationend', function () {
+            if (storage.read('rollResponse').BonusResults[0] === 'FreeSpinBonus') {
                 events.trigger('initFreeSpins');
-            }, 1000);
+                stage.removeChild(lizaWin);
+            }
+        });
+        lizaWin.on('change', function () {
+            if (Math.floor(lizaWin.currentAnimationFrame) === 12) {
+                fireCards(lizaWin.x, lizaWin.y);
+            }
+        });
+        stage.addChild(lizaWin);
+    }
+
+    function calcCardCoords(rot, x0, y0) {
+        let xFinal, yFinal;
+        if (rot < 90) {
+            xFinal = x0 + Math.tan(rot) * utils.height * 1 / 3;
+            yFinal = y0 - utils.height * 1 / 3;
+        } else if (rot < 180) {
+            xFinal = x0 + Math.tan(rot - 90) * utils.height;
+            yFinal = y0 + utils.height;
+        } else if (rot < 270) {
+            xFinal = x0 - Math.tan(rot - 180) * utils.height;
+            yFinal = y0 + utils.height;
+        } else if (rot < 360) {
+            xFinal = x0 - Math.tan(rot - 270) * utils.height * 1 / 3;
+            yFinal = y0 - utils.height * 1 / 3;
         }
+        return {
+            x: xFinal,
+            y: yFinal
+        };
+    }
+
+    function fireCards(curX, curY) {
+        console.log('I am called with', curX, curY);
+        const loader = storage.read('loadResult');
+        const cardsContainer = new c.Container().set({
+            name: 'cardsContainer'
+        });
+        const cards = [];
+        cards.push(
+            new c.Sprite(loader.getResult('cardsForLizaWin'), '01card'),
+            new c.Sprite(loader.getResult('cardsForLizaWin'), '02card'),
+            new c.Sprite(loader.getResult('cardsForLizaWin'), '03card'),
+            new c.Sprite(loader.getResult('cardsForLizaWin'), '04card')
+        );
+        const amount = Math.round(Math.random() * 50 + 50);
+        for (let i = 0; i < amount; i++) {
+            const cardIndex = Math.floor(Math.random() * 4);
+            const cardRotation = Math.round(Math.random() * 360);
+            const cardTime = Math.random() * 2 + 0.7;
+            const finalCoords = calcCardCoords(cardRotation, curX + utils.elementWidth / 2, curY + utils.elementHeight / 2);
+            const newCard = cards[cardIndex].clone(true);
+            newCard.rotation = cardRotation;
+            newCard.x = curX + utils.elementWidth / 2;
+            newCard.y = curY + utils.elementHeight / 2;
+            newCard.regX = 39;
+            newCard.regY = 51;
+            TweenMax.to(newCard, cardTime, {x: finalCoords.x, y: finalCoords.y, onComplete: function () {
+                cardsContainer.removeChild(this.target);
+            }});
+            cardsContainer.addChild(newCard);
+        }
+        stage.addChild(cardsContainer);
     }
 
     function drawTotalWin(lines) {
@@ -366,7 +452,9 @@ const win = (function () {
             if (+lineNumber !== -1) {
                 fireWinLine(lineNumber, lineAmount);
                 lightLinesCounter++;
-            } else if (+lineWin !== 0) {
+            } else if (+lineWin !== 0 && storage.readState('mode') !== 'fsBonus') {
+                fireAllScatters();
+            } else if (+lineWin === 0 && storage.readState('mode') === 'fsBonus') {
                 fireAllScatters();
             } else {
                 fireScatterWild();
@@ -401,6 +489,7 @@ const win = (function () {
         winData.winLines = parseWinResult(rollData.LinesResult);
         if (winData.winLines.length) {
             drawTotalWin(winData.winLines);
+            createjs.Sound.play('lineWinSound');
         }
     }
 
@@ -410,8 +499,13 @@ const win = (function () {
         winElements.forEach((line) => {
             line.forEach((element) => {
                 const animationName = element.currentAnimation;
-                const elementIndex = animationName.substr(animationName.indexOf('-') + 1);
-                element.gotoAndStop(`normal-${elementIndex}`);
+                let elementIndex;
+                if (animationName.length === 4) {
+                    elementIndex = animationName.substr(animationName.indexOf('-') - 2, 2);
+                } else {
+                    elementIndex = animationName.substr(animationName.indexOf('-') - 1, 1);
+                }
+                element.gotoAndStop(`${elementIndex}-n`);
                 element.set({
                     scaleX: 1,
                     scaleY: 1
@@ -424,12 +518,42 @@ const win = (function () {
 
     function checkState(state) {
         if (state === 'roll' && storage.readState(state) === 'ended') {
+            if (storage.read('rollResponse').BonusResults.length) {
+                storage.changeState('lockedMenu', true);
+            }
             showWin();
             if (storage.readState('autoplay') === 'started') {
+                let time;
+                if (storage.read('rollResponse').LinesResult.length > 0) {
+                    time = 1000;
+                } else {
+                    time = 300;
+                }
                 const autoTimeout = setTimeout(function () {
                     autoplay.startAutoplay();
-                }, 1000);
+                }, time);
                 storage.write('autoTimeout', autoTimeout);
+            }
+            if (storage.readState('mode') === 'fsBonus') {
+                let count = storage.read('rollResponse').TotalFreeSpins;
+                storage.changeState('fsMulti', storage.read('rollResponse').Multiplier.MultiplierValue);
+                storage.changeState('fsLevel', storage.read('rollResponse').Multiplier.MultiplierStep);
+                if (count > 0) {
+                    console.log('I start free Spin', count);
+                    let time;
+                    if (storage.read('rollResponse').LinesResult.length > 0) {
+                        time = 1000;
+                    } else {
+                        time = 300;
+                    }
+                    const fsTimeout = setTimeout(function () {
+                        freeSpins.startFreeSpin();
+                    }, time);
+                    storage.write('fsTimeout', fsTimeout);
+                } else {
+                    console.warn('I am stoping Free Spins!');
+                    events.trigger('finishFreeSpins');
+                }
             }
         }
         if (state === 'roll' && storage.readState(state) === 'started') {
@@ -459,6 +583,11 @@ const win = (function () {
                 drawAnotherLine(storage.readState('anotherLine') + 1);
             }, 1500);
             storage.write('lineTimeout', lineTimeout);
+        }
+        if (state === 'fsMultiplier' && storage.readState(state)) {
+            if (storage.readState('roll') === 'ended') {
+                events.trigger('multiplierBonus', storage.read('fsMultiplierResponse'));
+            }
         }
     }
 

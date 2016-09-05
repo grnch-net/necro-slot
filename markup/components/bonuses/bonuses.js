@@ -4,41 +4,77 @@ let bonuses = (function () {
     let currentLevel = 1;
     let bonusData;
     const c = createjs;
+    const w = utils.width;
+    const h = utils.height;
+
     function initBonusLevel() {
         const loader = storage.read('loadResult');
         const stage = storage.read('stage');
         let initContainer = new c.Container().set({
-            name: 'initContainer',
+            name: 'initContainer'
+        });
+        let initBG = new c.Bitmap(loader.getResult('bonusPerehodBG')).set({
+            name: 'initBG',
             alpha: 0
         });
-        let initBG = new c.Bitmap(loader.getResult('multiBG')).set({
-            name: 'initBG'
-        });
-        let initText = new c.Text('You starting Bonus Level!!!', '80px bold Arial', '#fff').set({
+        let initYouWin = new c.Bitmap(loader.getResult('youWin')).set({
             name: 'initText',
-            x: 1280 / 2,
-            y: 720 / 2,
-            textAlign: 'center',
-            textBaseline: 'middle'
+            x: (1280 - 1277 * 0.7) / 2,
+            y: 20,
+            scaleX: 0.7,
+            scaleY: 0.7
         });
+        let initBonusLevel = new c.Bitmap(loader.getResult('bonusLevel')).set({
+            name: 'initBonusLevel',
+            x: (1280 - 1100 * 0.7) / 2,
+            y: 250,
+            scaleX: 0.7,
+            scaleY: 0.7
+        });
+        let initLiza = new c.Bitmap(loader.getResult('lizaBonusPerehod')).set({
+            x: -50,
+            y: 150,
+            scaleX: 0.7,
+            scaleY: 0.7
+        });
+        let initButton = new createjs.Bitmap(loader.getResult('But')).set({
+            name: 'initButton',
+            x: (1280 - 396) / 2,
+            y: 575
+        });
+        initContainer.addChild(initBG, initBonusLevel, initYouWin, initLiza, initButton);
 
-        c.Tween.get(initContainer)
-            .to({alpha: 1}, 500)
-            .call(
-                function () {
-                    currentLevel = 1;
-                    win.cleanWin();
-                    getBonusLevel();
-                }
-            );
+        // c.Tween.get(initContainer)
+        //     .to({alpha: 1}, 500)
+        //     .call(
+        //         function () {
+        //             currentLevel = 1;
+        //             win.cleanWin();
+        //             getBonusLevel();
+        //         }
+        //     );
+        createjs.Sound.stop('ambientSound');
+        createjs.Sound.play('bonusPerehodSound', {loop: -1});
+        let tl = new TimelineMax();
+        tl.to(initBG, 0.4, {alpha: 1})
+            .call(function () {
+                        currentLevel = 1;
+                        win.cleanWin();
+                        getBonusLevel();
+                    })
+            .from(initYouWin, 0.4, {y: -400, alpha: 0}, '-=0.2')
+            .from(initBonusLevel, 0.4, {y: 900, alpha: 0}, '-=0.2')
+            .from(initLiza, 0.4, {x: -400, alpha: 0}, '-=0.2')
+            .from(initButton, 0.4, {alpha: 0}, '-=0.2');
         initContainer.on('click', function () {
             c.Tween.get(initContainer)
                 .to({alpha: 0}, 300)
                 .call(function () {
                     stage.removeChild(initContainer);
+                    createjs.Sound.stop('bonusPerehodSound');
+                    createjs.Sound.play('doorsAmbientSound', {loop: -1});
                 });
         });
-        initContainer.addChild(initBG, initText);
 
         stage.addChild(initContainer);
     }
@@ -57,6 +93,38 @@ let bonuses = (function () {
         let bonusBG = new createjs.Bitmap(loader.getResult('bonusBG_' + level)).set({
             name: 'bonusBG'
         });
+        const bonusBalance = new c.Container().set({
+            name: 'bonusBalance',
+            x: 75
+        });
+        const totalWinText = new createjs.Text('Total Win:', '24px Helvetica', '#dddddd').set({
+            name: 'totalWinText',
+            y: 658,
+            textAlign: 'center'
+        });
+        let totalCount;
+        if (storage.read('bonusResponse').CurrentWinCoins && level !== 1) {
+            totalCount = storage.read('bonusResponse').CurrentWinCoins + '';
+        } else {
+            totalCount = '0';
+        }
+        const totalWinSum = new createjs.Text(totalCount, '24px Helvetica', '#e8b075').set({
+            name: 'totalWinSum',
+            y: 658,
+            textAlign: 'center',
+            shadow: new c.Shadow('#e8b075', 0, 0, 15)
+        });
+        totalWinText.x = utils.width / 2 - 10 - totalWinText.getMeasuredWidth();
+        totalWinSum.x = totalWinText.x + 20 + totalWinText.getMeasuredWidth() / 2 + totalWinSum.getMeasuredWidth() / 2;
+        var footerBgDown = new c.Shape().set({
+            name: 'footerBgDown'
+        });
+        var footerBgUp = new c.Shape().set({
+            name: 'footerBgUp'
+        });
+        footerBgDown.graphics.beginFill('rgba(0, 0, 0)').drawRect(0, h - 30, w, 30);
+        footerBgUp.graphics.beginFill('rgba(0, 0, 0, 0.6)').drawRect(0, h - 70, w, 40);
+        bonusBalance.addChild(footerBgDown, footerBgUp, totalWinText, totalWinSum);
         if (data.BonusEnd) {
             var bonusWall = new createjs.Bitmap(loader.getResult('bonusFail_' + level)).set({
                 name: 'bonusWall'
@@ -120,6 +188,7 @@ let bonuses = (function () {
 
             function setClickEvent(door, darkness) {
                 door.on('click', function () {
+                    createjs.Sound.play('door1Sound');
                     if (clickCounter < 1) {
                         clickCounter++;
                         createjs.Tween.get(door)
@@ -147,7 +216,6 @@ let bonuses = (function () {
             bonusContainer.addChild(bonusWall, doorsContainer, bonusBG);
 
         } else if (level === 2 || level === 3 || level === 4) {
-            console.log('Я пытаюсь нарисовать второй уровень!', bonusBG);
 
             let ss = loader.getResult('doorSprite_' + level);
             let door_1 = new createjs.Sprite(ss, 'door_1').set({
@@ -193,6 +261,16 @@ let bonuses = (function () {
 
             function doorSpriteClick(door) {
                 door.on('click', function () {
+                    if (level === 2) {
+                        createjs.Sound.play('door2Sound');
+                    } else if (level === 3) {
+                        createjs.Sound.play('door3Sound');
+                        if (data.BonusEnd) {
+                            createjs.Sound.play('smehSound');
+                        }
+                    } else if (level === 4) {
+                        createjs.Sound.play('door4Sound');
+                    }
                     if (clickCounter < 1) {
                         clickCounter++;
                         door.play();
@@ -255,9 +333,10 @@ let bonuses = (function () {
             function handleLastDoor(door) {
                 door.on('click', function () {
                     if (clickCounter < 1) {
+                        createjs.Sound.play('door5Sound');
                         clickCounter++;
                         door.play();
-                        if (data.CurrentValue) {
+                        if (data.CurrentValue !== 'Exit') {
                             let light = new createjs.Bitmap(loader.getResult('bonusLight')).set({
                                 x: door.x,
                                 y: door.y,
@@ -283,6 +362,12 @@ let bonuses = (function () {
                             });
                             showBonusWin(data.CurrentValue, true, 3000)
                         } else {
+                            console.log('Это fail выход из пятых дверей.');
+                            door.on('animationend', function () {
+                                door.gotoAndStop(4);
+                                door.paused = true;
+                            });
+                            createjs.Sound.play('muhaSound');
                             setTimeout(function () {
                                 events.trigger('finishBonusLevel')
                             }, 1000);
@@ -309,6 +394,7 @@ let bonuses = (function () {
             bonusContainer.addChild(bonusBG, doorsContainer);
             stage.addChild(bonusContainer);
         }
+        bonusContainer.addChild(bonusBalance);
         if (stage.getChildIndex(stage.getChildByName('initContainer'))) {
             stage.addChildAt(bonusContainer, stage.getChildIndex(stage.getChildByName('initContainer')));
         } else {
@@ -350,39 +436,75 @@ let bonuses = (function () {
     }
 
     function finishBonusLevel() {
+        storage.changeState('lockedMenu', false);
+        createjs.Sound.stop('doorsAmbientSound');
+        createjs.Sound.play('bonusPerehodSound', {loop: -1});
         let stage = storage.read('stage');
         let loader = storage.read('loadResult');
         console.warn('I am finishing Bonuses!');
         let finishContainer = new createjs.Container().set({
-            name: 'finishContainer',
+            name: 'finishContainer'
+        });
+        let finishBG = new createjs.Bitmap(loader.getResult('bonusWinBG')).set({
+            name: 'finishBG',
             alpha: 0
         });
-        let finishBG = new createjs.Bitmap(loader.getResult('multiBG')).set({
-            name: 'finishBG'
+        let finishTotalWin = new createjs.Bitmap(loader.getResult('totalWin')).set({
+            name: 'finishTotalWin',
+            x: (1280 - 820 * 0.7) / 2,
+            y: 50,
+            scaleX: 0.7,
+            scaleY: 0.7
         });
-        let finishText = new createjs.Text(`You win ${bonusData.CurrentWinCoins} coins!!!`, '80px bold Arial', '#fff').set({
-            name: 'finishText',
-            x: 1280 / 2,
-            y: 720 / 2,
-            textAlign: 'center',
-            textBaseline: 'middle'
+        let finishText = new createjs.BitmapText(bonusData.CurrentWinCoins + '', loader.getResult('numbers')).set({
+            name: 'finishWinText',
+            scaleX: 0.1,
+            scaleY: 0.1,
+            alpha: 0
         });
-        createjs.Tween.get(finishContainer)
-            .to({alpha: 1}, 500)
-            .call(
-                function () {
-                    stage.removeChild(stage.getChildByName('bonusContainer'));
-                }
-            );
+        let finishLiza = new createjs.Bitmap(loader.getResult('lizaBonusWin')).set({
+            name: 'lizaBonusWin',
+            x: 920,
+            y: 210,
+            scaleX: 0.7,
+            scaleY: 0.7
+        });
+        let bounds = finishText.getBounds();
+        finishText.x = 1280 - bounds.width * 0.7 >> 1;
+        finishText.y = (720 - bounds.height * 0.7 >> 1);
+        let finishButton = new createjs.Bitmap(loader.getResult('But')).set({
+            name: 'finishButton',
+            x: (1280 - 396) / 2,
+            y: 575
+        });
+        let tl = new TimelineMax();
+
+        tl.to(finishBG, 0.4, {alpha: 1})
+            .call(function () {
+                stage.removeChild(stage.getChildByName('bonusContainer'));
+            })
+            .from(finishTotalWin, 0.4, {y: -400, alpha: 0}, '-=0.2')
+            .to(finishText, 0.4, {scaleX: 0.7, scaleY: 0.7, alpha: 1}, '-=0.2')
+            .from(finishLiza, 0.4, {x: 1400, alpha: 0}, '-=0.2')
+            .from(finishButton, 0.4, {alpha: 0}, '-=0.2');
+        // createjs.Tween.get(finishContainer)
+        //     .to({alpha: 1}, 500)
+        //     .call(
+        //         function () {
+        //             stage.removeChild(stage.getChildByName('bonusContainer'));
+        //         }
+        //     );
         finishBG.on('click', function () {
             createjs.Tween.get(finishContainer)
                 .to({alpha: 0}, 500)
                 .call(function () {
-                    stage.removeChild(stage.getChildByName('bonusContainer'));
+                    stage.removeChild(stage.getChildByName('finishContainer'));
+                    createjs.Sound.stop('bonusPerehodSound');
+                    createjs.Sound.play('ambientSound', {loop: -1});
                     readyAfterBonus();
                 });
         });
-        finishContainer.addChild(finishBG, finishText);
+        finishContainer.addChild(finishBG, finishTotalWin, finishText, finishLiza, finishButton);
 
         stage.addChild(finishContainer);
 
@@ -418,6 +540,7 @@ let bonuses = (function () {
             .then((data) => {
                 bonusData = data;
                 drawBonusLevel(currentLevel, data)
+                storage.write('bonusResponse', data);
             });
     }
 
