@@ -1,6 +1,6 @@
 /* eslint-disable no-undef */
 /* eslint-disable no-use-before-define */
-const init = (function () {
+export default init = (function () {
 
     const savedFS = {};
     const savedBonus = {};
@@ -99,7 +99,7 @@ const init = (function () {
     }
 
     // qo2 - двери, qo4 - фри-спины, qo5 - фри-спины всегда заканчиваются, qos - стандартный режим
-    function login(userID = 555003, casinoID = 555, gameID = 'qos') {
+    function login(userID = 1, casinoID = 1, gameID = 'qo5') {
         if (localStorage.getItem('userID')) {
             userID = localStorage.getItem('userID');
         }
@@ -135,7 +135,8 @@ const init = (function () {
                     savedFS.count = initData.PlayerState.Saved.RemainSpins;
                     savedFS.multi = initData.PlayerState.Saved.Multiplier.MultiplierValue;
                     savedFS.level = initData.PlayerState.Saved.Multiplier.MultiplierStep;
-                    // savedFS.totalWin
+                    savedFS.currentWinCoins = initData.PlayerState.Saved.CurrentTotalWinCoins;
+                    savedFS.currentWinCents = initData.PlayerState.Saved.CurrentTotalWinCents;
                 } else if (initData.PlayerState.Saved.ResultType === 'MultiplierBonus') {
                     // Обработка оборванных бонусов
                     storage.log();
@@ -171,4 +172,4 @@ const init = (function () {
     };
 })();
 
-init.login();
+// init.login();

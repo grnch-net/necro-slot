@@ -3,6 +3,9 @@ let bonuses = (function () {
 
     let currentLevel = 1;
     let bonusData;
+    let firstCashWin;
+    let totalCount;
+    let fristWin;
     const c = createjs;
     const w = utils.width;
     const h = utils.height;
@@ -99,17 +102,20 @@ let bonuses = (function () {
         });
         const totalWinText = new createjs.Text('Total Win:', '24px Helvetica', '#dddddd').set({
             name: 'totalWinText',
+            x: 10,
             y: 658,
             textAlign: 'center'
         });
-        let totalCount;
         if (storage.read('bonusResponse').CurrentWinCoins && level !== 1) {
-            totalCount = storage.read('bonusResponse').CurrentWinCoins + '';
+            totalCount = storage.read('bonusResponse').CurrentWinCoins + firstWin + '';
         } else {
-            totalCount = '0';
+            totalCount = storage.read('rollResponse').TotalWinCoins + '';
+            firstWin = +totalCount;
+            firstCashWin = +storage.read('currentBalance').winCash;
         }
         const totalWinSum = new createjs.Text(totalCount, '24px Helvetica', '#e8b075').set({
             name: 'totalWinSum',
+            x: 10,
             y: 658,
             textAlign: 'center',
             shadow: new c.Shadow('#e8b075', 0, 0, 15)
@@ -125,6 +131,7 @@ let bonuses = (function () {
         footerBgDown.graphics.beginFill('rgba(0, 0, 0)').drawRect(0, h - 30, w, 30);
         footerBgUp.graphics.beginFill('rgba(0, 0, 0, 0.6)').drawRect(0, h - 70, w, 40);
         bonusBalance.addChild(footerBgDown, footerBgUp, totalWinText, totalWinSum);
+        balance.writeCashBalance(bonusBalance);
         if (data.BonusEnd) {
             var bonusWall = new createjs.Bitmap(loader.getResult('bonusFail_' + level)).set({
                 name: 'bonusWall'
@@ -196,6 +203,7 @@ let bonuses = (function () {
                         createjs.Tween.get(darkness)
                         .to({alpha: 0}, 500);
                         if (data.CurrentValue !== 'Exit') {
+                            storage.read('currentBalance').winCash = (firstCashWin * 100 + storage.read('bonusResponse').CurrentWinCents) / 100;
                             showBonusWin(data.CurrentValue);
                         } else {
                             setTimeout(function () {
@@ -275,6 +283,7 @@ let bonuses = (function () {
                         clickCounter++;
                         door.play();
                         if (data.CurrentValue !== 'Exit') {
+                            storage.read('currentBalance').winCash = (firstCashWin * 100 + storage.read('bonusResponse').CurrentWinCents) / 100;
                             showBonusWin(data.CurrentValue);
                         } else {
                             setTimeout(function () {
@@ -337,6 +346,7 @@ let bonuses = (function () {
                         clickCounter++;
                         door.play();
                         if (data.CurrentValue !== 'Exit') {
+                            storage.read('currentBalance').winCash = (firstCashWin * 100 + storage.read('bonusResponse').CurrentWinCents) / 100;
                             let light = new createjs.Bitmap(loader.getResult('bonusLight')).set({
                                 x: door.x,
                                 y: door.y,
@@ -425,17 +435,23 @@ let bonuses = (function () {
         createjs.Tween.get(winText)
         .to({scaleX: 1, scaleY: 1}, 1000, createjs.Ease.bounceOut)
         .call(
-            setTimeout(function () {
-                if (!last) {
-                    callNextBonusLevel();
-                } else {
-                    events.trigger('finishBonusLevel');
-                }
-            }, time)
+            function () {
+                setTimeout(function () {
+                    if (!last) {
+                        callNextBonusLevel();
+                    } else {
+                        events.trigger('finishBonusLevel');
+                    }
+                }, time)
+
+            }
         );
     }
 
     function finishBonusLevel() {
+        storage.read('currentBalance').coinsCash = ((storage.read('currentBalance').coinsCash * 100 + +storage.read('currentBalance').winCash * 100) / 100).toFixed(2);
+        storage.read('currentBalance').coinsSum = +storage.read('currentBalance').coinsSum + +totalCount;
+
         storage.changeState('lockedMenu', false);
         createjs.Sound.stop('doorsAmbientSound');
         createjs.Sound.play('bonusPerehodSound', {loop: -1});
@@ -456,7 +472,7 @@ let bonuses = (function () {
             scaleX: 0.7,
             scaleY: 0.7
         });
-        let finishText = new createjs.BitmapText(bonusData.CurrentWinCoins + '', loader.getResult('numbers')).set({
+        let finishText = new createjs.BitmapText(totalCount + '', loader.getResult('numbers')).set({
             name: 'finishWinText',
             scaleX: 0.1,
             scaleY: 0.1,
@@ -481,6 +497,7 @@ let bonuses = (function () {
 
         tl.to(finishBG, 0.4, {alpha: 1})
             .call(function () {
+                balance.updateBalance();
                 stage.removeChild(stage.getChildByName('bonusContainer'));
             })
             .from(finishTotalWin, 0.4, {y: -400, alpha: 0}, '-=0.2')
@@ -538,6 +555,10 @@ let bonuses = (function () {
         const coinsValue = currentBalance.coinsValue * 100;
         utils.request('_Roll/', `${sessionID}/${betValue}/${coinsValue}`)
             .then((data) => {
+                if (data.ErrorMessage) {
+                    utils.showPopup(data.ErrorMessage);
+                    return;
+                }
                 bonusData = data;
                 drawBonusLevel(currentLevel, data)
                 storage.write('bonusResponse', data);

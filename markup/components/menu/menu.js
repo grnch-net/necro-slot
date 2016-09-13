@@ -353,7 +353,7 @@ const menu = (function () {
                 y: 335 + 70 - 20
             });
             utils.getCenterPoint(handModeText);
-            const infoButton = new c.Sprite(setSS, 'info_off').set({
+            const infoButton = new c.Sprite(setSS, 'info_on').set({
                 name: 'infoButton',
                 x: 82,
                 y: 480
@@ -451,7 +451,15 @@ const menu = (function () {
     }
 
     function handleInfoClick() {
-        utils.showPopup('Coming soon!');
+        const loader = storage.read('loadResult');
+        const stage = storage.read('stage');
+        const rules = new c.Bitmap(loader.getResult('rules'));
+        rules.on('click', function () {
+            TweenMax.to(rules, 0.5, {alpha: 0, onComplete: function () {
+                stage.removeChild(rules);
+            }});
+        });
+        stage.addChild(rules);
     }
 
     function handleHistoryClick() {

@@ -124,12 +124,12 @@ const balance = (function () {
         balanceContainer.cache(0, 500, w, h - 500);
         storage.write('currentBalance', balanceData);
         setTimeout(updateBalance, 500);
-        storage.write('fun', true);
-        if (storage.read('fun')) {
-            setInterval(function () {
-                runingWords('You are playing for fun!!!');
-            }, 25000);
-        }
+        // storage.write('fun', true);
+        // if (storage.read('fun')) {
+        //     setInterval(function () {
+        //         runingWords('You are playing for fun!!!');
+        //     }, 25000);
+        // }
     }
 
     function runingWords(text) {
@@ -153,6 +153,17 @@ const balance = (function () {
         runingText.regX = runingText.getMeasuredWidth() / 2;
         runingContainer.addChild(blackLine, runingText);
         stage.addChild(runingContainer);
+    }
+
+    function writeCashBalance(container) {
+        let coinsCash = new c.Text(currencySymbol + storage.read('currentBalance').coinsCash, parameters.font, parameters.color).set(parameters.coinsCash);
+        let betCash = new c.Text(currencySymbol + storage.read('currentBalance').betCash, parameters.font, parameters.color).set(parameters.betCash);
+        let winCash = new c.Text(currencySymbol + storage.read('currentBalance').winCash, parameters.font, parameters.color).set(parameters.winCash);
+        let coinsCashText = new c.Text('Cash:', parameters.font, '#888').set({x: 375, y: 686 + 7});
+        let betCashText = new c.Text('Bet:', parameters.font, '#888').set({x: 535, y: 686 + 7});
+        let winCashText = new c.Text('Win:', parameters.font, '#888').set({x: 685, y: 686 + 7});
+        coinsCashText.x = coinsCash.x - coinsCash.getMeasuredWidth() / 2 - 20 - coinsCashText.getMeasuredWidth();
+        container.addChild(coinsCashText, betCashText, winCashText, coinsCash, betCash, winCash);
     }
 
     function updateBalance() {
@@ -298,6 +309,8 @@ const balance = (function () {
     return {
         changeBet,
         changeCoins,
+        writeCashBalance,
+        updateBalance,
         lowBalance
     };
 

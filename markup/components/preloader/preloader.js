@@ -8,6 +8,7 @@ const mainManifest = [
     {id: 'newBGLight', src: 'static/img/content/bg/newBGLight.png'},
     {id: 'bg', src: 'static/img/content/bg/bg.json', type: 'spritesheet'},
     {id: 'newGameMachine', src: 'static/img/content/new/gameMachine.png'},
+    {id: 'rules', src: 'static/img/content/bg/firstRules.png'},
     {id: 'fonar', src: 'static/img/content/bg/fonar.png'},
     {id: 'home', src: 'static/img/content/new/home.png'},
 
@@ -93,7 +94,11 @@ const mainManifest = [
     {id: 'multiBG', src: 'static/img/content/bg/multiBG.png'},
     {id: 'multiTitle', src: 'static/img/content/bg/multiTitle.png'},
     {id: 'multiCoins', src: 'static/img/content/bg/multiCoins.png'},
-    {id: 'popup', src: 'static/img/content/new/popup.png'}
+    {id: 'x7', src: 'static/img/content/fs/x7.png'},
+    {id: 'popup', src: 'static/img/content/new/popup.png'},
+
+
+    {id: 'Bandit_anim', src: 'static/img/content/new/Bandit_anim.json', type: 'spritesheet'}
 
 
 

@@ -1,9 +1,15 @@
+/* eslint-disable no-undef */
+/* eslint-disable eqeqeq */
+/* eslint-disable curly */
+/* eslint-disable no-use-before-define */
 let freeSpins = (function () {
 
     let currentFreeSpins;
     let currentMulti = 2;
     let currentLevel = 0;
     let currentCount = 15;
+    let currentWinCoins = 0;
+    let currentWinCents = 0;
     let c = createjs;
     let fsWheels;
     let fsStartData;
@@ -30,12 +36,15 @@ let freeSpins = (function () {
             y: 658,
             textAlign: 'center'
         });
-        const totalWinSum = new createjs.Text('0', '24px Helvetica', '#e8b075').set({
+        const totalWinSum = new createjs.Text(currentWinCoins + '', '24px Helvetica', '#e8b075').set({
             name: 'totalWinSum',
             y: 658,
             textAlign: 'center',
             shadow: new c.Shadow('#e8b075', 0, 0, 15)
         });
+        if (currentWinCents) {
+            storage.read('currentBalance').winCash = (currentWinCents / 100).toFixed(2);
+        }
         totalWinText.x = utils.width / 2 - 10 - totalWinText.getMeasuredWidth();
         totalWinSum.x = totalWinText.x + 20 + totalWinText.getMeasuredWidth() / 2 + totalWinSum.getMeasuredWidth() / 2;
         balanceContainer.addChild(totalWinText, totalWinSum);
@@ -264,6 +273,20 @@ let freeSpins = (function () {
             getFirework();
             crashGame();
             getMultiLight();
+            const loader = storage.read('loadResult');
+            const x7 = new c.Bitmap(loader.getResult('x7')).set({
+                x: utils.width / 2 + 100,
+                y: utils.height / 2 - 50,
+                scaleX: 0.3,
+                scaleY: 0.3
+            });
+            utils.getCenterPoint(x7);
+            stage.addChild(x7);
+            TweenMax.to(x7, 1.5, {scaleX: 1, scaleY: 1, ease: Bounce.easeOut, onComplete: function () {
+                TweenMax.to(x7, 0.3, {alpha: 0, onComplete: function () {
+                    stage.removeChild(x7);
+                }});
+            }});
         }
         pressureFire.mask = newMask;
     }
@@ -418,6 +441,8 @@ let freeSpins = (function () {
             currentLevel = data.level - 1;
             currentMulti = data.multi;
             currentCount = data.count;
+            currentWinCoins = data.currentWinCoins;
+            currentWinCents = data.currentWinCents;
         }
         const loader = storage.read('loadResult');
         stage = storage.read('stage');
@@ -488,7 +513,7 @@ let freeSpins = (function () {
         let tl = new TimelineMax();
         tl.to(transitionBG, 0.4, {alpha: 1})
             .call(function () {
-                 events.trigger('drawFreeSpins', fsStartData);
+                events.trigger('drawFreeSpins', fsStartData);
             })
             .from(transitionYouWin, 0.4, {y: -400, alpha: 0}, '-=0.2')
             .from(transitionFSText, 0.4, {y: 900, alpha: 0}, '-=0.2')
@@ -571,6 +596,12 @@ let freeSpins = (function () {
     }
 
     function finishFreeSpins() {
+
+        const response = storage.read('freeRollResponse');
+        storage.read('currentBalance').coinsCash = ((+storage.read('currentBalance').coinsCash * 100 + +storage.read('currentBalance').winCash * 100) / 100).toFixed(2);
+        storage.read('currentBalance').coinsSum = +storage.read('currentBalance').coinsSum + response.CoinsWinCounter + response.TotalWinCoins;
+        balance.updateBalance();
+
         createjs.Sound.stop('fsAmbientSound');
         createjs.Sound.play('bonusPerehodSound', {loop: -1});
         let loader = storage.read('loadResult');
@@ -721,11 +752,17 @@ let freeSpins = (function () {
         parTimer = setTimeout(crashGame, time);
     }
 
+    function countMoney(response) {
+        storage.read('currentBalance').winCash = ((response.CentsWinCounter + response.TotalWinCents) / 100).toFixed(2);
+        balance.updateBalance();
+    }
+
     function checkState(state) {
         if (state === 'roll' && storage.readState(state) === 'ended') {
             if (storage.readState('mode') === 'fsBonus') {
                 countTotalWin(storage.read('rollResponse'));
                 countFreeSpins(storage.read('freeRollResponse').TotalFreeSpins);
+                countMoney(storage.read('freeRollResponse'));
                 if (storage.read('rollResponse').LinesResult.length && storage.readState('fsMulti') == 7) {
                     getFirework();
                 }
@@ -738,7 +775,7 @@ let freeSpins = (function () {
         }
         if (state === 'fsMulti') {
             // if (currentMulti != storage.readState(state)) {
-                changeMultiplier(storage.readState(state));
+            changeMultiplier(storage.readState(state));
                 // currentMulti = storage.readState(state);
             // }
         }

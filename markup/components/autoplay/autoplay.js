@@ -19,8 +19,9 @@ const autoplay = (function () {
                 autoEnd = true;
                 storage.changeState('autoplay', 'ended');
                 utils.showPopup('Low balance!');
+            } else {
+                roll.startRoll();
             }
-            roll.startRoll();
         }
         if (autoCount > 0) {
             storage.write('autoCount', autoCount);

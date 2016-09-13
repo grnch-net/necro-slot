@@ -169,6 +169,10 @@ const roll = (function () {
         const coinsValue = currentBalance.coinsValue * 100;
         utils.request('_Roll/', `${sessionID}/${betValue}/${coinsValue}`)
             .then((response) => {
+                if (response.ErrorMessage) {
+                    utils.showPopup(response.ErrorMessage);
+                    return;
+                }
                 if (response.Mode === 'root') { // Стандартный режим
                     if (storage.readState('mode') !== 'normal') {
                         storage.changeState('mode', 'normal');
