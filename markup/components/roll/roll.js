@@ -103,7 +103,8 @@ export let roll = (function () {
             x: elementWidth / 2,
             y: elementHeight * i + elementHeight / 2,
             regX: config.elementHalfWidth,
-            regY: config.elementHalfHeight
+            regY: config.elementHalfHeight,
+            posY: i - 1
         });
         element.snapToPixel = true;
         return element;
@@ -186,14 +187,14 @@ export let roll = (function () {
                 for (let indRow = 0; indRow < 3; indRow++) {
                     let _element = topContainer[indColumn][indRow] = createElement(1, ss, 'n', indRow, gameTopContainer);
                     _element.set({
-                        x: _element.x + elementWidth * indColumn,
-                        alpha: 0.5
+                        x: _element.x + elementWidth * indColumn
                     });
-                    // _element.visible = false;
+                    _element.visible = false;
                     gameTopContainer.addChild(_element);
                 }
             }
             storage.write('gameTopContainer', gameTopContainer);
+            storage.write('gameTopElements', topContainer);
         } else { // Отображение новых экранов
             columns.forEach((column, i) => {
                 updateColumn(currentScreenData[i], nextScreenData[i], column);
