@@ -183,22 +183,29 @@ export let win = (function () {
     }
 
     function drawLineFire(number) {
-        const loader = storage.read('loadResult');
-        const ss = loader.getResult('lineFire');
-        const lineFire = new c.Sprite(ss, 'go').set({
-            name: 'lineFire',
-            x: parameters[number].x - winRectsContainer.x - 3, // Magic Numbers
-            y: parameters[number].y - winRectsContainer.y + 5 // Magic Numbers
-        });
-        if (storage.readState('side') === 'right') {
-            lineFire.x += 150; // Magic Numbers
-        }
-        winRectsContainer.addChild(lineFire);
+        // const loader = storage.read('loadResult');
+        // const ss = loader.getResult('lineFire');
+        // const lineFire = new c.Sprite(ss, 'go').set({
+        //     name: 'lineFire',
+        //     x: parameters[number].x - winRectsContainer.x - 3, // Magic Numbers
+        //     y: parameters[number].y - winRectsContainer.y + 5 // Magic Numbers
+        // });
+        // if (storage.readState('side') === 'right') {
+        //     lineFire.x += 150; // Magic Numbers
+        // }
+        // winRectsContainer.addChild(lineFire);
     }
 
     function fireWinLine(number, amount) {
         const gameTopElements = storage.read('gameTopElements');
         const winLine = storage.read('lines')[number - 1];
+
+        let winNumbersArr = storage.read('winNumbersArr');
+        if (number - 1 < winNumbersArr.length) {
+            console.log('WIN NUMBER', number);
+            winNumbersArr[number - 1][0].visible = true;
+            winNumbersArr[number - 1][1].visible = true;
+        }
 
         if (defaultConfig.topScreen) {
             currWinLines.push({
@@ -249,7 +256,7 @@ export let win = (function () {
     }
 
     function fireAllScatters() {
-        const gameContainer = stage.getChildByName('gameContainer');
+        // const gameContainer = stage.getChildByName('gameContainer');
         const gameTopElements = storage.read('gameTopElements');
         winElements.forEach((winLine) => {
             winLine.forEach((element, colInd) => {
@@ -279,10 +286,10 @@ export let win = (function () {
                 }
             });
         });
-        if (storage.read('rollResponse').BonusResults[0] === 'StagesSlotBonus') {
+        if (storage.read('rollResponse').BonusResults[0] === 'FreeSpinBonus') {
             setTimeout(function () {
-                events.trigger('initBonusLevel');
-            }, 1000);
+                events.trigger('initFreeSpins');
+            }, 1500);
         }
     }
 
@@ -386,13 +393,14 @@ export let win = (function () {
             if (+lineNumber !== -1) {
                 fireWinLine(lineNumber, lineAmount);
                 lightLinesCounter++;
-            } else if (+lineWin !== 0 && storage.readState('mode') !== 'fsBonus') {
+            } else { // if (+lineWin !== 0 && storage.readState('mode') !== 'fsBonus') {
                 fireAllScatters();
-            } else if (+lineWin === 0 && storage.readState('mode') === 'fsBonus') {
-                fireAllScatters();
-            } else {
-                fireScatterWild();
             }
+            // else if (+lineWin === 0 && storage.readState('mode') === 'fsBonus') {
+            //     fireAllScatters();
+            // } else {
+            //     fireScatterWild();
+            // }
         });
         const totalWin = storage.read('rollResponse').TotalWinCoins;
         if (totalWin > 0) {
@@ -447,6 +455,7 @@ export let win = (function () {
         if (defaultConfig.topScreen) {
             const gameTopElements = storage.read('gameTopElements');
             if (currWinLines.length) {
+                let winNumbersArr = storage.read('winNumbersArr');
                 currWinLines.forEach((lineData) => {
                     let amount = lineData.amount;
                     let number = lineData.number;
@@ -457,6 +466,11 @@ export let win = (function () {
                         element.visible = true;
                         topElement.visible = false;
                         _clearWinElement(topElement);
+                    }
+
+                    if (number - 1 < winNumbersArr.length) {
+                        winNumbersArr[number - 1][0].visible = false;
+                        winNumbersArr[number - 1][1].visible = false;
                     }
                 });
 
