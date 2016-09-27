@@ -195,8 +195,8 @@ export let freeSpin = (function () {
         showPressureTube();
 
         const fgContainer = stage.getChildByName('fgContainer');
-        const fonar = fgContainer.getChildByName('fonar');
-        fonar.visible = false;
+        // const fonar = fgContainer.getChildByName('fonar');
+        // fonar.visible = false;
         fgContainer.uncache();
         const fsBG = new createjs.Bitmap(loader.getResult('fsBG')).set({
             name: 'fsBG'
@@ -568,8 +568,6 @@ export let freeSpin = (function () {
         const pressureContainer = fgContainer.getChildByName('pressureContainer');
         const fsMachineBG = bgContainer.getChildByName('fsMachineBG');
         const fsBG = bgContainer.getChildByName('fsBG');
-        const fonar = fgContainer.getChildByName('fonar');
-        fonar.visible = true;
 
         const balanceContainer = stage.getChildByName('balanceContainer');
         const coinsSum = balanceContainer.getChildByName('coinsSum');
