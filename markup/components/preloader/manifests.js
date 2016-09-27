@@ -9,8 +9,9 @@ export const mainManifest = [
     {id: 'bg', src: 'static/img/content/bg/bg.json', type: 'spritesheet'},
     {id: 'newGameMachine', src: 'static/img/content/new/gameMachine.png'},
     {id: 'rules', src: 'static/img/content/bg/firstRules.png'},
-    {id: 'fonar', src: 'static/img/content/bg/fonar.png'},
     {id: 'home', src: 'static/img/content/new/home.png'},
+    {id: 'logoNecro', src: 'static/img/content/new/logoNecro.png'},
+    // {id: 'winAllNumbersSprite', src: 'static/img/content/new/winAllNumbers.png'},
 
     // buttons module
     {id: 'buttons', src: 'static/img/content/buttons/buttons.json', type: 'spritesheet'},
@@ -21,6 +22,7 @@ export const mainManifest = [
     {id: 'gameShadow', src: 'static/img/content/bg/gameShadow.png'},
 
     // win module
+    {id: 'winAllNumbers', src: 'static/img/content/new/winAllNumbers.json', type: 'spritesheet'},
     {id: 'newLight', src: 'static/img/content/new/newLight_yellow.png'},
     {id: 'winLineRect', src: 'static/img/content/lines/winLineRect.png'},
     {id: 'winTotalRect', src: 'static/img/content/lines/winTotalRect.png'},
