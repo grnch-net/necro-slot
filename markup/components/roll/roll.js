@@ -20,8 +20,8 @@ export let roll = (function () {
         columnsNumber: 5,
         rowsNumber: 5,
         longRowsNumber: 30,
-        gameX: 100,
-        gameY: 89,
+        gameX: 77,
+        gameY: 84,
         elementHalfWidth: 168,
         elementHalfHeight: 145
     };
