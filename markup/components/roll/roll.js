@@ -1,10 +1,13 @@
 import { utils } from 'components/utils/utils';
 import { storage } from 'components/storage/storage';
 import { events } from 'components/events/events';
+import { noConnect } from 'components/noConnect/noConnect';
 
 export let roll = (function () {
 
     // Consts
+    const isNoConnect = storage.read('isNoConnect');
+
     const c = createjs;
     const elementWidth = utils.elementWidth;
     const elementHeight = utils.elementHeight;
@@ -202,65 +205,76 @@ export let roll = (function () {
         }
     }
 
+    function _startRollSuccessful(response) {
+        if (response.ErrorMessage) {
+            utils.showPopup(response.ErrorMessage);
+            return;
+        }
+        if (response.Mode === 'root') { // Стандартный режим
+            if (storage.readState('mode') !== 'normal') {
+                storage.changeState('mode', 'normal');
+            }
+            createjs.Sound.play('spinSound');
+            createjs.Sound.play('barabanSound');
+            rollData.nextScreen = getScreenData(response.Indexes, storage.read('wheels'));
+            drawScreen(rollData.currentScreen, rollData.nextScreen);
+            rollAnimation = new TimelineMax();
+            rollAnimation.staggerTo(columns, 2, {y: -utils.elementHeight, ease: Back.easeInOut.config(0.75)}, 0.1, '+=0', endRoll)
+                .staggerTo(shadows, 1, {alpha: 1, ease: Power1.easeOut}, 0.1, 0)
+                .staggerTo(shadows, 1, {alpha: 0, ease: Power1.easeIn}, 0.1, '-=1');
+            if (storage.readState('fastSpinSetting')) {
+                rollAnimation.timeScale(2);
+            }
+            rollData.currentScreen = rollData.nextScreen;
+            storage.changeState('roll', 'started');
+            events.trigger('roll:started');
+            setTimeout(function () {
+                storage.changeState('fastRoll', true);
+                events.trigger('roll:fastRoll', true);
+            }, 500);
+        } else if (response.Mode === 'fsBonus') { // Режим Фри-Спинов
+            if (storage.readState('mode') !== 'fsBonus') {
+                storage.changeState('mode', 'fsBonus');
+            }
+            rollData.nextScreen = getScreenData(response.Indexes, storage.read('fsWheels'));
+            drawScreen(rollData.currentScreen, rollData.nextScreen);
+            rollAnimation = new TimelineMax();
+            rollAnimation.staggerTo(columns, 2, {y: -utils.elementHeight, ease: Back.easeInOut.config(0.75)}, 0.1, '+=0', endRoll)
+                .staggerTo(shadows, 1, {alpha: 1, ease: Power1.easeOut}, 0.1, 0)
+                .staggerTo(shadows, 1, {alpha: 0, ease: Power1.easeIn}, 0.1, '-=1');
+            if (storage.readState('fastSpinSetting')) {
+                rollAnimation.timeScale(2);
+            }
+            rollData.currentScreen = rollData.nextScreen;
+            storage.changeState('roll', 'started');
+            events.trigger('roll:started');
+            storage.write('freeRollResponse', response);
+        }
+        if (response.Type === 'MultiplierBonus') {
+            storage.changeState('fsMultiplier', true);
+            storage.write('fsMultiplierResponse', response);
+            events.trigger('roll:fsMultiplier', true);
+        }
+        storage.write('rollResponse', response);
+    }
+
     function startRoll() {
         const loader = storage.read('loadResult');
         const currentBalance = storage.read('currentBalance');
         const sessionID = storage.read('sessionID');
         const betValue = currentBalance.betValue;
         const coinsValue = currentBalance.coinsValue * 100;
-        utils.request('_Roll/', `${sessionID}/${betValue}/${coinsValue}`)
-            .then((response) => {
-                if (response.ErrorMessage) {
-                    utils.showPopup(response.ErrorMessage);
-                    return;
-                }
-                if (response.Mode === 'root') { // Стандартный режим
-                    if (storage.readState('mode') !== 'normal') {
-                        storage.changeState('mode', 'normal');
-                    }
-                    createjs.Sound.play('spinSound');
-                    createjs.Sound.play('barabanSound');
-                    rollData.nextScreen = getScreenData(response.Indexes, storage.read('wheels'));
-                    drawScreen(rollData.currentScreen, rollData.nextScreen);
-                    rollAnimation = new TimelineMax();
-                    rollAnimation.staggerTo(columns, 2, {y: -utils.elementHeight, ease: Back.easeInOut.config(0.75)}, 0.1, '+=0', endRoll)
-                        .staggerTo(shadows, 1, {alpha: 1, ease: Power1.easeOut}, 0.1, 0)
-                        .staggerTo(shadows, 1, {alpha: 0, ease: Power1.easeIn}, 0.1, '-=1');
-                    if (storage.readState('fastSpinSetting')) {
-                        rollAnimation.timeScale(2);
-                    }
-                    rollData.currentScreen = rollData.nextScreen;
-                    storage.changeState('roll', 'started');
-                    events.trigger('roll:started');
-                    setTimeout(function () {
-                        storage.changeState('fastRoll', true);
-                        events.trigger('roll:fastRoll', true);
-                    }, 500);
-                } else if (response.Mode === 'fsBonus') { // Режим Фри-Спинов
-                    if (storage.readState('mode') !== 'fsBonus') {
-                        storage.changeState('mode', 'fsBonus');
-                    }
-                    rollData.nextScreen = getScreenData(response.Indexes, storage.read('fsWheels'));
-                    drawScreen(rollData.currentScreen, rollData.nextScreen);
-                    rollAnimation = new TimelineMax();
-                    rollAnimation.staggerTo(columns, 2, {y: -utils.elementHeight, ease: Back.easeInOut.config(0.75)}, 0.1, '+=0', endRoll)
-                        .staggerTo(shadows, 1, {alpha: 1, ease: Power1.easeOut}, 0.1, 0)
-                        .staggerTo(shadows, 1, {alpha: 0, ease: Power1.easeIn}, 0.1, '-=1');
-                    if (storage.readState('fastSpinSetting')) {
-                        rollAnimation.timeScale(2);
-                    }
-                    rollData.currentScreen = rollData.nextScreen;
-                    storage.changeState('roll', 'started');
-                    events.trigger('roll:started');
-                    storage.write('freeRollResponse', response);
-                }
-                if (response.Type === 'MultiplierBonus') {
-                    storage.changeState('fsMultiplier', true);
-                    storage.write('fsMultiplierResponse', response);
-                    events.trigger('roll:fsMultiplier', true);
-                }
-                storage.write('rollResponse', response);
-            });
+
+        if (isNoConnect) {
+            let response = JSON.parse(noConnect._Roll);
+            _startRollSuccessful(response);
+        } else {
+            utils.request('_Roll/', `${sessionID}/${betValue}/${coinsValue}`)
+                .then((response) => {
+                    // console.log('req; _Roll', JSON.stringify(response) );
+                    _startRollSuccessful(response);
+                });
+        }
     }
 
     function fastRoll() {
@@ -270,14 +284,22 @@ export let roll = (function () {
         }
     }
 
+    function _endRollSuccessful(response) {
+        events.trigger('roll:ended');
+        storage.changeState('roll', 'ended');
+        storage.changeState('fastRoll', false);
+        storage.changeState('lockedRoll', false);
+    }
+
     function endRoll() {
-        utils.request('_Ready/', storage.read('sessionID'))
-            .then((response) => {
-                events.trigger('roll:ended');
-                storage.changeState('roll', 'ended');
-                storage.changeState('fastRoll', false);
-                storage.changeState('lockedRoll', false);
-            });
+        if (isNoConnect) {
+            let response = JSON.parse(noConnect._Ready);
+            _endRollSuccessful(response);
+        } else {
+            utils.request('_Ready/', storage.read('sessionID'))
+                .then(_endRollSuccessful);
+        }
+
     }
 
     return {
