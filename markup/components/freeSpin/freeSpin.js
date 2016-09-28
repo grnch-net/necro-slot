@@ -195,8 +195,6 @@ export let freeSpin = (function () {
         showPressureTube();
 
         const fgContainer = stage.getChildByName('fgContainer');
-        // const fonar = fgContainer.getChildByName('fonar');
-        // fonar.visible = false;
         fgContainer.uncache();
         const fsBG = new createjs.Bitmap(loader.getResult('fsBG')).set({
             name: 'fsBG'
@@ -478,44 +476,37 @@ export let freeSpin = (function () {
         let transitionContainer = new createjs.Container().set({
             name: 'transitionContainer'
         });
-        let transitionBG = new createjs.Bitmap(loader.getResult('transitionBG')).set({
+        let transitionBG = new createjs.Shape().set({
             name: 'transitionBG',
             alpha: 0
         });
-        let transitionYouWin = new createjs.Bitmap(loader.getResult('youWin')).set({
-            name: 'transitionYouWin',
-            x: (1280 - 1277 * 0.7) / 2,
-            y: 20,
-            scaleX: 0.7,
-            scaleY: 0.7
-        });
-        let transitionFSText = new createjs.Bitmap(loader.getResult('freeSpins')).set({
-            name: 'transitionFSText',
-            x: (1280 - 825 * 0.7) / 2,
-            y: 420,
-            scaleX: 0.7,
-            scaleY: 0.7
+        transitionBG.graphics.beginFill('#000').drawRect(0, 0, utils.width, utils.height);
+        let transitionPopup = new createjs.Bitmap(loader.getResult('transitionPopup')).set({
+            name: 'transitionPopup',
+            x: utils.width / 2,
+            y: utils.height / 2 - 50,
+            regX: 350,
+            regY: 200,
+            alpha: 1
         });
         let transitionWinText = new createjs.BitmapText(config.currentCount + '', loader.getResult('numbers')).set({
             name: 'transitionWinText',
-            scaleX: 0.1,
-            scaleY: 0.1,
-            alpha: 0
+            scaleX: 0.7,
+            scaleY: 0.7,
+            alpha: 1
         });
         let bounds = transitionWinText.getBounds();
-        transitionWinText.x = 1280 - bounds.width * 0.7 >> 1;
-        transitionWinText.y = (720 - bounds.height * 0.7 >> 1) - 50;
-        let transitionPerson = new createjs.Bitmap(loader.getResult('liza')).set({
-            name: 'transitionPerson',
-            x: (1280 - 566 * 0.65) / 2 + 380,
-            y: 215,
-            scaleX: 0.65,
-            scaleY: 0.65
-        });
+        transitionWinText.x = utils.width / 2;
+        transitionWinText.y = utils.height / 2 - 85;
+        transitionWinText.regX = bounds.width / 2;
+        transitionWinText.regY = bounds.height / 2;
         let transitionButton = new createjs.Bitmap(loader.getResult('But')).set({
             name: 'transitionButton',
-            x: (1280 - 396) / 2,
-            y: 575
+            x: utils.width / 2,
+            y: utils.height / 2 + 150,
+            regX: 118,
+            regY: 47.5,
+            alpha: 1
         });
 
         transitionContainer.on('click', function () {
@@ -528,17 +519,15 @@ export let freeSpin = (function () {
                 .to({alpha: 0}, 500);
         }, transitionContainer, true);
 
-        transitionContainer.addChild(transitionBG, transitionYouWin, transitionWinText, transitionPerson, transitionFSText, transitionButton);
+        transitionContainer.addChild(transitionBG, transitionPopup, transitionWinText, transitionButton);
         stage.addChild(transitionContainer);
         let tl = new TimelineMax();
-        tl.to(transitionBG, 0.4, {alpha: 1})
+        tl.to(transitionBG, 0.4, {alpha: 0.8})
             .call(function () {
-                events.trigger('drawFreeSpins', fsStartData);
+                // events.trigger('drawFreeSpins', fsStartData);
             })
-            .from(transitionYouWin, 0.4, {y: -400, alpha: 0}, '-=0.2')
-            .from(transitionFSText, 0.4, {y: 900, alpha: 0}, '-=0.2')
-            .to(transitionWinText, 0.4, {scaleX: 0.7, scaleY: 0.7, alpha: 1}, '-=0.2')
-            .from(transitionPerson, 0.4, {x: 1400, alpha: 0}, '-=0.2')
+            .from(transitionPopup, 0.4, {y: 0, alpha: 0}, '-=0.2')
+            .from(transitionWinText, 0.4, {scaleX: 0.1, scaleY: 0.1, alpha: 0}, '-=0.2')
             .from(transitionButton, 0.4, {alpha: 0}, '-=0.2');
     }
 
