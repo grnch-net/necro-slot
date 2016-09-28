@@ -478,7 +478,7 @@ export let freeSpin = (function () {
         });
         let transitionBG = new createjs.Shape().set({
             name: 'transitionBG',
-            alpha: 0
+            alpha: 0.8
         });
         transitionBG.graphics.beginFill('#000').drawRect(0, 0, utils.width, utils.height);
         let transitionPopup = new createjs.Bitmap(loader.getResult('transitionPopup')).set({
@@ -489,15 +489,23 @@ export let freeSpin = (function () {
             regY: 200,
             alpha: 1
         });
+        let transitionLuchi = new createjs.Bitmap(loader.getResult('luchi')).set({
+            name: 'transitionLuchi',
+            x: utils.width / 2,
+            y: utils.height / 2 - 50,
+            regX: 410,
+            regY: 403,
+            alpha: 0.5
+        });
         let transitionWinText = new createjs.BitmapText(config.currentCount + '', loader.getResult('numbers')).set({
             name: 'transitionWinText',
-            scaleX: 0.7,
-            scaleY: 0.7,
+            scaleX: 0.9,
+            scaleY: 0.9,
             alpha: 1
         });
         let bounds = transitionWinText.getBounds();
-        transitionWinText.x = utils.width / 2;
-        transitionWinText.y = utils.height / 2 - 85;
+        transitionWinText.x = utils.width / 2 - 20;
+        transitionWinText.y = utils.height / 2 - 100;
         transitionWinText.regX = bounds.width / 2;
         transitionWinText.regY = bounds.height / 2;
         let transitionButton = new createjs.Bitmap(loader.getResult('But')).set({
@@ -509,25 +517,32 @@ export let freeSpin = (function () {
             alpha: 1
         });
 
+        let tl0 = new TimelineMax({repeat: -1});
+        tl0.from(transitionLuchi, 15, {rotation: -360, ease: Power0.easeNone});
+
         transitionContainer.on('click', function () {
             createjs.Sound.stop('bonusPerehodSound');
             createjs.Sound.play('fsAmbientSound', {loop: -1});
-            setTimeout(function () {
-                events.trigger('startFreeSpin');
-            }, 1000);
-            createjs.Tween.get(transitionContainer)
-                .to({alpha: 0}, 500);
+
+            let tl = new TimelineMax();
+            tl.to(transitionBG, 0.4, {alpha: 1})
+                .call(function () {
+                    events.trigger('drawFreeSpins', fsStartData);
+                    setTimeout(function () {
+                        events.trigger('startFreeSpin');
+                    }, 1000);
+                    createjs.Tween.get(transitionContainer)
+                        .to({alpha: 0}, 500);
+                });
         }, transitionContainer, true);
 
-        transitionContainer.addChild(transitionBG, transitionPopup, transitionWinText, transitionButton);
+        transitionContainer.addChild(transitionBG, transitionPopup, transitionLuchi, transitionWinText, transitionButton);
         stage.addChild(transitionContainer);
         let tl = new TimelineMax();
-        tl.to(transitionBG, 0.4, {alpha: 0.8})
-            .call(function () {
-                // events.trigger('drawFreeSpins', fsStartData);
-            })
+        tl.from(transitionBG, 0.4, {alpha: 0})
             .from(transitionPopup, 0.4, {y: 0, alpha: 0}, '-=0.2')
-            .from(transitionWinText, 0.4, {scaleX: 0.1, scaleY: 0.1, alpha: 0}, '-=0.2')
+            .from(transitionLuchi, 0.4, {alpha: 0}, '-=0.2')
+            .from(transitionWinText, 1.2, {scaleX: 0.1, scaleY: 0.1, alpha: 0, ease: Elastic.easeOut.config(1, 0.3)}, '-=0.2')
             .from(transitionButton, 0.4, {alpha: 0}, '-=0.2');
     }
 
@@ -607,38 +622,66 @@ export let freeSpin = (function () {
             name: 'finishContainer',
             alpha: 0
         });
-        let finishBG = new createjs.Bitmap(loader.getResult('bonusWinBG')).set({
-            name: 'finishBG'
+        // let finishBG = new createjs.Bitmap(loader.getResult('bonusWinBG')).set({
+        //     name: 'finishBG'
+        // });
+        let finishBG = new createjs.Shape().set({
+            name: 'finishBG',
+            alpha: 0.8
         });
+        finishBG.graphics.beginFill('#000').drawRect(0, 0, utils.width, utils.height);
         let finishText = new createjs.Bitmap(loader.getResult('totalWin')).set({
             name: 'finishText',
-            x: (1280 - 820 * 0.7) / 2,
-            y: 50,
+            x: utils.width / 2,
+            y: utils.height / 2 - 250,
+            regX: 500,
+            regY: 150,
             scaleX: 0.7,
             scaleY: 0.7
         });
-        let finishPerson = new createjs.Bitmap(loader.getResult('lizaBonusWin')).set({
-            name: 'lizaBonusWin',
-            x: 920,
-            y: 210,
-            scaleX: 0.7,
-            scaleY: 0.7
+        let cultists = new createjs.Bitmap(loader.getResult('cultists')).set({
+            name: 'cultists',
+            x: utils.width / 2,
+            y: utils.height / 2 + 150,
+            regX: 250,
+            regY: 175,
+            scaleX: 0.9,
+            scaleY: 0.9
         });
         let finishWinText = new createjs.BitmapText(fsTotalWin + '', loader.getResult('numbers')).set({
-            x: 1280 / 2,
-            y: 720 / 2,
+            name: 'transitionWinText',
             scaleX: 0.7,
-            scaleY: 0.7
+            scaleY: 0.7,
+            alpha: 1
         });
+        let tl2 = new TimelineMax({repeat: -1, yoyo: true});
+        tl2.from(finishWinText, 1, {scaleX: 0.3, scaleY: 0.3});
+
         let bounds = finishWinText.getBounds();
+        finishWinText.x = utils.width / 2;
+        finishWinText.y = utils.height / 2 - 80;
         finishWinText.regX = bounds.width / 2;
         finishWinText.regY = bounds.height / 2;
+        let luchi = new createjs.Bitmap(loader.getResult('luchi')).set({
+            name: 'transitionLuchi',
+            x: utils.width / 2,
+            y: utils.height / 2 - 50,
+            regX: 410,
+            regY: 403,
+            alpha: 0.5
+        });
+        let tl = new TimelineMax({repeat: -1});
+        tl.from(luchi, 15, {rotation: -360, ease: Power0.easeNone});
+
         let finishButton = new createjs.Bitmap(loader.getResult('But')).set({
             name: 'finishButton',
-            x: (1280 - 396) / 2,
-            y: 560
+            x: utils.width / 2,
+            y: utils.height / 2 + 255,
+            regX: 118,
+            regY: 47.5,
+            alpha: 1
         });
-        finishContainer.addChild(finishBG, finishText, finishPerson, finishWinText, finishButton);
+        finishContainer.addChild(finishBG, luchi, finishText, finishWinText, cultists, finishButton);
         createjs.Tween.get(finishContainer)
             .to({alpha: 1}, 500)
             .call(function () {
