@@ -64,6 +64,9 @@ export let preloader = (function () {
         preloaderCache.addChild(preloaderBG, preloaderLogo);
         preloaderCache.cache(0, 0, w, h);
         preloaderContainer.addChild(preloaderCache, preloaderPlay, preloaderSprite);
+        preloaderContainer.on('click', function (e) {
+            e.stopPropagation();
+        });
         stage.addChild(preloaderContainer);
 
         mainPreload(preloaderContainer);
