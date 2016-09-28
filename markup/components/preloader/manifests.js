@@ -110,6 +110,7 @@ export const mainManifest = [
     {id: 'logoFire', src: 'static/img/content/fs/logoFire.png'},
     {id: 'parPack', src: 'static/img/content/fs/parPack.json', type: 'spritesheet'},
     {id: 'transitionBG', src: 'static/img/content/bg/transitionBG.png'},
+    {id: 'transitionPopup', src: 'static/img/content/bg/transitionPopup.png'},
     {id: 'freeSpins', src: 'static/img/content/bg/freeSpins.png'},
     {id: 'liza', src: 'static/img/content/bg/liza.png'},
     {id: 'fsTable', src: 'static/img/content/fs/fsTable.png'},
