@@ -134,26 +134,30 @@ export let win = (function () {
         const lineWin = data.lineWin;
         const winText = new c.Container().set({
             name: 'winText',
-            y: linesCoords[number - 1][amount - 1].y + 30, // Magic Numbers
-            x: linesCoords[number - 1][amount - 1].x + 32 // Magic Numbers
+            y: linesCoords[number - 1][amount - 1].y + 50, // Magic Numbers
+            x: linesCoords[number - 1][amount - 1].x + 52 // Magic Numbers
         });
         const winLineRect = new c.Bitmap(loader.getResult('winLineRect')).set({
             name: 'winLineRect',
-            scaleX: 1.8,
-            scaleY: 1.8
+            // y: 3,
+            regX: 24,
+            regY: 24,
+            scaleX: 1.2,
+            scaleY: 1.2
         });
         const winLineText = new c.Text(lineWin, '35px Helvetica', '#f0e194').set({
             name: 'winLineText',
-            x: 30, // Magic Numbers
-            y: 22, // Magic Numbers
+            y: -1,
             textAlign: 'center',
             textBaseline: 'middle',
             shadow: new c.Shadow('#C19433', 0, 0, 8)
         });
+        let bounds = winLineText.getBounds();
+
         if ((winLineText.text + '').length > 3) {
-            winLineText.font = '20px Helvetica';
+            winLineText.font = '19px Helvetica';
         } else if ((winLineText.text + '').length > 2) {
-            winLineText.font = '25px Helvetica';
+            winLineText.font = '24px Helvetica';
         } else if ((winLineText.text + '').length > 1) {
             winLineText.font = '30px Helvetica';
         }
@@ -202,7 +206,6 @@ export let win = (function () {
 
         let winNumbersArr = storage.read('winNumbersArr');
         if (number - 1 < winNumbersArr.length) {
-            console.log('WIN NUMBER', number);
             winNumbersArr[number - 1][0].visible = true;
             winNumbersArr[number - 1][1].visible = true;
         }
@@ -289,7 +292,7 @@ export let win = (function () {
         if (storage.read('rollResponse').BonusResults[0] === 'FreeSpinBonus') {
             setTimeout(function () {
                 events.trigger('initFreeSpins');
-            }, 1500);
+            }, 1000);
         }
     }
 
