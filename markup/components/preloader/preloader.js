@@ -38,18 +38,21 @@ export let preloader = (function () {
         const preloaderContainer = new c.Container().set({ name: 'preloaderContainer' });
         const preloaderCache = new c.Container().set({ name: 'preloaderCache' });
         const preloaderBG = new c.Sprite(ss, 'bg').set({ name: 'preloaderBG' });
+
         const preloaderLogo = new c.Sprite(ss, 'logo');
         preloaderLogo.set({
             name: 'preloaderLogo',
             x: (w - preloaderLogo.getBounds().width) / 2,
             y: 75
         });
+
         const preloaderPlay = new c.Sprite(ss, 'play');
         preloaderPlay.set({
             name: 'preloaderPlay',
             x: (w - preloaderPlay.getBounds().width) / 2,
             y: 310
         });
+
         const preloaderSprite = new c.Sprite(clock, 'start');
         preloaderSprite.set({
             name: 'preloaderSprite',
