@@ -22,8 +22,8 @@ export let roll = (function () {
         longRowsNumber: 30,
         gameX: 77,
         gameY: 84,
-        elementHalfWidth: 168,
-        elementHalfHeight: 145
+        elementHalfWidth: 134,
+        elementHalfHeight: 124
     };
 
     // Container
