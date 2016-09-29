@@ -1,6 +1,9 @@
 export const preloaderManifest = [
     {id: 'preloader', src: 'static/img/content/preloader/preloader.json', type: 'spritesheet'},
-    {id: 'preloaderSprite', src: 'static/img/content/preloader/sprite.json', type: 'spritesheet'}
+    {id: 'preloaderSprite', src: 'static/img/content/preloader/sprite.json', type: 'spritesheet'},
+    {id: 'fsBG', src: 'static/img/content/bg/fsBG.png'},
+    {id: 'preloaderLogo', src: 'static/img/content/preloader/preloaderLogo.png'},
+    {id: 'play', src: 'static/img/content/preloader/play.png'}
 ];
 
 export const mainManifest = [
