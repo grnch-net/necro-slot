@@ -106,54 +106,54 @@ export let freeSpin = (function () {
     }
 
     function showPressureTube() {
-        const loader = storage.read('loadResult');
-        const fgContainer = stage.getChildByName('fgContainer');
-        const pressure = new createjs.Bitmap(loader.getResult('pressure')).set({
-            name: 'pressure',
-            x: 60,
-            y: 575
-        });
-        const pressureFire = new createjs.Sprite(loader.getResult('fireToPressure'), 'go').set({
-            name: 'pressureFire',
-            x: 90,
-            y: 605
-        });
-        const pressureDark = new createjs.Shape().set({
-            name: 'pressureDark',
-            x: 100,
-            y: 620
-        });
-        pressureDark.graphics.beginFill('#000').drawRect(0, 0, 810, 14);
-        const fireMask = new createjs.Shape();
-        fireMask.graphics.drawRect(0, 0, 100, utils.height);
-        pressureFire.mask = fireMask;
-        const pressureContainer = new createjs.Container().set({
-            name: 'pressureContainer'
-        });
-        const pressureDisc = new createjs.Bitmap(loader.getResult('pressureDisc')).set({
-            name: 'pressureDisc',
-            x: 375,
-            y: 598
-        });
-        pressureContainer.addChild(pressureDark, pressureFire, pressure);
-        for (let i = 0; i < 6; i++) {
-            const newDisc = pressureDisc.clone();
-            pressureDiscs.push(newDisc);
-            pressureContainer.addChild(newDisc);
-        }
-        pressureDiscs[0].x = 244;
-        pressureDiscs[1].x = 376;
-        pressureDiscs[2].x = 508;
-        pressureDiscs[3].x = 640;
-        pressureDiscs[4].x = 772;
-        pressureDiscs[5].x = 904;
-        const truba = new createjs.Bitmap(loader.getResult('truba')).set({
-            name: 'truba',
-            x: 755,
-            y: 40
-        });
-        fgContainer.addChildAt(truba, 0);
-        fgContainer.addChild(pressureContainer);
+        // const loader = storage.read('loadResult');
+        // const fgContainer = stage.getChildByName('fgContainer');
+        // const pressure = new createjs.Bitmap(loader.getResult('pressure')).set({
+        //     name: 'pressure',
+        //     x: 60,
+        //     y: 575
+        // });
+        // const pressureFire = new createjs.Sprite(loader.getResult('fireToPressure'), 'go').set({
+        //     name: 'pressureFire',
+        //     x: 90,
+        //     y: 605
+        // });
+        // const pressureDark = new createjs.Shape().set({
+        //     name: 'pressureDark',
+        //     x: 100,
+        //     y: 620
+        // });
+        // pressureDark.graphics.beginFill('#000').drawRect(0, 0, 810, 14);
+        // const fireMask = new createjs.Shape();
+        // fireMask.graphics.drawRect(0, 0, 100, utils.height);
+        // pressureFire.mask = fireMask;
+        // const pressureContainer = new createjs.Container().set({
+        //     name: 'pressureContainer'
+        // });
+        // const pressureDisc = new createjs.Bitmap(loader.getResult('pressureDisc')).set({
+        //     name: 'pressureDisc',
+        //     x: 375,
+        //     y: 598
+        // });
+        // pressureContainer.addChild(pressureDark, pressureFire);
+        // for (let i = 0; i < 6; i++) {
+        //     const newDisc = pressureDisc.clone();
+        //     pressureDiscs.push(newDisc);
+        //     pressureContainer.addChild(newDisc);
+        // }
+        // pressureDiscs[0].x = 244;
+        // pressureDiscs[1].x = 376;
+        // pressureDiscs[2].x = 508;
+        // pressureDiscs[3].x = 640;
+        // pressureDiscs[4].x = 772;
+        // pressureDiscs[5].x = 904;
+        // const truba = new createjs.Bitmap(loader.getResult('truba')).set({
+        //     name: 'truba',
+        //     x: 755,
+        //     y: 40
+        // });
+        // fgContainer.addChildAt(truba, 0);
+        // fgContainer.addChild(pressureContainer);
     }
 
     function drawFreeSpinsBG() {
@@ -167,32 +167,60 @@ export let freeSpin = (function () {
 
         const bgContainer = stage.getChildByName('bgContainer');
         const gameBG = bgContainer.getChildByName('gameBG');
+        gameBG.visible = false;
         const fsTableContainer = new createjs.Container().set({
-            name: 'fsTableContainer'
-        });
-        const fsMachineBG = new createjs.Bitmap(loader.getResult('fsMachineBG')).set({
-            name: 'fsMachineBG',
-            x: 255,
-            y: 85
+            name: 'fsTableContainer',
+            x: 230,
+            y: 75
         });
         const fsTotalTable = new createjs.Bitmap(loader.getResult('fsTotalTable')).set({
             name: 'fsTotalTable',
-            x: 985,
-            y: 30
+            regX: 125,
+            regY: 125,
+            scaleX: 0.65,
+            scaleY: 0.65
         });
-        const fsTotalCount = new createjs.BitmapText(config.currentCount + '', loader.getResult('fsText')).set({
+        const fsTotalCount = new createjs.BitmapText(config.currentCount + '', loader.getResult('numbers')).set({
             name: 'fsTotalCount',
-            x: 1133,
-            y: 66,
-            scaleX: 0.4,
-            scaleY: 0.4
+            x: 5,
+            scaleX: 0.3,
+            scaleY: 0.3
         });
+        let bounds = fsTotalCount.getBounds();
+        fsTotalCount.regX = bounds.width / 2;
+        fsTotalCount.regY = bounds.height / 2;
+
         utils.getCenterPoint(fsTotalCount);
         fsTableContainer.addChild(fsTotalTable, fsTotalCount);
         stage.addChildAt(fsTableContainer, stage.getChildIndex(stage.getChildByName('fgContainer')) + 1);
-        bgContainer.addChildAt(fsMachineBG, bgContainer.getChildIndex(gameBG) + 1);
 
         showPressureTube();
+
+        const cultistBlackContainer = new createjs.Container().set({
+            name: 'cultistBlackContainer'
+        });
+        const cultistBlack1 = new createjs.Bitmap(loader.getResult('cultistBlack1')).set({
+            name: 'cultistBlack1',
+            x: 30,
+            y: 0,
+            scaleX: 0.6,
+            scaleY: 0.6
+        });
+        const cultistBlack2 = new createjs.Bitmap(loader.getResult('cultistBlack2')).set({
+            name: 'cultistBlack2',
+            x: 30,
+            y: 120,
+            scaleX: 0.6,
+            scaleY: 0.6
+        });
+        const cultistBlack3 = new createjs.Bitmap(loader.getResult('cultistBlack3')).set({
+            name: 'cultistBlack3',
+            x: 30,
+            y: 250,
+            scaleX: 0.6,
+            scaleY: 0.6
+        });
+        cultistBlackContainer.addChild(cultistBlack1, cultistBlack2, cultistBlack3);
 
         const fgContainer = stage.getChildByName('fgContainer');
         fgContainer.uncache();
@@ -204,26 +232,18 @@ export let freeSpin = (function () {
         const clockContainer = new c.Container().set({
             name: 'clockContainer'
         });
-        const clock = new c.Bitmap(loader.getResult('chasyFS')).set({
+        const book = new c.Bitmap(loader.getResult('chasyFS')).set({
             name: 'clock',
-            x: -160,
-            y: 350
+            x: 120,
+            y: utils.height - 200,
+            regX: 300,
+            regY: 300,
+            scaleX: 0.52,
+            scaleY: 0.52
         });
-        const clockHours = new c.Sprite(loader.getResult('chasy')).set({
-            name: 'clockHours',
-            x: -10,
-            y: 335
-        });
-        clockHours.gotoAndStop('h-2');
-        const clockMinutes = new c.Sprite(loader.getResult('chasy'), 'minute').set({
-            name: 'clockMinutes',
-            x: -10,
-            y: 335
-        });
-        clockMinutes.paused = true;
-        clockContainer.addChild(clock, clockHours, clockMinutes);
+        clockContainer.addChild(book);
         addClockParticles(clockContainer);
-        stage.addChildAt(clockContainer, stage.getChildIndex(stage.getChildByName('winRectsContainer')) + 1);
+        stage.addChildAt(cultistBlackContainer, clockContainer, stage.getChildIndex(stage.getChildByName('winRectsContainer')) + 1);
         moveClock(clockContainer);
 
         if (config.currentLevel !== 0) {
@@ -252,78 +272,78 @@ export let freeSpin = (function () {
     }
 
     function changeLevel(num) {
-        if (num != config.currentLevel) {
-            config.currentLevel = num;
-            createjs.Sound.play('fsClockSound');
-            const clockContainer = stage.getChildByName('clockContainer');
-            const hours = clockContainer.getChildByName('clockHours');
-            const minutes = clockContainer.getChildByName('clockMinutes');
-            minutes.play();
-            minutes.on('animationend', function () {
-                minutes.paused = true;
-                minutes.gotoAndStop('minute');
-                if (num !== 11) {
-                    hours.gotoAndStop(`h-${num + 2}`);
-                } else {
-                    hours.gotoAndStop('h-1');
-                    minutes.gotoAndPlay('finish');
-                }
-            });
-        }
+        // if (num != config.currentLevel) {
+        //     config.currentLevel = num;
+        //     createjs.Sound.play('fsClockSound');
+        //     const clockContainer = stage.getChildByName('clockContainer');
+        //     const hours = clockContainer.getChildByName('clockHours');
+        //     const minutes = clockContainer.getChildByName('clockMinutes');
+        //     minutes.play();
+        //     minutes.on('animationend', function () {
+        //         minutes.paused = true;
+        //         minutes.gotoAndStop('minute');
+        //         if (num !== 11) {
+        //             hours.gotoAndStop(`h-${num + 2}`);
+        //         } else {
+        //             hours.gotoAndStop('h-1');
+        //             minutes.gotoAndPlay('finish');
+        //         }
+        //     });
+        // }
     }
 
     function changeMultiplier(multi) {
-        if (pressureDiscs[multi - 2].alpha === 0) return;
-        createjs.Sound.play('pressureSound');
-        const fgContainer = stage.getChildByName('fgContainer');
-        const pressureContainer = fgContainer.getChildByName('pressureContainer');
-        const pressureFire = pressureContainer.getChildByName('pressureFire');
-        const newMask = new createjs.Shape();
-        const tl = new TimelineMax();
-        if (multi == 2) {
-            newMask.graphics.drawRect(0, 0, 300, utils.height);
-            tl.to(pressureDiscs[0], 0.3, {y: '-=150', alpha: 0});
-            addPar(0);
-        } else if (multi == 3) {
-            newMask.graphics.drawRect(0, 0, 400, utils.height);
-            tl.to([pressureDiscs[0], pressureDiscs[1]], 0.3, {y: '-=150', alpha: 0});
-            addPar(1);
-        } else if (multi == 4) {
-            newMask.graphics.drawRect(0, 0, 500, utils.height);
-            tl.to([pressureDiscs[0], pressureDiscs[1], pressureDiscs[2]], 0.3, {y: '-=150', alpha: 0});
-            addPar(2);
-        } else if (multi == 5) {
-            newMask.graphics.drawRect(0, 0, 650, utils.height);
-            tl.to([pressureDiscs[0], pressureDiscs[1], pressureDiscs[2], pressureDiscs[3]], 0.3, {y: '-=150', alpha: 0});
-            addPar(3);
-        } else if (multi == 6) {
-            newMask.graphics.drawRect(0, 0, 800, utils.height);
-            tl.to([pressureDiscs[0], pressureDiscs[1], pressureDiscs[2], pressureDiscs[3], pressureDiscs[4]], 0.3, {y: '-=150', alpha: 0});
-            addPar(4);
-        } else if (multi == 7) {
-            newMask.graphics.drawRect(0, 0, utils.width, utils.height);
-            tl.to([pressureDiscs[0], pressureDiscs[1], pressureDiscs[2], pressureDiscs[3], pressureDiscs[4], pressureDiscs[5]], 0.3, {y: '-=150', alpha: 0});
-            addPar(5);
-            getFireLogo();
-            getFirework();
-            crashGame();
-            getMultiLight();
-            const loader = storage.read('loadResult');
-            const x7 = new c.Bitmap(loader.getResult('x7')).set({
-                x: utils.width / 2 + 100,
-                y: utils.height / 2 - 50,
-                scaleX: 0.3,
-                scaleY: 0.3
-            });
-            utils.getCenterPoint(x7);
-            stage.addChild(x7);
-            TweenMax.to(x7, 1.5, {scaleX: 1, scaleY: 1, ease: Bounce.easeOut, onComplete: function () {
-                TweenMax.to(x7, 0.3, {alpha: 0, onComplete: function () {
-                    stage.removeChild(x7);
-                }});
-            }});
-        }
-        pressureFire.mask = newMask;
+        // if (pressureDiscs[multi - 2].alpha === 0) return;
+        // createjs.Sound.play('pressureSound');
+        // const fgContainer = stage.getChildByName('fgContainer');
+        // const pressureContainer = fgContainer.getChildByName('pressureContainer');
+        // const pressureFire = pressureContainer.getChildByName('pressureFire');
+        // const newMask = new createjs.Shape();
+        // const tl = new TimelineMax();
+        // if (multi == 2) {
+        //     newMask.graphics.drawRect(0, 0, 300, utils.height);
+        //     tl.to(pressureDiscs[0], 0.3, {y: '-=150', alpha: 0});
+        //     addPar(0);
+        // } else if (multi == 3) {
+        //     newMask.graphics.drawRect(0, 0, 400, utils.height);
+        //     tl.to([pressureDiscs[0], pressureDiscs[1]], 0.3, {y: '-=150', alpha: 0});
+        //     addPar(1);
+        // } else if (multi == 4) {
+        //     newMask.graphics.drawRect(0, 0, 500, utils.height);
+        //     tl.to([pressureDiscs[0], pressureDiscs[1], pressureDiscs[2]], 0.3, {y: '-=150', alpha: 0});
+        //     addPar(2);
+        // } else if (multi == 5) {
+        //     newMask.graphics.drawRect(0, 0, 650, utils.height);
+        //     tl.to([pressureDiscs[0], pressureDiscs[1], pressureDiscs[2], pressureDiscs[3]], 0.3, {y: '-=150', alpha: 0});
+        //     addPar(3);
+        // } else if (multi == 6) {
+        //     newMask.graphics.drawRect(0, 0, 800, utils.height);
+        //     tl.to([pressureDiscs[0], pressureDiscs[1], pressureDiscs[2], pressureDiscs[3], pressureDiscs[4]], 0.3, {y: '-=150', alpha: 0});
+        //     addPar(4);
+        // } else if (multi == 7) {
+        //     newMask.graphics.drawRect(0, 0, utils.width, utils.height);
+        //     tl.to([pressureDiscs[0], pressureDiscs[1], pressureDiscs[2], pressureDiscs[3], pressureDiscs[4], pressureDiscs[5]], 0.3, {y: '-=150', alpha: 0});
+        //     addPar(5);
+        //     getFireLogo();
+        //     getFirework();
+        //     crashGame();
+        //     getMultiLight();
+        //     const loader = storage.read('loadResult');
+        //     const x7 = new c.Bitmap(loader.getResult('x7')).set({
+        //         x: utils.width / 2 + 100,
+        //         y: utils.height / 2 - 50,
+        //         scaleX: 0.3,
+        //         scaleY: 0.3
+        //     });
+        //     utils.getCenterPoint(x7);
+        //     stage.addChild(x7);
+        //     TweenMax.to(x7, 1.5, {scaleX: 1, scaleY: 1, ease: Bounce.easeOut, onComplete: function () {
+        //         TweenMax.to(x7, 0.3, {alpha: 0, onComplete: function () {
+        //             stage.removeChild(x7);
+        //         }});
+        //     }});
+        // }
+        // pressureFire.mask = newMask;
     }
 
     function getFirework() {
@@ -497,6 +517,7 @@ export let freeSpin = (function () {
             regY: 403,
             alpha: 0.5
         });
+
         let transitionWinText = new createjs.BitmapText(config.currentCount + '', loader.getResult('numbers')).set({
             name: 'transitionWinText',
             scaleX: 0.9,
@@ -504,8 +525,8 @@ export let freeSpin = (function () {
             alpha: 1
         });
         let bounds = transitionWinText.getBounds();
-        transitionWinText.x = utils.width / 2 - 20;
-        transitionWinText.y = utils.height / 2 - 100;
+        transitionWinText.x = utils.width / 2 - 27;
+        transitionWinText.y = utils.height / 2 - 90;
         transitionWinText.regX = bounds.width / 2;
         transitionWinText.regY = bounds.height / 2;
         let transitionButton = new createjs.Bitmap(loader.getResult('But')).set({
@@ -570,8 +591,11 @@ export let freeSpin = (function () {
         buttonsContainer.visible = true;
         const truba = fgContainer.getChildByName('truba');
         const pressureContainer = fgContainer.getChildByName('pressureContainer');
-        const fsMachineBG = bgContainer.getChildByName('fsMachineBG');
+        // const fsMachineBG = bgContainer.getChildByName('fsMachineBG');
         const fsBG = bgContainer.getChildByName('fsBG');
+
+        const gameBG = bgContainer.getChildByName('gameBG');
+        gameBG.visible = true;
 
         const balanceContainer = stage.getChildByName('balanceContainer');
         const coinsSum = balanceContainer.getChildByName('coinsSum');
@@ -584,13 +608,14 @@ export let freeSpin = (function () {
         balanceContainer.removeChild(totalWinText, totalWinSum);
         balanceContainer.updateCache();
 
-        bgContainer.removeChild(fsMachineBG, fsBG);
+        bgContainer.removeChild(fsBG);
         bgContainer.uncache();
         fgContainer.removeChild(truba, pressureContainer);
         fgContainer.uncache();
         stage.removeChild(stage.getChildByName('fsLogoContainer'));
         stage.removeChild(stage.getChildByName('fsTableContainer'));
         stage.removeChild(stage.getChildByName('clockContainer'));
+        stage.removeChild(stage.getChildByName('cultistBlackContainer'));
         storage.changeState('side', 'left');
         events.trigger('menu:changeSide', 'left');
         // canvas.changeGamePosition('left');
@@ -622,9 +647,6 @@ export let freeSpin = (function () {
             name: 'finishContainer',
             alpha: 0
         });
-        // let finishBG = new createjs.Bitmap(loader.getResult('bonusWinBG')).set({
-        //     name: 'finishBG'
-        // });
         let finishBG = new createjs.Shape().set({
             name: 'finishBG',
             alpha: 0.8
@@ -636,32 +658,40 @@ export let freeSpin = (function () {
             y: utils.height / 2 - 250,
             regX: 500,
             regY: 150,
-            scaleX: 0.7,
-            scaleY: 0.7
+            scaleX: 0.1, scaleY: 0.1, alpha: 0
         });
-        let cultists = new createjs.Bitmap(loader.getResult('cultists')).set({
+        let cultists1 = new createjs.Sprite(loader.getResult('new_elements'), '12-w').set({
             name: 'cultists',
-            x: utils.width / 2,
-            y: utils.height / 2 + 150,
-            regX: 250,
-            regY: 175,
-            scaleX: 0.9,
-            scaleY: 0.9
+            x: utils.width / 2 - 330,
+            y: utils.height / 2 + 40,
+            scaleX: 1.4,
+            scaleY: 1.4
+        });
+        let cultists2 = new createjs.Sprite(loader.getResult('new_elements'), '11-w').set({
+            name: 'cultists',
+            x: utils.width / 2 - 220,
+            y: utils.height / 2 - 30,
+            scaleX: 1.6,
+            scaleY: 1.6
+        });
+        let cultists3 = new createjs.Sprite(loader.getResult('new_elements'), '13-w').set({
+            name: 'cultists',
+            x: utils.width / 2 + 300,
+            y: utils.height / 2 + 34,
+            scaleX: 1.4,
+            scaleY: 1.4,
+            skewY: 180
         });
         let finishWinText = new createjs.BitmapText(fsTotalWin + '', loader.getResult('numbers')).set({
             name: 'transitionWinText',
-            scaleX: 0.7,
-            scaleY: 0.7,
-            alpha: 1
+            x: utils.width / 2 - 40,
+            y: utils.height / 2 - 110,
+            scaleX: 0.1, scaleY: 0.1, alpha: 0
         });
-        let tl2 = new TimelineMax({repeat: -1, yoyo: true});
-        tl2.from(finishWinText, 1, {scaleX: 0.3, scaleY: 0.3});
-
         let bounds = finishWinText.getBounds();
-        finishWinText.x = utils.width / 2;
-        finishWinText.y = utils.height / 2 - 80;
         finishWinText.regX = bounds.width / 2;
         finishWinText.regY = bounds.height / 2;
+
         let luchi = new createjs.Bitmap(loader.getResult('luchi')).set({
             name: 'transitionLuchi',
             x: utils.width / 2,
@@ -681,12 +711,16 @@ export let freeSpin = (function () {
             regY: 47.5,
             alpha: 1
         });
-        finishContainer.addChild(finishBG, luchi, finishText, finishWinText, cultists, finishButton);
+        finishContainer.addChild(finishBG, luchi, finishText, cultists1, cultists3, cultists2, finishButton, finishWinText);
         createjs.Tween.get(finishContainer)
             .to({alpha: 1}, 500)
             .call(function () {
                 events.trigger('stopFreeSpins');
+                let tl2 = new TimelineMax();
+                tl2.to(finishText, 1.2, {scaleX: 0.7, scaleY: 0.7, alpha: 1, ease: Elastic.easeOut.config(1, 0.3)}, '-=0.2')
+                    .to(finishWinText, 1.2, {scaleX: 1.1, scaleY: 1.1, alpha: 1, ease: Elastic.easeOut.config(1, 0.3)}, '-=0.2');
             });
+
         finishButton.on('click', function () {
             createjs.Sound.stop('bonusPerehodSound');
             createjs.Sound.play('ambientSound', {loop: -1});
