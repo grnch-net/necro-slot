@@ -37,20 +37,30 @@ export let preloader = (function () {
 
         const preloaderContainer = new c.Container().set({ name: 'preloaderContainer' });
         const preloaderCache = new c.Container().set({ name: 'preloaderCache' });
-        const preloaderBG = new c.Sprite(ss, 'bg').set({ name: 'preloaderBG' });
-
-        const preloaderLogo = new c.Sprite(ss, 'logo');
-        preloaderLogo.set({
-            name: 'preloaderLogo',
-            x: (w - preloaderLogo.getBounds().width) / 2,
-            y: 75
+        const preloaderBG = new createjs.Bitmap(loader.getResult('fsBG')).set({
+            name: 'fsBG'
         });
 
-        const preloaderPlay = new c.Sprite(ss, 'play');
+        const preloaderLogo = new createjs.Bitmap(loader.getResult('preloaderLogo'));
+        preloaderLogo.set({
+            name: 'preloaderLogo',
+            x: w / 2 + 70,
+            y: h / 2,
+            regX: preloaderLogo.getBounds().width / 2,
+            regY: preloaderLogo.getBounds().height / 2,
+            scaleX: 1,
+            scaleY: 1
+        });
+
+        const preloaderPlay = new createjs.Bitmap(loader.getResult('play'));
         preloaderPlay.set({
             name: 'preloaderPlay',
-            x: (w - preloaderPlay.getBounds().width) / 2,
-            y: 310
+            x: w / 2,
+            y: h / 2 + 150,
+            regX: preloaderPlay.getBounds().width / 2,
+            regY: preloaderPlay.getBounds().height / 2,
+            scaleX: 1,
+            scaleY: 1
         });
 
         const preloaderSprite = new c.Sprite(clock, 'start');
@@ -104,7 +114,16 @@ export let preloader = (function () {
         const sprite = container.getChildByName('preloaderSprite');
         const play = container.getChildByName('preloaderPlay');
 
-        sprite.gotoAndPlay('finish');
+        // sprite.gotoAndPlay('finish');
+        sprite.visible = false;
+
+        let tl = new TimelineMax({repeat: -1});
+        tl.to(play, 0.1, {rotation: -20, ease: Power0.easeNone, delay: 2})
+            .to(play, 0.1, {rotation: 20, ease: Power0.easeNone})
+            .to(play, 0.1, {rotation: -20, ease: Power0.easeNone})
+            .to(play, 0.1, {rotation: 20, ease: Power0.easeNone})
+            .to(play, 0.1, {rotation: 0, ease: Power0.easeNone});
+
         play.on('click', handlePlayClick, play, true, {
             container
         });
