@@ -51,10 +51,8 @@ export let win = (function () {
         const ss = loader.getResult('fireWinNumberAndBloha');
         fireWinNumberPrefab = new c.Sprite(ss).set({
             name: 'fireWinNumber',
-            scaleX: 0.19,
-            scaleY: 0.19,
-            regX: 568, // 1136
-            regY: 568 // 1136
+            regX: 114, // 228
+            regY: 114 // 228
         });
 
         stage.addChildAt(winLinesContainer, 1);
