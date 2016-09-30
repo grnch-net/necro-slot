@@ -32,7 +32,6 @@ export let preloader = (function () {
     function showPreloader(event) {
         stage = storage.read('stage');
         const loader = event.target;
-        const ss = loader.getResult('preloader');
         const clock = loader.getResult('preloaderSprite');
 
         const preloaderContainer = new c.Container().set({ name: 'preloaderContainer' });
@@ -44,23 +43,23 @@ export let preloader = (function () {
         const preloaderLogo = new createjs.Bitmap(loader.getResult('preloaderLogo'));
         preloaderLogo.set({
             name: 'preloaderLogo',
-            x: w / 2 + 70,
-            y: h / 2,
+            x: w / 2 + 40,
+            y: h / 2 - 40,
             regX: preloaderLogo.getBounds().width / 2,
             regY: preloaderLogo.getBounds().height / 2,
-            scaleX: 1,
-            scaleY: 1
+            scaleX: 0.65,
+            scaleY: 0.65
         });
 
         const preloaderPlay = new createjs.Bitmap(loader.getResult('play'));
         preloaderPlay.set({
             name: 'preloaderPlay',
             x: w / 2,
-            y: h / 2 + 150,
+            y: h / 2 + 250,
             regX: preloaderPlay.getBounds().width / 2,
             regY: preloaderPlay.getBounds().height / 2,
-            scaleX: 1,
-            scaleY: 1
+            scaleX: 0.8,
+            scaleY: 0.8
         });
 
         const preloaderSprite = new c.Sprite(clock, 'start');
