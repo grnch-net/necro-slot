@@ -16,6 +16,7 @@ export let win = (function () {
     let stage;
     let winLinesContainer;
     let winRectsContainer;
+    let fireWinNumberPrefab;
     let winElements;
     let currWinLines = [];
     let currWinScatters = [];
@@ -26,12 +27,15 @@ export let win = (function () {
         topScreen: true
     };
 
+
     function start(configObj) {
         config = configObj || defaultConfig;
     }
 
     function initWin() {
         stage = storage.read('stage');
+        const loader = storage.read('loadResult');
+
         const gameContainer = stage.getChildByName('gameContainer');
         winLinesContainer = new c.Container().set({
             name: 'winLinesContainer',
@@ -43,6 +47,16 @@ export let win = (function () {
             x: gameContainer.x,
             y: gameContainer.y
         });
+
+        const ss = loader.getResult('fireWinNumberAndBloha');
+        fireWinNumberPrefab = new c.Sprite(ss).set({
+            name: 'fireWinNumber',
+            scaleX: 0.19,
+            scaleY: 0.19,
+            regX: 568, // 1136
+            regY: 568 // 1136
+        });
+
         stage.addChildAt(winLinesContainer, 1);
         stage.addChild(winRectsContainer);
         winElements = findWinElements();
@@ -206,8 +220,28 @@ export let win = (function () {
 
         let winNumbersArr = storage.read('winNumbersArr');
         if (number - 1 < winNumbersArr.length) {
+            let winNumsPos = [ 4, 2, 6, 9, 10, 1, 8, 7, 3, 5];
             winNumbersArr[number - 1][0].visible = true;
             winNumbersArr[number - 1][1].visible = true;
+
+            let winNumInd = winNumsPos.indexOf(+number);
+            let plusMarginTop = 0;
+            if (+winNumInd === 4) plusMarginTop = 3;
+            else if (+winNumInd > 4) plusMarginTop = 5;
+
+            const fireWinNumberLeft = fireWinNumberPrefab.clone().set({
+                name: 'winNumber1',
+                x: -32,
+                y: 40 + winNumInd * 50 + plusMarginTop
+            });
+            const fireWinNumberRight = fireWinNumberPrefab.clone().set({
+                name: 'winNumber2',
+                x: 990,
+                y: 40 + winNumInd * 50 + plusMarginTop
+            });
+            winRectsContainer.addChild(fireWinNumberLeft, fireWinNumberRight);
+            fireWinNumberLeft.gotoAndPlay('fireWinNumber');
+            fireWinNumberRight.gotoAndPlay('fireWinNumber');
         }
 
         if (defaultConfig.topScreen) {
