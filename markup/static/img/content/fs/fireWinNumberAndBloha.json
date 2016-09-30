@@ -35,7 +35,7 @@
 ],
 
 "animations": {
-    "Cthulhuflash-animation1": [0, 11],
+    "fireWinNumber": [0, 11],
     "bloha0": { "frames": [12] },
     "bloha1": { "frames": [13] },
     "bloha2": { "frames": [14] },
