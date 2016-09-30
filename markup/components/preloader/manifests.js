@@ -21,6 +21,7 @@ export const mainManifest = [
 
     // roll module
     {id: 'new_elements', src: 'static/img/content/new/elements_new3.json', type: 'spritesheet'},
+    {id: 'fireWinNumberAndBloha', src: 'static/img/content/fs/fireWinNumberAndBloha.json', type: 'spritesheet'},
     // {id: 'new_elements', src: 'static/img/content/elements/Bonuses.json', type: 'spritesheet'},
     {id: 'gameShadow', src: 'static/img/content/bg/gameShadow.png'},
 
