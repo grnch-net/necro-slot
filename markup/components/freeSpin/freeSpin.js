@@ -79,32 +79,6 @@ export let freeSpin = (function () {
         .to(clockContainer, 1, { y: 0 });
     }
 
-    function addClockParticles(clockContainer) {
-        const loader = storage.read('loadResult');
-        const clockParticle = new c.Bitmap(loader.getResult('newLight'));
-        utils.getCenterPoint(clockParticle);
-        let particleAmount = Math.round(Math.random() * 60) + 30;
-        let particleArray = [];
-        for (let i = 0; i < particleAmount; i++) {
-            const newParticle = clockParticle.clone();
-            newParticle.x = 80 + Math.round(Math.random() * 350 - 175);
-            newParticle.y = 450 + Math.round(Math.random() * 400 - 200);
-            newParticle.alpha = Math.random() - 0.2;
-            newParticle.scaleX = newParticle.scaleY = Math.random() + 0.4;
-            const time = 4 * Math.random() + 3;
-            TweenMax.to(newParticle, time, {
-                x: newParticle.x + Math.round(Math.random() * 190 - 50),
-                y: newParticle.y + Math.round(Math.random() * 190 - 50),
-                alpha: Math.random(),
-                repeat: -1,
-                yoyo: true
-            });
-            particleArray.push(newParticle);
-            clockContainer.addChild(newParticle);
-        }
-
-    }
-
     function showPressureTube() {
         // const loader = storage.read('loadResult');
         // const fgContainer = stage.getChildByName('fgContainer');
@@ -156,6 +130,47 @@ export let freeSpin = (function () {
         // fgContainer.addChild(pressureContainer);
     }
 
+    function _createParticleS(container, count) {
+        const loader = storage.read('loadResult');
+
+        for (let i = 0; i < count; i++) {
+            let random = Math.random() * 0.7 + 0.3;
+            let localPos = container.globalToLocal(utils.width / 2, utils.height / 2 - 40 - Math.round( random * 200 ) );
+            const ss = loader.getResult('randomSprites');
+            let _clone = new c.Sprite(ss, 'bloha' + (i % 13) ).set({
+                x: localPos.x,
+                y: localPos.y,
+                scaleX: random,
+                scaleY: random,
+                alpha: 1 - random,
+                rotation: Math.round( Math.random() * 360 )
+            });
+            container.addChild(_clone);
+            container.set({
+                rotation: 360 / count * i
+            });
+        }
+
+        container.set({
+            rotation: 0
+        });
+    }
+
+    function _createContainers(parent, count = 13, clockwise = 1) {
+        let course = ( clockwise % 2 ) ? 1 : -1;
+
+        let container = new createjs.Container().set({
+            x: 0,
+            y: 0
+        });
+
+        parent.addChild(container);
+        _createParticleS(container, count);
+
+        let tl = new TimelineMax({ repeat: -1});
+        tl.to(container, 20 + Math.round( Math.random() * 30 ), { rotation: 360 * course, ease: Linear.easeNone});
+    }
+
     function drawFreeSpinsBG() {
         pressureDiscs = [];
         stage = storage.read('stage');
@@ -196,8 +211,8 @@ export let freeSpin = (function () {
 
         showPressureTube();
 
-        const cultistBlackContainer = new createjs.Container().set({
-            name: 'cultistBlackContainer'
+        const fsLeftContainer = new createjs.Container().set({
+            name: 'fsLeftContainer'
         });
         const cultistBlack1 = new createjs.Bitmap(loader.getResult('cultistBlack1')).set({
             name: 'cultistBlack1',
@@ -220,14 +235,34 @@ export let freeSpin = (function () {
             scaleX: 0.6,
             scaleY: 0.6
         });
-        cultistBlackContainer.addChild(cultistBlack1, cultistBlack2, cultistBlack3);
+
+        const particleContainer = new c.Container().set({
+            name: 'particleContainerRight',
+            x: utils.width / 2,
+            y: utils.height / 2
+        });
+        let containerCount = 4;
+        let particlesInContainer = 13;
+        for (let i = 0; i < containerCount; i++) {
+            _createContainers(particleContainer, particlesInContainer, i);
+        }
+        particleContainer.set({
+            x: 90,
+            y: utils.height - 200
+        });
+
+        let _mask = new createjs.Shape();
+        _mask.graphics.beginFill( 'rgba(0, 0, 0, 1)' ).drawRect(0, 190, utils.width, 500);
+        particleContainer.mask = _mask;
+
+        fsLeftContainer.addChild(cultistBlack1, cultistBlack2, cultistBlack3);
 
         const fgContainer = stage.getChildByName('fgContainer');
         fgContainer.uncache();
         const fsBG = new createjs.Bitmap(loader.getResult('fsBG')).set({
             name: 'fsBG'
         });
-        bgContainer.addChildAt(fsBG, 1);
+        bgContainer.addChildAt(fsBG, 2);
         changeMultiplier(2);
         const clockContainer = new c.Container().set({
             name: 'clockContainer'
@@ -241,9 +276,8 @@ export let freeSpin = (function () {
             scaleX: 0.52,
             scaleY: 0.52
         });
-        clockContainer.addChild(book);
-        addClockParticles(clockContainer);
-        stage.addChildAt(cultistBlackContainer, clockContainer, stage.getChildIndex(stage.getChildByName('winRectsContainer')) + 1);
+        clockContainer.addChild(book, particleContainer);
+        stage.addChildAt(fsLeftContainer, clockContainer, stage.getChildIndex(stage.getChildByName('winRectsContainer')) + 1);
         moveClock(clockContainer);
 
         if (config.currentLevel !== 0) {
@@ -615,7 +649,7 @@ export let freeSpin = (function () {
         stage.removeChild(stage.getChildByName('fsLogoContainer'));
         stage.removeChild(stage.getChildByName('fsTableContainer'));
         stage.removeChild(stage.getChildByName('clockContainer'));
-        stage.removeChild(stage.getChildByName('cultistBlackContainer'));
+        stage.removeChild(stage.getChildByName('fsLeftContainer'));
         storage.changeState('side', 'left');
         events.trigger('menu:changeSide', 'left');
         // canvas.changeGamePosition('left');
@@ -662,22 +696,22 @@ export let freeSpin = (function () {
         });
         let cultists1 = new createjs.Sprite(loader.getResult('new_elements'), '12-w').set({
             name: 'cultists',
-            x: utils.width / 2 - 330,
-            y: utils.height / 2 + 40,
+            x: utils.width / 2 - 370,
+            y: utils.height / 2,
             scaleX: 1.4,
             scaleY: 1.4
         });
         let cultists2 = new createjs.Sprite(loader.getResult('new_elements'), '11-w').set({
             name: 'cultists',
-            x: utils.width / 2 - 220,
-            y: utils.height / 2 - 30,
+            x: utils.width / 2 - 270,
+            y: utils.height / 2 - 70,
             scaleX: 1.6,
             scaleY: 1.6
         });
         let cultists3 = new createjs.Sprite(loader.getResult('new_elements'), '13-w').set({
             name: 'cultists',
-            x: utils.width / 2 + 300,
-            y: utils.height / 2 + 34,
+            x: utils.width / 2 + 360,
+            y: utils.height / 2 - 5,
             scaleX: 1.4,
             scaleY: 1.4,
             skewY: 180
