@@ -82,8 +82,19 @@ export let bg = (function () {
             window.history.back();
         });
 
+        const rainContainer = new c.Container().set({name: 'rainContainer'});
+        const ss = loader.getResult('randomSprites');
+        const rainSprite = new c.Sprite(ss, 'rain' );
+        for (let i = 0; i < 5; i++) {
+            const _clone = rainSprite.clone().set({
+                name: 'rainSprite' + i,
+                x: 284 * i
+            });
+            _clone.gotoAndPlay('rain');
+            rainContainer.addChild(_clone);
+        }
 
-        bgContainer.addChild(mainBG, gameBG, footerBgUp, footerBgDown, home);
+        bgContainer.addChild(mainBG, rainContainer, gameBG, footerBgUp, footerBgDown, home);
         fgContainer.addChild(gameMachine, winNumbersContainer, logoNecro);
         stage.addChildAt(bgContainer, fgContainer, 0);
 
