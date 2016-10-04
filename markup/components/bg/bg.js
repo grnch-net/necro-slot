@@ -94,6 +94,21 @@ export let bg = (function () {
             rainContainer.addChild(_clone);
         }
 
+        const lightningSprite = new c.Sprite(ss, 'lightning0');
+        rainContainer.addChild(lightningSprite);
+
+        (function animLightning() {
+            lightningSprite.set({
+                x: Math.round( Math.random() * utils.width ),
+                alpha: 1
+            });
+            lightningSprite.gotoAndStop('lightning' + Math.round( Math.random() * 3 ) );
+            TweenMax.to(lightningSprite, 0.3, {alpha: 0});
+            setTimeout(() => {
+                animLightning();
+            }, Math.round(Math.random() * 2000 + 300) );
+        })();
+
         bgContainer.addChild(mainBG, rainContainer, gameBG, footerBgUp, footerBgDown, home);
         fgContainer.addChild(gameMachine, winNumbersContainer, logoNecro);
         stage.addChildAt(bgContainer, fgContainer, 0);
