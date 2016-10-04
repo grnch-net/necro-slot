@@ -4,6 +4,10 @@ export const preloaderManifest = [
 ];
 
 export const mainManifest = [
+    // atlas
+    {id: 'randomSprites', src: 'static/img/content/fs/randomSprites.json', type: 'spritesheet'},
+    {id: 'atlas', src: 'static/img/content/atlas/atlas.json', type: 'spritesheet'},
+
     // init screen
     {id: 'preloaderSprite', src: 'static/img/content/preloader/sprite.json', type: 'spritesheet'},
     {id: 'fsBG', src: 'static/img/content/bg/fsBG.png'},
@@ -22,7 +26,6 @@ export const mainManifest = [
 
     // roll module
     {id: 'new_elements', src: 'static/img/content/new/elements_new3.json', type: 'spritesheet'},
-    {id: 'randomSprites', src: 'static/img/content/fs/randomSprites.json', type: 'spritesheet'},
     {id: 'gameShadow', src: 'static/img/content/bg/gameShadow.png'},
 
     // win module
@@ -70,8 +73,5 @@ export const mainManifest = [
     {id: 'cultistBlack3', src: 'static/img/content/fs/cultistBlack3.png'},
     {id: 'transitionPopup', src: 'static/img/content/bg/transitionPopup.png'},
     {id: 'luchi', src: 'static/img/content/bg/luchi.png'},
-    {id: 'popup', src: 'static/img/content/new/popup.png'},
-
-
-    {id: 'Bandit_anim', src: 'static/img/content/new/Bandit_anim.json', type: 'spritesheet'}
+    {id: 'popup', src: 'static/img/content/new/popup.png'}
 ];
