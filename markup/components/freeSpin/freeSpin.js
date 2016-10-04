@@ -132,11 +132,11 @@ export let freeSpin = (function () {
 
     function _createParticleS(container, count) {
         const loader = storage.read('loadResult');
+        const ss = loader.getResult('randomSprites');
 
         for (let i = 0; i < count; i++) {
             let random = Math.random() * 0.7 + 0.3;
             let localPos = container.globalToLocal(utils.width / 2, utils.height / 2 - 40 - Math.round( random * 200 ) );
-            const ss = loader.getResult('randomSprites');
             let _clone = new c.Sprite(ss, 'bloha' + (i % 13) ).set({
                 x: localPos.x,
                 y: localPos.y,
@@ -263,33 +263,59 @@ export let freeSpin = (function () {
             name: 'fsBG'
         });
         bgContainer.addChildAt(fsBG, 2);
+
+
         changeMultiplier(2);
         const clockContainer = new c.Container().set({
             name: 'clockContainer'
         });
-        const book = new c.Bitmap(loader.getResult('chasyFS')).set({
-            name: 'clock',
-            x: 120,
-            y: utils.height - 200,
-            regX: 300,
-            regY: 300,
-            scaleX: 0.52,
-            scaleY: 0.52
+        const fsX = new createjs.BitmapText('+', loader.getResult('numbers')).set({
+            name: 'fsX',
+            x: 81,
+            y: utils.height - 195,
+            scaleX: 0.14,
+            scaleY: 0.14,
+            rotation: -20
         });
-
-        const fsMulti = new createjs.BitmapText('+2', loader.getResult('numbers')).set({
-            name: 'fsTotalCount',
-            x: 86,
-            y: utils.height - 200,
-            scaleX: 0.15,
-            scaleY: 0.15,
+        let fsXBounds = fsTotalCount.getBounds();
+        fsX.regX = fsXBounds.width / 2;
+        fsX.regY = fsXBounds.height / 2;
+        const fsMulti = new createjs.BitmapText('2', loader.getResult('numbers')).set({
+            name: 'fsMulti',
+            x: 102,
+            y: utils.height - 210,
+            scaleX: 0.2,
+            scaleY: 0.2,
             rotation: -20
         });
         let multiBounds = fsTotalCount.getBounds();
         fsMulti.regX = multiBounds.width / 2;
         fsMulti.regY = multiBounds.height / 2;
 
-        clockContainer.addChild(book, fsMulti, particleContainer);
+        const ssAtlas = loader.getResult('atlas');
+        const bookTop = new c.Sprite(ssAtlas, 'book1').set({
+            name: 'bookTop',
+            x: 115,
+            y: utils.height - 227,
+            regX: 300,
+            regY: 300,
+            scaleX: 0.4,
+            scaleY: 0.4,
+            rotation: -20
+        });
+        const bookBot = new c.Sprite(ssAtlas, 'bookBot').set({
+            name: 'bookBot',
+            x: 121,
+            y: utils.height - 229,
+            regX: 300,
+            regY: 300,
+            scaleX: 0.4,
+            scaleY: 0.4,
+            rotation: -20
+        });
+        clockContainer.addChild(bookBot, bookTop);
+        clockContainer.addChild(particleContainer);
+        clockContainer.addChild(fsX, fsMulti, particleContainer);
         stage.addChildAt(fsLeftContainer, clockContainer, stage.getChildIndex(stage.getChildByName('winRectsContainer')) + 1);
         moveClock(clockContainer);
 
