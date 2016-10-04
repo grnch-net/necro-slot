@@ -276,7 +276,20 @@ export let freeSpin = (function () {
             scaleX: 0.52,
             scaleY: 0.52
         });
-        clockContainer.addChild(book, particleContainer);
+
+        const fsMulti = new createjs.BitmapText('+2', loader.getResult('numbers')).set({
+            name: 'fsTotalCount',
+            x: 86,
+            y: utils.height - 200,
+            scaleX: 0.15,
+            scaleY: 0.15,
+            rotation: -20
+        });
+        let multiBounds = fsTotalCount.getBounds();
+        fsMulti.regX = multiBounds.width / 2;
+        fsMulti.regY = multiBounds.height / 2;
+
+        clockContainer.addChild(book, fsMulti, particleContainer);
         stage.addChildAt(fsLeftContainer, clockContainer, stage.getChildIndex(stage.getChildByName('winRectsContainer')) + 1);
         moveClock(clockContainer);
 
