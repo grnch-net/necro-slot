@@ -48,7 +48,7 @@ export let win = (function () {
             y: gameContainer.y
         });
 
-        const ss = loader.getResult('fireWinNumberAndBloha');
+        const ss = loader.getResult('randomSprites');
         fireWinNumberPrefab = new c.Sprite(ss).set({
             name: 'fireWinNumber',
             regX: 114, // 228
@@ -99,39 +99,50 @@ export let win = (function () {
     function drawLineLight(number) {
         let completeCounter = 0;
         const lightMas = [];
-        const amount = Math.round(Math.random() * 80) + 20;
         const linesCoords = storage.read('linesCoords');
         const loader = storage.read('loadResult');
-        // const ss = loader.getResult('linesSprite');
-        for (let i = 0; i < amount; i++) {
-            const timeout = (Math.random() * 700) / 1000;
-            let scale;
-            let endsAmount = Math.round(amount / 4);
-            let scalePart = 0.7 / endsAmount;
-            if (i < endsAmount) {
-                scale = i * scalePart;
-            } else if (i > (amount - endsAmount)) {
-                scale = scalePart * (amount - i);
-            } else {
-                scale = 0.7;
-            }
-            const light = new c.Bitmap(loader.getResult('newLight')).set({
-                name: 'winLight',
-                x: linesCoords[number - 1][0].x,
-                y: linesCoords[number - 1][0].y,
-                scaleX: scale,
-                scaleY: scale
-            });
+
+        const ss = loader.getResult('randomSprites');
+        const lightParam = {
+            name: 'winLight',
+            x: linesCoords[number - 1][0].x,
+            y: linesCoords[number - 1][0].y,
+            scaleX: 0.5,
+            scaleY: 0.5
+        };
+
+        const lightHead = new c.Sprite(ss, 'glista0' ).set(lightParam);
+        utils.getCenterPoint(lightHead);
+        lightMas.push(lightHead);
+        winLinesContainer.addChild(lightHead);
+
+        for (let i = 0; i < 2; i++) {
+            const light = new c.Sprite(ss, 'glista1' ).set(lightParam);
             utils.getCenterPoint(light);
             lightMas.push(light);
             winLinesContainer.addChild(light);
         }
+
+        for (let i = 0; i < 2; i++) {
+            const light = new c.Sprite(ss, 'glista2' ).set(lightParam);
+            utils.getCenterPoint(light);
+            lightMas.push(light);
+            winLinesContainer.addChild(light);
+        }
+
+        for (let i = 0; i < 2; i++) {
+            const light = new c.Sprite(ss, 'glista3' ).set(lightParam);
+            utils.getCenterPoint(light);
+            lightMas.push(light);
+            winLinesContainer.addChild(light);
+        }
+
         TweenMax.staggerTo(lightMas, 0.75,
             {bezier: {type: 'soft', values: linesCoords[number - 1], autoRotate: true},
             ease: Power1.easeOut,
             onComplete: function () {
                 winLinesContainer.removeChild(this.target);
-            }}, 0.003, function () {
+            }}, 0.050, function () {
                 storage.changeState('lineLight', 'done');
                 events.trigger('win:lineLight', number);
             }
@@ -470,16 +481,23 @@ export let win = (function () {
         }
     }
 
-    function _clearWinElement(el) {
+    function _elemPlayDefaultAnim(el) {
         const animationName = el.currentAnimation;
 
         let elementIndex;
+        let elementMode = animationName.substr(animationName.indexOf('-') + 1, 1);
         if (animationName.length === 4) {
             elementIndex = animationName.substr(animationName.indexOf('-') - 2, 2);
         } else {
             elementIndex = animationName.substr(animationName.indexOf('-') - 1, 1);
         }
-        el.gotoAndStop(`${elementIndex}-n`);
+
+        if (elementMode !== 'n'
+            || !el.currentAnimationFrame
+        ) {
+            el.gotoAndPlay(`${elementIndex}-n`);
+        }
+
         el.set({
             scaleX: 1,
             scaleY: 1
@@ -487,25 +505,27 @@ export let win = (function () {
     }
 
     function cleanWin() {
+        let winNumbersArr = storage.read('winNumbersArr');
+
+        winElements.forEach((line) => {
+            line.forEach((element) => {
+                _elemPlayDefaultAnim(element);
+            });
+        });
+
         if (defaultConfig.topScreen) {
             const gameTopElements = storage.read('gameTopElements');
+
             if (currWinLines.length) {
-                let winNumbersArr = storage.read('winNumbersArr');
                 currWinLines.forEach((lineData) => {
-                    let amount = lineData.amount;
                     let number = lineData.number;
+                    let amount = lineData.amount;
                     let winLine = lineData.winLine;
                     for (let i = 0; i < amount; i++) {
                         const element = winElements[number - 1][i];
                         const topElement = gameTopElements[+winLine[i][0]][+winLine[i][1]];
                         element.visible = true;
                         topElement.visible = false;
-                        _clearWinElement(topElement);
-                    }
-
-                    if (number - 1 < winNumbersArr.length) {
-                        winNumbersArr[number - 1][0].visible = false;
-                        winNumbersArr[number - 1][1].visible = false;
                     }
                 });
 
@@ -515,24 +535,18 @@ export let win = (function () {
             if (currWinScatters.length) {
                 currWinScatters.forEach((scatter) => {
                     let element = scatter.el;
-                    if (defaultConfig.topScreen) {
-                        let topElement = gameTopElements[scatter.colInd][+element.posY];
-                        element.visible = true;
-                        topElement.visible = false;
-                        _clearWinElement(topElement);
-                    } else {
-                        _clearWinElement(element);
-                    }
+                    let topElement = gameTopElements[scatter.colInd][+element.posY];
+                    element.visible = true;
+                    topElement.visible = false;
                 });
                 currWinScatters = [];
             }
-        } else {
-            winElements.forEach((line) => {
-                line.forEach((element) => {
-                    _clearWinElement(element);
-                });
-            });
         }
+
+        winNumbersArr.forEach((line) => {
+            line[0].visible = false;
+            line[1].visible = false;
+        });
 
         winLinesContainer.removeAllChildren();
         winRectsContainer.removeAllChildren();
