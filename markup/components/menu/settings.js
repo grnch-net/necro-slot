@@ -194,13 +194,16 @@ function handleHandModeClick() {
 function handleInfoClick() {
     const loader = storage.read('loadResult');
     const stage = storage.read('stage');
-    const rules = new c.Bitmap(loader.getResult('rules'));
+    const rules = new c.Bitmap(loader.getResult('rules')).set({
+        alpha: 0
+    });
     rules.on('click', function () {
         TweenMax.to(rules, 0.5, {alpha: 0, onComplete: function () {
             stage.removeChild(rules);
         }});
     });
     stage.addChild(rules);
+    TweenMax.to(rules, 0.5, {alpha: 1});
 }
 
 function handleHistoryClick() {
