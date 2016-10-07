@@ -10,7 +10,6 @@ export let canvas = (function () {
     const defaultConfig = {
         canvas: '#game',
         mouseOver: 10,
-        leftToRight: 150,
         timeToSlide: 0.5
     };
     const c = createjs;
@@ -57,38 +56,27 @@ export let canvas = (function () {
         });
     }
 
-    // TODO: Эту функцию нужно будет полностью продебажить
     function changeSide(side) {
-
         console.log('I must change side to:', side);
 
-        // TODO: Нужно будет сделать общий контейнер для автомата и всего с ним
         const stage = storage.read('stage');
         const fg = stage.getChildByName('fgContainer');
-        const bg = stage.getChildByName('bgContainer');
-        const gameBG = bg.getChildByName('gameBG');
-        const game = stage.getChildByName('gameContainer');
-        const winLinesContainer = stage.getChildByName('winLinesContainer');
-        const winRectsContainer = stage.getChildByName('winRectsContainer');
-        const gameMask = game.mask;
-        const balance = stage.getChildByName('balanceContainer');
-        const gameTopContainer = stage.getChildByName('gameTopContainer');
 
         let delta;
         switch (side) {
             case 'right':
-                delta = `+=${config.leftToRight}`;
+                delta = utils.width - fg.regX - 50;
                 storage.changeState('side', 'right');
                 break;
             case 'left':
-                delta = `-=${config.leftToRight}`;
+                delta = fg.regX;
                 storage.changeState('side', 'left');
                 break;
             default:
                 return;
         }
 
-        TweenMax.to([fg, game, gameMask, gameBG, balance, winRectsContainer, winLinesContainer, gameTopContainer], config.timeToSlide, {x: delta});
+        TweenMax.to(fg, config.timeToSlide, {x: delta});
     }
 
     return {

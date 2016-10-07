@@ -21,10 +21,12 @@ import { bonuses } from 'components/bonuses/bonuses';
 import { freeSpin } from 'components/freeSpin/freeSpin';
 
 // Init Module
+let isMouse = false;
 init.start({
-    userID: 1,
-    casinoID: 1,
-    mode: 'normal'
+    userID: 3,
+    casinoID: 3,
+    mode: 'normal',
+    isMobile: isMouse
 });
 
 init.login();
@@ -32,8 +34,7 @@ init.login();
 // Canvas Module
 canvas.start({
     canvas: '#game',
-    mouseOver: 0,
-    leftToRight: 150,
+    mouseOver: (isMouse) ? 0 : 20,
     timeToSlide: 0.5
 });
 events.on('init:inited', canvas.initStage);
@@ -60,7 +61,6 @@ bg.start({
     topLineHeight: 40
 });
 events.on('preloader:loaded', bg.drawBG);
-events.on('menu:changeSide', bg.changeSide);
 
 // Balance Module
 balance.start({
@@ -86,8 +86,8 @@ events.on('buttons:stopAutoplay', autoplay.stopAutoplay);
 // Buttons Module
 buttons.start({
     buttonsX: 1080,
-    buttonsLeftX: 14,
-    buttonsWidth: 300
+    buttonsLeftX: 0,
+    buttonsWidth: 200
 });
 events.on('bg:main', buttons.drawButtons);
 events.on('buttons:startRoll', roll.startRoll);

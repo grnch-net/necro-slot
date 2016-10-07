@@ -1,0 +1,46 @@
+{
+
+"images": [
+    "static/img/content/atlas/mainScreenDesctop.png"
+],
+
+"framerate": 15,
+
+"frames": [
+    [1, 1, 113, 89, 0, 0, 0],
+    [116, 1, 66, 99, 0, -1, -1],
+    [184, 1, 66, 99, 0, -1, -1],
+    [252, 1, 66, 99, 0, -1, -1],
+    [320, 1, 66, 99, 0, -1, -1],
+    [388, 1, 67, 99, 0, 0, -1],
+    [457, 1, 122, 99, 0, -3, -1],
+    [581, 1, 122, 99, 0, -3, -1],
+    [705, 1, 122, 99, 0, -3, -1],
+    [829, 1, 127, 99, 0, 0, -1],
+    [1, 102, 884, 139, 0, 0, -1],
+    [887, 102, 22, 32, 0, -4, -2],
+    [911, 102, 22, 32, 0, -4, -2]
+],
+
+"animations": {
+    "autoSpinArea": { "frames": [0] },
+    "autoSpinBtnOn": { "frames": [1] },
+    "autoSpinBtn": { "frames": [2] },
+    "autoSpinBtnOff": { "frames": [3] },
+    "maxBetBtn": { "frames": [4] },
+    "maxBetBtnOn": { "frames": [5] },
+    "spinBtnOn": { "frames": [6] },
+    "spinBtn": { "frames": [7] },
+    "stopBtn": { "frames": [8] },
+    "stopBtnOn": { "frames": [9] },
+    "optionsBg": { "frames": [10] },
+    "plus": { "frames": [11] },
+    "minus": { "frames": [12] }
+},
+
+"texturepacker": [
+        "SmartUpdateHash: $TexturePacker:SmartUpdate:26279dcaf99dd55593db789cde885e95:47395d83d3c27169a1db60781bc62b35:ee51041572272cbf2cf18247757705de$",
+        "Created with TexturePacker (https://www.codeandweb.com/texturepacker) for EaselJS"
+]
+
+}

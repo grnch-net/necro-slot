@@ -19,7 +19,9 @@
         "Bounce": true,
         "Power1": true,
         "Power0": true,
-        "RoughEase": true
+        "RoughEase": true,
+        "Elastic": true,
+        "Linear": true
     },
 
     "extends": "eslint:recommended",

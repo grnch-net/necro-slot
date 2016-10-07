@@ -35,8 +35,8 @@ export let win = (function () {
     function initWin() {
         stage = storage.read('stage');
         const loader = storage.read('loadResult');
-
-        const gameContainer = stage.getChildByName('gameContainer');
+        const fgContainer = stage.getChildByName('fgContainer');
+        const gameContainer = fgContainer.getChildByName('gameContainer');
         winLinesContainer = new c.Container().set({
             name: 'winLinesContainer',
             x: gameContainer.x,
@@ -48,15 +48,15 @@ export let win = (function () {
             y: gameContainer.y
         });
 
-        const ss = loader.getResult('randomSprites');
+        const ss = loader.getResult('overall');
         fireWinNumberPrefab = new c.Sprite(ss).set({
             name: 'fireWinNumber',
             regX: 114, // 228
             regY: 114 // 228
         });
 
-        stage.addChildAt(winLinesContainer, 1);
-        stage.addChild(winRectsContainer);
+        fgContainer.addChildAt(winLinesContainer, 1);
+        fgContainer.addChild(winRectsContainer);
         winElements = findWinElements();
     }
 
@@ -64,7 +64,7 @@ export let win = (function () {
         const result = [];
         const columns = [];
         const winLines = storage.read('lines');
-        const gameContainer = stage.getChildByName('gameContainer');
+        const gameContainer = stage.getChildByName('fgContainer').getChildByName('gameContainer');
         for (let i = 0; i < 5; i++) {
             const column = gameContainer.getChildByName(`gameColumn${i}`);
             columns.push(column);
@@ -102,13 +102,11 @@ export let win = (function () {
         const linesCoords = storage.read('linesCoords');
         const loader = storage.read('loadResult');
 
-        const ss = loader.getResult('randomSprites');
+        const ss = loader.getResult('overall');
         const lightParam = {
             name: 'winLight',
             x: linesCoords[number - 1][0].x,
-            y: linesCoords[number - 1][0].y,
-            scaleX: 0.5,
-            scaleY: 0.5
+            y: linesCoords[number - 1][0].y
         };
 
         const lightHead = new c.Sprite(ss, 'glista0' ).set(lightParam);
@@ -151,6 +149,7 @@ export let win = (function () {
 
     function drawLineText(data) {
         const loader = storage.read('loadResult');
+        const ssOverall = loader.getResult('overall');
         const linesCoords = storage.read('linesCoords');
         const number = data.lineNumber;
         const amount = data.lineAmount;
@@ -160,7 +159,7 @@ export let win = (function () {
             y: linesCoords[number - 1][amount - 1].y + 50, // Magic Numbers
             x: linesCoords[number - 1][amount - 1].x + 52 // Magic Numbers
         });
-        const winLineRect = new c.Bitmap(loader.getResult('winLineRect')).set({
+        const winLineRect = new c.Sprite(ssOverall, 'winLineRect').set({
             name: 'winLineRect',
             // y: 3,
             regX: 24,
@@ -190,12 +189,13 @@ export let win = (function () {
 
     function showTotalWin(totalWinNumber) {
         const loader = storage.read('loadResult');
+        const ssOverall = loader.getResult('overall');
         const totalWin = new c.Container().set({
             name: 'totalWin',
             x: utils.gameWidth / 2 + 3, // Magic Numbers
             y: utils.gameHeight / 2
         });
-        const totalWinRect = new c.Bitmap(loader.getResult('winTotalRect')).set({
+        const totalWinRect = new c.Sprite(ssOverall, 'winTotalRect').set({
             name: 'totalWinRect'
         });
         utils.getCenterPoint(totalWinRect);
@@ -207,20 +207,6 @@ export let win = (function () {
         });
         totalWin.addChild(totalWinRect, totalWinText);
         winRectsContainer.addChild(totalWin);
-    }
-
-    function drawLineFire(number) {
-        // const loader = storage.read('loadResult');
-        // const ss = loader.getResult('lineFire');
-        // const lineFire = new c.Sprite(ss, 'go').set({
-        //     name: 'lineFire',
-        //     x: parameters[number].x - winRectsContainer.x - 3, // Magic Numbers
-        //     y: parameters[number].y - winRectsContainer.y + 5 // Magic Numbers
-        // });
-        // if (storage.readState('side') === 'right') {
-        //     lineFire.x += 150; // Magic Numbers
-        // }
-        // winRectsContainer.addChild(lineFire);
     }
 
     function fireWinLine(number, amount) {
@@ -262,8 +248,7 @@ export let win = (function () {
 
             for (let i = 0; i < amount; i++) {
                 const element = winElements[number - 1][i];
-                const animationName = element.currentAnimation;
-                const elementIndex = animationName.substr(animationName.indexOf('-') - 1, 1);
+                const elementIndex = element.currentAnimation.split('-')[0];
                 let topElement = gameTopElements[+winLine[i][0]][+winLine[i][1]];
                 element.visible = false;
                 topElement.visible = true;
@@ -273,14 +258,12 @@ export let win = (function () {
         } else {
             for (let i = 0; i < amount; i++) {
                 const element = winElements[number - 1][i];
-                const animationName = element.currentAnimation;
-                const elementIndex = animationName.substr(animationName.indexOf('-') - 1, 1);
+                const elementIndex = element.currentAnimation.split('-')[0];
                 element.gotoAndPlay(`${elementIndex}-w`);
             }
         }
 
         drawLineLight(number);
-        drawLineFire(number);
     }
 
     function drawAnotherLine(index) {
@@ -302,34 +285,31 @@ export let win = (function () {
     }
 
     function fireAllScatters() {
-        // const gameContainer = stage.getChildByName('gameContainer');
         const gameTopElements = storage.read('gameTopElements');
         winElements.forEach((winLine) => {
             winLine.forEach((element, colInd) => {
                 const animationName = element.currentAnimation;
-                const elementIndex = animationName.substr(animationName.indexOf('-') - 2, 2);
-                if (+elementIndex === 10) {
-                    if (animationName === '10-n') {
-                        if (defaultConfig.topScreen) {
-                            let topElement = gameTopElements[colInd][+element.posY];
-                            element.visible = false;
-                            topElement.visible = true;
-                            topElement.gotoAndPlay(`${elementIndex}-w`);
-                        } else {
-                            element.gotoAndPlay(`${elementIndex}-w`);
-                        }
-
-                        currWinScatters.push({
-                            el: element,
-                            colInd: colInd
-                        });
+                const elementIndex = animationName.split('-')[0];
+                if (animationName === '10-n') {
+                    if (defaultConfig.topScreen) {
+                        let topElement = gameTopElements[colInd][+element.posY];
+                        element.visible = false;
+                        topElement.visible = true;
+                        topElement.gotoAndPlay(`${elementIndex}-w`);
+                    } else {
+                        element.gotoAndPlay(`${elementIndex}-w`);
                     }
+
+                    currWinScatters.push({
+                        el: element,
+                        colInd: colInd
+                    });
                 }
-                if (+elementIndex === 14) {
-                    element.gotoAndPlay(`${elementIndex}-w`);
-                    let totalFreeSpins = storage.read('rollResponse').TotalFreeSpins;
-                    freeSpin.showTotalFreeSpins(totalFreeSpins);
-                }
+                // if (+elementIndex === 14) {
+                //     element.gotoAndPlay(`${elementIndex}-w`);
+                //     let totalFreeSpins = storage.read('rollResponse').TotalFreeSpins;
+                //     freeSpin.showTotalFreeSpins(totalFreeSpins);
+                // }
             });
         });
         if (storage.read('rollResponse').BonusResults[0] === 'FreeSpinBonus') {
@@ -340,20 +320,20 @@ export let win = (function () {
     }
 
     function fireScatterWild() {
-        let currentRow;
-        storage.changeState('autoplay', 'ended');
-        winElements.forEach((winLine) => {
-            winLine.forEach((element, index) => {
-                const animationName = element.currentAnimation;
-                const elementIndex = animationName.substr(animationName.indexOf('-') - 2, 2);
-                if (+elementIndex === 11 || +elementIndex === 12 || +elementIndex === 13) {
-                    if (!currentRow) {
-                        currentRow = index;
-                    }
-                }
-            });
-        });
-        fireLizaAndCards(currentRow);
+        // let currentRow;
+        // storage.changeState('autoplay', 'ended');
+        // winElements.forEach((winLine) => {
+        //     winLine.forEach((element, index) => {
+        //         const animationName = element.currentAnimation;
+        //         const elementIndex = element.currentAnimation.split('-')[0];
+        //         if (+elementIndex === 11 || +elementIndex === 12 || +elementIndex === 13) {
+        //             if (!currentRow) {
+        //                 currentRow = index;
+        //             }
+        //         }
+        //     });
+        // });
+        // fireLizaAndCards(currentRow);
     }
 
     function fireLizaAndCards(rowNumber) {
@@ -482,15 +462,9 @@ export let win = (function () {
     }
 
     function _elemPlayDefaultAnim(el) {
-        const animationName = el.currentAnimation;
-
-        let elementIndex;
-        let elementMode = animationName.substr(animationName.indexOf('-') + 1, 1);
-        if (animationName.length === 4) {
-            elementIndex = animationName.substr(animationName.indexOf('-') - 2, 2);
-        } else {
-            elementIndex = animationName.substr(animationName.indexOf('-') - 1, 1);
-        }
+        let animationParse = el.currentAnimation.split('-');
+        let elementIndex = animationParse[0];
+        let elementMode = animationParse[1];
 
         if (elementMode !== 'n'
             || !el.currentAnimationFrame

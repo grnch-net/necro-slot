@@ -1,25 +1,31 @@
 export const preloaderManifest = [
     {id: 'coin', src: 'static/img/content/preloader/coin.json', type: 'spritesheet'},
-    {id: 'line', src: 'static/img/content/preloader/line.json', type: 'spritesheet'}
+    {id: 'line', src: 'static/img/content/preloader/line.json', type: 'spritesheet'},
+    {id: 'fsFonTest2', src: 'static/img/content/bg/fsBG2.png'}
 ];
 
 export const mainManifest = [
     // atlas
-    {id: 'randomSprites', src: 'static/img/content/fs/randomSprites.json', type: 'spritesheet'},
-    {id: 'atlas', src: 'static/img/content/atlas/atlas.json', type: 'spritesheet'},
+    {id: 'mainScreen', src: 'static/img/content/atlas/mainScreen.json', type: 'spritesheet'},
+    {id: 'mainScreenDesctop', src: 'static/img/content/atlas/mainScreenDesctop.json', type: 'spritesheet'},
+    {id: 'fsScreen', src: 'static/img/content/atlas/fsScreen.json', type: 'spritesheet'},
+    {id: 'overall', src: 'static/img/content/atlas/overall.json', type: 'spritesheet'},
+    {id: 'cultisti', src: 'static/img/content/atlas/cultisti.json', type: 'spritesheet'},
+    {id: 'other', src: 'static/img/content/atlas/other.json', type: 'spritesheet'},
+
+    // test
+    {id: 'optionsInterface', src: 'static/img/content/test/optionsInterface.png'},
+    {id: 'fsInterface', src: 'static/img/content/test/fsInterface.png'},
 
     // init screen
-    {id: 'preloaderSprite', src: 'static/img/content/preloader/sprite.json', type: 'spritesheet'},
     {id: 'fsBG', src: 'static/img/content/bg/fsBG.png'},
-    {id: 'preloaderLogo', src: 'static/img/content/preloader/preloaderLogo.png'},
     {id: 'play', src: 'static/img/content/preloader/play.png'},
+
     // bg module
     {id: 'newBGLight', src: 'static/img/content/bg/newBGLight.png'},
-    {id: 'bg', src: 'static/img/content/bg/bg.json', type: 'spritesheet'},
     {id: 'newGameMachine', src: 'static/img/content/new/gameMachine.png'},
     {id: 'rules', src: 'static/img/content/bg/firstRules.png'},
-    {id: 'home', src: 'static/img/content/new/home.png'},
-    {id: 'logoNecro', src: 'static/img/content/new/logoNecro.png'},
+    {id: 'gameBG', src: 'static/img/content/bg/gameBG.png'},
 
     // buttons module
     {id: 'buttons', src: 'static/img/content/buttons/buttons.json', type: 'spritesheet'},
@@ -30,18 +36,13 @@ export const mainManifest = [
 
     // win module
     {id: 'winAllNumbers', src: 'static/img/content/new/winAllNumbers.json', type: 'spritesheet'},
-    {id: 'winLineRect', src: 'static/img/content/lines/winLineRect.png'},
-    {id: 'winTotalRect', src: 'static/img/content/lines/winTotalRect.png'},
 
     // menu module
     {id: 'menu', src: 'static/img/content/menu/menu.json', type: 'spritesheet'},
     {id: 'settings', src: 'static/img/content/menu/settings.json', type: 'spritesheet'},
 
     // bonuses module
-    {id: 'But', src: 'static/img/content/bg/But.png'},
     {id: 'numbers', src: 'static/img/content/bonuses/numbers.json', type: 'spritesheet'},
-    {id: 'totalWin', src: 'static/img/content/new/totalWin.png'},
-    {id: 'cultists', src: 'static/img/content/new/cultists.png'},
 
     // Sound
     {id: 'spinSound', src: 'static/img/content/sounds/spin.mp3'},
@@ -65,13 +66,9 @@ export const mainManifest = [
 
     // fs module
     {id: 'fsBG', src: 'static/img/content/bg/fsBG.png'},
-    {id: 'fsTotalTable', src: 'static/img/content/fs/fsTotalTable.png'},
-    {id: 'fsText', src: 'static/img/content/fs/fsText.json', type: 'spritesheet'},
-    {id: 'chasyFS', src: 'static/img/content/fs/chasyFS.png'},
-    {id: 'cultistBlack1', src: 'static/img/content/fs/cultistBlack1.png'},
-    {id: 'cultistBlack2', src: 'static/img/content/fs/cultistBlack2.png'},
-    {id: 'cultistBlack3', src: 'static/img/content/fs/cultistBlack3.png'},
+    {id: 'fsFonTest2', src: 'static/img/content/bg/fsBG2.png'},
     {id: 'transitionPopup', src: 'static/img/content/bg/transitionPopup.png'},
     {id: 'luchi', src: 'static/img/content/bg/luchi.png'},
-    {id: 'popup', src: 'static/img/content/new/popup.png'}
+    {id: 'popup', src: 'static/img/content/new/popup.png'},
+    {id: 'fsInterfaceBg', src: 'static/img/content/new/fsInterfaceBg.png'}
 ];

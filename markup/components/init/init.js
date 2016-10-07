@@ -12,14 +12,15 @@ export let init = (function () {
     const defaultConfig = {
         mode: 'normal',
         userID: 1,
-        casinoID: 1
+        casinoID: 1,
+        isMobile: true
     };
 
     // qo2 - двери, qo5 - фри-спины, qos - стандартный режим
     const mode = {
-        normal: 'nec',
-        fsBonus: 'qo5',
-        bonus: 'qo2'
+        normal: 'nec'
+        // fsBonus: 'qo5',
+        // bonus: 'qo2'
     };
 
     const savedFS = {};
@@ -27,6 +28,7 @@ export let init = (function () {
 
     function start(configObj) {
         config = configObj || defaultConfig;
+        storage.write('isMobile', config.isMobile);
     }
 
     function checkPlayerState(state) {

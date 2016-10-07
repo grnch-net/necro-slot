@@ -10,7 +10,7 @@ import { parameters } from 'components/balance/parameters';
 /* eslint-disable no-use-before-define */
 
 export let balance = (function () {
-
+    let param;
     let config;
     const defaultConfig = {
         textDelta: 20
@@ -32,6 +32,7 @@ export let balance = (function () {
 
     function initBalance() {
         stage = storage.read('stage');
+        param = (storage.read('isMobile')) ? parameters.mobile : parameters.desktop;
         const data = storage.read('initState');
         balanceData.linesLength = storage.read('lines').length;
 
@@ -73,27 +74,35 @@ export let balance = (function () {
     }
 
     function writeBalance() {
+        const isMobile = storage.read('isMobile');
+        let coinsAndBetColor = (isMobile) ? param.orangeColor : param.color;
 
-        balanceText.coinsSum = new c.Text(balanceData.coinsSum, parameters.font, parameters.orangeColor).set(parameters.coinsSum);
-        balanceText.betSum = new c.Text(balanceData.betSum, parameters.font, parameters.orangeColor).set(parameters.betSum);
-        balanceText.coinsCash = new c.Text(currencySymbol + balanceData.coinsCash, parameters.font, parameters.color).set(parameters.coinsCash);
-        balanceText.betCash = new c.Text(currencySymbol + balanceData.betCash, parameters.font, parameters.color).set(parameters.betCash);
-        balanceText.winCash = new c.Text(currencySymbol + balanceData.winCash, parameters.font, parameters.color).set(parameters.winCash);
+        balanceText.coinsSum = new c.Text(balanceData.coinsSum, param.font, coinsAndBetColor).set(param.coinsSum);
+        balanceText.betSum = new c.Text(balanceData.betSum, param.font, coinsAndBetColor).set(param.betSum);
 
-        balanceText.coinsCashText = new c.Text('Cash:', parameters.font, parameters.greyColor).set(parameters.coinsCashText);
-        balanceText.betCashText = new c.Text('Bet:', parameters.font, parameters.greyColor).set(parameters.betCashText);
-        balanceText.winCashText = new c.Text('Win:', parameters.font, parameters.greyColor).set(parameters.winCashText);
-        balanceText.coinsSumText = new c.Text('Coins:', parameters.bigFont, parameters.color).set(parameters.coinsSumText);
-        balanceText.betSumText = new c.Text('Bet:', parameters.bigFont, parameters.color).set(parameters.betSumText);
+        balanceText.coinsCash = new c.Text(currencySymbol + balanceData.coinsCash, param.font, param.color).set(param.coinsCash);
+        balanceText.betCash = new c.Text(currencySymbol + balanceData.betCash, param.font, param.color).set(param.betCash);
+        balanceText.winCash = new c.Text(currencySymbol + balanceData.winCash, param.font, param.color).set(param.winCash);
+
+        balanceText.coinsCashText = new c.Text('Cash:', param.font, param.greyColor).set(param.coinsCashText);
+        balanceText.betCashText = new c.Text('Bet:', param.font, param.greyColor).set(param.betCashText);
+        balanceText.winCashText = new c.Text('Win:', param.font, param.greyColor).set(param.winCashText);
+        balanceText.coinsSumText = new c.Text('Coins:', param.bigFont, param.color).set(param.coinsSumText);
+        balanceText.betSumText = new c.Text('Bet:', param.bigFont, param.color).set(param.betSumText);
 
         makeTextDelta(balanceText.coinsSumText, balanceText.coinsSum, config.textDelta);
         makeTextDelta(balanceText.coinsCashText, balanceText.coinsCash, config.textDelta);
 
+        if ( isMobile ) {
+            balanceContainer.addChild(
+                balanceText.coinsSumText,
+                balanceText.betSumText
+            );
+        }
+
         balanceContainer.addChild(
             balanceText.coinsSum,
-            balanceText.coinsSumText,
             balanceText.betSum,
-            balanceText.betSumText,
             balanceText.coinsCash,
             balanceText.coinsCashText,
             balanceText.betCash,
@@ -114,12 +123,12 @@ export let balance = (function () {
     function writeCashBalance(container) {
         const currentBalance = storage.read('currentBalance');
 
-        let coinsCash = new c.Text(currencySymbol + currentBalance.coinsCash, parameters.font, parameters.color).set(parameters.coinsCash);
-        let betCash = new c.Text(currencySymbol + currentBalance.betCash, parameters.font, parameters.color).set(parameters.betCash);
-        let winCash = new c.Text(currencySymbol + currentBalance.winCash, parameters.font, parameters.color).set(parameters.winCash);
-        let coinsCashText = new c.Text('Cash:', parameters.font, parameters.greyColor).set(parameters.coinsCashText);
-        let betCashText = new c.Text('Bet:', parameters.font, parameters.greyColor).set(parameters.betCashText);
-        let winCashText = new c.Text('Win:', parameters.font, parameters.greyColor).set(parameters.winCashText);
+        let coinsCash = new c.Text(currencySymbol + currentBalance.coinsCash, param.font, param.color).set(param.coinsCash);
+        let betCash = new c.Text(currencySymbol + currentBalance.betCash, param.font, param.color).set(param.betCash);
+        let winCash = new c.Text(currencySymbol + currentBalance.winCash, param.font, param.color).set(param.winCash);
+        let coinsCashText = new c.Text('Cash:', param.font, param.greyColor).set(param.coinsCashText);
+        let betCashText = new c.Text('Bet:', param.font, param.greyColor).set(param.betCashText);
+        let winCashText = new c.Text('Win:', param.font, param.greyColor).set(param.winCashText);
 
         container.addChild(coinsCashText, betCashText, winCashText, coinsCash, betCash, winCash);
 

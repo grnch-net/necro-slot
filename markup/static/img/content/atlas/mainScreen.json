@@ -1,0 +1,66 @@
+{
+
+"images": [
+    "static/img/content/atlas/mainScreen.png"
+],
+
+"framerate": 15,
+
+"frames": [
+    [1, 1, 113, 89, 0, 0, 0],
+    [116, 1, 66, 99, 0, -1, -1],
+    [184, 1, 66, 99, 0, -1, -1],
+    [252, 1, 66, 99, 0, -1, -1],
+    [320, 1, 66, 99, 0, -1, -1],
+    [388, 1, 67, 99, 0, 0, -1],
+    [457, 1, 122, 99, 0, -3, -1],
+    [581, 1, 122, 99, 0, -3, -1],
+    [705, 1, 122, 99, 0, -3, -1],
+    [829, 1, 127, 99, 0, 0, -1],
+    [958, 1, 884, 139, 0, 0, -1],
+    [1, 142, 212, 221, 0, 0, 0],
+    [215, 142, 140, 222, 0, 0, 0],
+    [357, 142, 121, 194, 0, 0, 0],
+    [480, 142, 115, 191, 0, 0, 0],
+    [597, 142, 22, 32, 0, -4, -2],
+    [621, 142, 22, 32, 0, -4, -2],
+    [645, 142, 284, 221, 0, 0, 0],
+    [931, 142, 284, 221, 0, 0, 0],
+    [1217, 142, 284, 221, 0, 0, 0],
+    [1503, 142, 284, 221, 0, 0, 0],
+    [1, 366, 284, 221, 0, 0, 0],
+    [287, 366, 284, 221, 0, 0, 0],
+    [573, 366, 284, 221, 0, 0, 0],
+    [859, 366, 284, 221, 0, 0, 0],
+    [1145, 366, 284, 221, 0, 0, 0],
+    [1431, 366, 284, 221, 0, 0, 0],
+    [1717, 366, 284, 221, 0, 0, 0]
+],
+
+"animations": {
+    "autoSpinArea": { "frames": [0] },
+    "autoSpinBtnOn": { "frames": [1] },
+    "autoSpinBtn": { "frames": [2] },
+    "autoSpinBtnOff": { "frames": [3] },
+    "maxBetBtn": { "frames": [4] },
+    "maxBetBtnOn": { "frames": [5] },
+    "spinBtnOn": { "frames": [6] },
+    "spinBtn": { "frames": [7] },
+    "stopBtn": { "frames": [8] },
+    "stopBtnOn": { "frames": [9] },
+    "optionsBg": { "frames": [10] },
+    "lightning0": [11],
+    "lightning1": [12],
+    "lightning2": [13],
+    "lightning3": [14],
+    "plus": { "frames": [15] },
+    "minus": { "frames": [16] },
+    "rain": [17, 27]
+},
+
+"texturepacker": [
+        "SmartUpdateHash: $TexturePacker:SmartUpdate:0a80929a7a5cb2dc4a80d0c3c72c9bd5:0a39c94b2460e06620e546e118c19cef:d39eb866425b0b17a0144e5d63ce8c42$",
+        "Created with TexturePacker (https://www.codeandweb.com/texturepacker) for EaselJS"
+]
+
+}

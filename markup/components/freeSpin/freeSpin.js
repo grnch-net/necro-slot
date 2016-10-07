@@ -4,6 +4,7 @@ import { events } from 'components/events/events';
 
 import { balance } from 'components/balance/balance';
 import { roll } from 'components/roll/roll';
+import { handleInfoClick } from 'components/menu/settings';
 
 // /* eslint-disable no-undef */
 /* eslint-disable eqeqeq */
@@ -25,6 +26,8 @@ export let freeSpin = (function () {
     let fsTotalWin;
     let fireTimer;
     let parTimer;
+    let fsTotalCount;
+    let fsLastWin;
 
     let config;
     const defaultConfig = {
@@ -43,31 +46,56 @@ export let freeSpin = (function () {
         const balanceContainer = stage.getChildByName('balanceContainer');
         const coinsSum = balanceContainer.getChildByName('coinsSum');
         const betSum = balanceContainer.getChildByName('betSum');
-        const coinsSumText = balanceContainer.getChildByName('coinsSumText');
-        const betSumText = balanceContainer.getChildByName('betSumText');
-        betSum.visible = coinsSum.visible = betSumText.visible = coinsSumText.visible = false;
+        if (storage.read('isMobile')) {
+            const coinsSumText = balanceContainer.getChildByName('coinsSumText');
+            const betSumText = balanceContainer.getChildByName('betSumText');
+            betSum.visible = coinsSum.visible = betSumText.visible = coinsSumText.visible = false;
+        } else { // desktop
+            coinsSum.set({
+                x: 1006,
+                y: 642
+            });
+            betSum.set({
+                x: 349,
+                y: 579
+            });
+        }
     }
 
     function showFsBalance() {
+        const isMobile = storage.read('isMobile');
         const balanceContainer = stage.getChildByName('balanceContainer');
 
-        const totalWinText = new createjs.Text('Total Win:', '24px Helvetica', '#dddddd').set({
-            name: 'totalWinText',
-            y: 658,
-            textAlign: 'center'
-        });
-        const totalWinSum = new createjs.Text(config.currentWinCoins + '', '24px Helvetica', '#e8b075').set({
-            name: 'totalWinSum',
-            y: 658,
-            textAlign: 'center',
-            shadow: new c.Shadow('#e8b075', 0, 0, 15)
-        });
         if (config.currentWinCents) {
             storage.read('currentBalance').winCash = (config.currentWinCents / 100).toFixed(2);
         }
-        totalWinText.x = utils.width / 2 - 10 - totalWinText.getMeasuredWidth();
-        totalWinSum.x = totalWinText.x + 20 + totalWinText.getMeasuredWidth() / 2 + totalWinSum.getMeasuredWidth() / 2;
-        balanceContainer.addChild(totalWinText, totalWinSum);
+
+        let totalWinSum;
+        if (isMobile) {
+            const totalWinText = new createjs.Text('Total Win:', '24px Helvetica', '#dddddd').set({
+                name: 'totalWinText',
+                y: 658,
+                textAlign: 'center'
+            });
+            totalWinSum = new createjs.Text(config.currentWinCoins + '', '24px Helvetica', '#e8b075').set({
+                name: 'totalWinSum',
+                y: 658,
+                textAlign: 'center',
+                shadow: new c.Shadow('#e8b075', 0, 0, 15)
+            });
+            totalWinText.x = utils.width / 2 - 10 - totalWinText.getMeasuredWidth();
+            totalWinSum.x = totalWinText.x + 20 + totalWinText.getMeasuredWidth() / 2 + totalWinSum.getMeasuredWidth() / 2;
+            balanceContainer.addChild(totalWinText);
+        } else { // desktop
+            totalWinSum = new createjs.Text(config.currentWinCoins + '', 'normal 14px Helvetica', '#dddddd').set({
+                name: 'totalWinSum',
+                x: 1007,
+                y: 610,
+                textAlign: 'center',
+                shadow: new c.Shadow('#e8b075', 0, 0, 15)
+            });
+        }
+        balanceContainer.addChild(totalWinSum);
         balanceContainer.updateCache();
     }
 
@@ -79,65 +107,14 @@ export let freeSpin = (function () {
         .to(clockContainer, 1, { y: 0 });
     }
 
-    function showPressureTube() {
-        // const loader = storage.read('loadResult');
-        // const fgContainer = stage.getChildByName('fgContainer');
-        // const pressure = new createjs.Bitmap(loader.getResult('pressure')).set({
-        //     name: 'pressure',
-        //     x: 60,
-        //     y: 575
-        // });
-        // const pressureFire = new createjs.Sprite(loader.getResult('fireToPressure'), 'go').set({
-        //     name: 'pressureFire',
-        //     x: 90,
-        //     y: 605
-        // });
-        // const pressureDark = new createjs.Shape().set({
-        //     name: 'pressureDark',
-        //     x: 100,
-        //     y: 620
-        // });
-        // pressureDark.graphics.beginFill('#000').drawRect(0, 0, 810, 14);
-        // const fireMask = new createjs.Shape();
-        // fireMask.graphics.drawRect(0, 0, 100, utils.height);
-        // pressureFire.mask = fireMask;
-        // const pressureContainer = new createjs.Container().set({
-        //     name: 'pressureContainer'
-        // });
-        // const pressureDisc = new createjs.Bitmap(loader.getResult('pressureDisc')).set({
-        //     name: 'pressureDisc',
-        //     x: 375,
-        //     y: 598
-        // });
-        // pressureContainer.addChild(pressureDark, pressureFire);
-        // for (let i = 0; i < 6; i++) {
-        //     const newDisc = pressureDisc.clone();
-        //     pressureDiscs.push(newDisc);
-        //     pressureContainer.addChild(newDisc);
-        // }
-        // pressureDiscs[0].x = 244;
-        // pressureDiscs[1].x = 376;
-        // pressureDiscs[2].x = 508;
-        // pressureDiscs[3].x = 640;
-        // pressureDiscs[4].x = 772;
-        // pressureDiscs[5].x = 904;
-        // const truba = new createjs.Bitmap(loader.getResult('truba')).set({
-        //     name: 'truba',
-        //     x: 755,
-        //     y: 40
-        // });
-        // fgContainer.addChildAt(truba, 0);
-        // fgContainer.addChild(pressureContainer);
-    }
-
     function _createParticleS(container, count) {
         const loader = storage.read('loadResult');
-        const ss = loader.getResult('randomSprites');
+        const ssFSScreen = loader.getResult('fsScreen');
 
         for (let i = 0; i < count; i++) {
             let random = Math.random() * 0.7 + 0.3;
             let localPos = container.globalToLocal(utils.width / 2, utils.height / 2 - 40 - Math.round( random * 200 ) );
-            let _clone = new c.Sprite(ss, 'bloha' + (i % 13) ).set({
+            let _clone = new c.Sprite(ssFSScreen, 'bloha' + (i % 13) ).set({
                 x: localPos.x,
                 y: localPos.y,
                 scaleX: random,
@@ -171,31 +148,28 @@ export let freeSpin = (function () {
         tl.to(container, 20 + Math.round( Math.random() * 30 ), { rotation: 360 * course, ease: Linear.easeNone});
     }
 
-    function drawFreeSpinsBG() {
-        pressureDiscs = [];
-        stage = storage.read('stage');
-        const loader = storage.read('loadResult');
-
+    function _drawFsBgMobile(loader) {
+        const ssFSScreen = loader.getResult('fsScreen');
         // Balance data invisible
-        hideBalance();
-        showFsBalance();
-
         const bgContainer = stage.getChildByName('bgContainer');
-        const gameBG = bgContainer.getChildByName('gameBG');
+        const fgContainer = stage.getChildByName('fgContainer');
+
+        const gameBG = fgContainer.getChildByName('gameBG');
         gameBG.visible = false;
+
         const fsTableContainer = new createjs.Container().set({
             name: 'fsTableContainer',
             x: 230,
             y: 75
         });
-        const fsTotalTable = new createjs.Bitmap(loader.getResult('fsTotalTable')).set({
+        const fsTotalTable = new c.Sprite(ssFSScreen, 'fsTotalTable').set({
             name: 'fsTotalTable',
             regX: 125,
             regY: 125,
             scaleX: 0.65,
             scaleY: 0.65
         });
-        const fsTotalCount = new createjs.BitmapText(config.currentCount + '', loader.getResult('numbers')).set({
+        fsTotalCount = new createjs.BitmapText(config.currentCount + '', loader.getResult('numbers')).set({
             name: 'fsTotalCount',
             x: 5,
             scaleX: 0.3,
@@ -209,32 +183,31 @@ export let freeSpin = (function () {
         fsTableContainer.addChild(fsTotalTable, fsTotalCount);
         stage.addChildAt(fsTableContainer, stage.getChildIndex(stage.getChildByName('fgContainer')) + 1);
 
-        showPressureTube();
-
         const fsLeftContainer = new createjs.Container().set({
             name: 'fsLeftContainer'
         });
-        const cultistBlack1 = new createjs.Bitmap(loader.getResult('cultistBlack1')).set({
+        const cultistBlack1 = new c.Sprite(ssFSScreen, 'cultistBlack1').set({
             name: 'cultistBlack1',
             x: 30,
             y: 0,
             scaleX: 0.6,
             scaleY: 0.6
         });
-        const cultistBlack2 = new createjs.Bitmap(loader.getResult('cultistBlack2')).set({
+        const cultistBlack2 = new c.Sprite(ssFSScreen, 'cultistBlack2').set({
             name: 'cultistBlack2',
             x: 30,
             y: 120,
             scaleX: 0.6,
             scaleY: 0.6
         });
-        const cultistBlack3 = new createjs.Bitmap(loader.getResult('cultistBlack3')).set({
+        const cultistBlack3 = new c.Sprite(ssFSScreen, 'cultistBlack3').set({
             name: 'cultistBlack3',
             x: 30,
             y: 250,
             scaleX: 0.6,
             scaleY: 0.6
         });
+        fsLeftContainer.addChild(cultistBlack1, cultistBlack2, cultistBlack3);
 
         const particleContainer = new c.Container().set({
             name: 'particleContainerRight',
@@ -255,17 +228,28 @@ export let freeSpin = (function () {
         _mask.graphics.beginFill( 'rgba(0, 0, 0, 1)' ).drawRect(0, 190, utils.width, 500);
         particleContainer.mask = _mask;
 
-        fsLeftContainer.addChild(cultistBlack1, cultistBlack2, cultistBlack3);
 
-        const fgContainer = stage.getChildByName('fgContainer');
         fgContainer.uncache();
-        const fsBG = new createjs.Bitmap(loader.getResult('fsBG')).set({
+
+        const fonContainer = new c.Container().set({
             name: 'fsBG'
         });
-        bgContainer.addChildAt(fsBG, 2);
+        const fon0 = new createjs.Bitmap(loader.getResult('fsBG'));
+        const fon2 = new createjs.Bitmap(loader.getResult('fsFonTest2')).set({
+            x: utils.width / 2,
+            y: utils.height / 2,
+            regX: 684 / 2,
+            regY: 684 / 2,
+            scaleX: 1.7,
+            scaleY: 1.7,
+            alpha: 0.5
+        });
+        let tlFon = new TimelineMax({ repeat: -1 });
+        tlFon.to(fon2, 300, { rotation: 360 });
 
+        fonContainer.addChild(fon0, fon2);
+        bgContainer.addChildAt(fonContainer, 2);
 
-        changeMultiplier(2);
         const clockContainer = new c.Container().set({
             name: 'clockContainer'
         });
@@ -292,56 +276,180 @@ export let freeSpin = (function () {
         fsMulti.regX = multiBounds.width / 2;
         fsMulti.regY = multiBounds.height / 2;
 
-        const ssAtlas = loader.getResult('atlas');
-        const bookTop = new c.Sprite(ssAtlas, 'book1').set({
+        const bookTop = new c.Sprite(ssFSScreen, 'book1').set({
             name: 'bookTop',
-            x: 115,
+            x: 117,
             y: utils.height - 227,
-            regX: 300,
-            regY: 300,
-            scaleX: 0.4,
-            scaleY: 0.4,
+            regX: 120,
+            regY: 120,
             rotation: -20
         });
-        const bookBot = new c.Sprite(ssAtlas, 'bookBot').set({
+        const bookBot = new c.Sprite(ssFSScreen, 'bookBot').set({
             name: 'bookBot',
-            x: 121,
+            x: 123,
             y: utils.height - 229,
-            regX: 300,
-            regY: 300,
-            scaleX: 0.4,
-            scaleY: 0.4,
+            regX: 120,
+            regY: 120,
             rotation: -20
         });
-        clockContainer.addChild(bookBot, bookTop);
-        clockContainer.addChild(particleContainer);
-        clockContainer.addChild(fsX, fsMulti, particleContainer);
-        stage.addChildAt(fsLeftContainer, clockContainer, stage.getChildIndex(stage.getChildByName('winRectsContainer')) + 1);
+        clockContainer.addChild(bookBot, bookTop, particleContainer, fsX, fsMulti, particleContainer);
+
+        stage.addChild(fsLeftContainer, clockContainer);
         moveClock(clockContainer);
 
         if (config.currentLevel !== 0) {
             changeLevel(config.currentLevel + 1);
         }
-        if (config.currentMulti !== 2) {
-            changeMultiplier(config.currentMulti);
-        }
-
     }
 
-    function addPar(num) {
-        const loader = storage.read('loadResult');
+    function _drawFsBgDesktop(loader) {
+        const ssFSScreen = loader.getResult('fsScreen');
+        const ssOverall = loader.getResult('overall');
+        // Balance data invisible
+        const bgContainer = stage.getChildByName('bgContainer');
         const fgContainer = stage.getChildByName('fgContainer');
-        const pressureContainer = fgContainer.getChildByName('pressureContainer');
-        const parSprite = new createjs.Sprite(loader.getResult('parNaKryshku'), 'go');
-        parSprite.set({
-            x: pressureDiscs[num].x - 30,
-            y: pressureDiscs[num].y - 33
+
+        const gameBG = fgContainer.getChildByName('gameBG');
+        gameBG.visible = false;
+
+        const fonContainer = new c.Container().set({
+            name: 'fsBG'
         });
-        pressureContainer.addChildAt(parSprite, pressureContainer.getChildIndex(pressureDiscs[num]));
-        parSprite.on('animationend', function (e) {
-            pressureContainer.removeChild(parSprite);
-            e.remove();
+        const fon0 = new createjs.Bitmap(loader.getResult('fsBG'));
+        const fon2 = new createjs.Bitmap(loader.getResult('fsFonTest2')).set({
+            x: utils.width / 2,
+            y: utils.height / 2,
+            regX: 684 / 2,
+            regY: 684 / 2,
+            scaleX: 1.7,
+            scaleY: 1.7,
+            alpha: 0.5
         });
+        let tlFon = new TimelineMax({ repeat: -1 });
+        tlFon.to(fon2, 300, { rotation: 360 });
+        fonContainer.addChild(fon0, fon2);
+        bgContainer.addChildAt(fonContainer, 2);
+
+        const fsInterfaceContainer = new c.Container().set({
+            name: 'fsInterfaceContainer'
+        });
+
+        const fsInterfaceBg = new c.Bitmap(loader.getResult('fsInterfaceBg')).set({
+            x: 197,
+            y: 551,
+            scaleX: 0.67,
+            scaleY: 0.67
+        });
+        const fsInterface = new c.Bitmap(loader.getResult('fsInterface')).set({
+            x: 199,
+            y: 559,
+            alpha: 1
+        });
+
+        const infoBtn = new c.Sprite(ssOverall, 'infoBtn').set({
+            x: 224,
+            y: 573
+        });
+        infoBtn.on('click', handleInfoClick);
+
+        const fsTableContainer = new createjs.Container().set({
+            name: 'fsTableContainer',
+            x: 772,
+            y: 605
+        });
+        const fsTotalTable = new c.Sprite(ssFSScreen, 'fsTotalTable').set({
+            name: 'fsTotalTable',
+            regX: 125,
+            regY: 125,
+            scaleX: 0.65,
+            scaleY: 0.65
+        });
+        fsTotalCount = new createjs.BitmapText(config.currentCount + '', loader.getResult('numbers')).set({
+            name: 'fsTotalCount',
+            x: 5,
+            scaleX: 0.3,
+            scaleY: 0.3
+        });
+        let bounds = fsTotalCount.getBounds();
+        fsTotalCount.regX = bounds.width / 2;
+        fsTotalCount.regY = bounds.height / 2;
+
+        fsLastWin = new createjs.Text(0, 'normal 14px Helvetica', '#dddddd').set({
+            name: 'totalWinSum',
+            x: 1007,
+            y: 579,
+            textAlign: 'center',
+            shadow: new c.Shadow('#e8b075', 0, 0, 15)
+        });
+
+        const linesTxt = new createjs.Text( 10, 'normal 14px Helvetica', '#dddddd').set({
+            name: 'totalWinSum',
+            x: 242,
+            y: 634,
+            textAlign: 'center',
+            shadow: new c.Shadow('#e8b075', 0, 0, 15)
+        });
+
+        const betLevelTxt = new createjs.Text( storage.read('currentBalance').betValue, 'normal 14px Helvetica', '#dddddd').set({
+            name: 'totalWinSum',
+            x: 298,
+            y: 634,
+            textAlign: 'center',
+            shadow: new c.Shadow('#e8b075', 0, 0, 15)
+        });
+
+        const countValueTxt = new createjs.Text( storage.read('currentBalance').coinsValue, 'normal 14px Helvetica', '#dddddd').set({
+            name: 'totalWinSum',
+            x: 362,
+            y: 634,
+            textAlign: 'center',
+            shadow: new c.Shadow('#e8b075', 0, 0, 15)
+        });
+
+        utils.getCenterPoint(fsTotalCount);
+        fsTableContainer.addChild(fsTotalTable, fsTotalCount);
+
+        const cultistBlack1 = new c.Sprite(ssFSScreen, 'cultistBlack1').set({
+            name: 'cultistBlack1',
+            x: 393,
+            y: 540,
+            scaleX: 0.7,
+            scaleY: 0.7
+        });
+        const cultistBlack2 = new c.Sprite(ssFSScreen, 'cultistBlack2').set({
+            name: 'cultistBlack2',
+            x: 470,
+            y: 530,
+            scaleX: 0.7,
+            scaleY: 0.7
+        });
+        const cultistBlack3 = new c.Sprite(ssFSScreen, 'cultistBlack3').set({
+            name: 'cultistBlack3',
+            x: 550,
+            y: 541,
+            scaleX: 0.7,
+            scaleY: 0.7
+        });
+
+        fsInterfaceContainer.addChild(fsInterfaceBg, fsInterface, fsTableContainer, infoBtn, fsLastWin, cultistBlack1, cultistBlack3, cultistBlack2, linesTxt, betLevelTxt, countValueTxt);
+        stage.addChildAt(fsInterfaceContainer, stage.getChildIndex(stage.getChildByName('fgContainer')) + 1);
+    }
+
+    function drawFreeSpinsBG() {
+        pressureDiscs = [];
+        stage = storage.read('stage');
+        const loader = storage.read('loadResult');
+        const isMobile = storage.read('isMobile');
+
+        hideBalance();
+        showFsBalance();
+
+        if (isMobile) {
+            _drawFsBgMobile(loader);
+        } else { // desktop
+            _drawFsBgDesktop(loader);
+        }
+
     }
 
     function changeLevel(num) {
@@ -363,60 +471,6 @@ export let freeSpin = (function () {
         //         }
         //     });
         // }
-    }
-
-    function changeMultiplier(multi) {
-        // if (pressureDiscs[multi - 2].alpha === 0) return;
-        // createjs.Sound.play('pressureSound');
-        // const fgContainer = stage.getChildByName('fgContainer');
-        // const pressureContainer = fgContainer.getChildByName('pressureContainer');
-        // const pressureFire = pressureContainer.getChildByName('pressureFire');
-        // const newMask = new createjs.Shape();
-        // const tl = new TimelineMax();
-        // if (multi == 2) {
-        //     newMask.graphics.drawRect(0, 0, 300, utils.height);
-        //     tl.to(pressureDiscs[0], 0.3, {y: '-=150', alpha: 0});
-        //     addPar(0);
-        // } else if (multi == 3) {
-        //     newMask.graphics.drawRect(0, 0, 400, utils.height);
-        //     tl.to([pressureDiscs[0], pressureDiscs[1]], 0.3, {y: '-=150', alpha: 0});
-        //     addPar(1);
-        // } else if (multi == 4) {
-        //     newMask.graphics.drawRect(0, 0, 500, utils.height);
-        //     tl.to([pressureDiscs[0], pressureDiscs[1], pressureDiscs[2]], 0.3, {y: '-=150', alpha: 0});
-        //     addPar(2);
-        // } else if (multi == 5) {
-        //     newMask.graphics.drawRect(0, 0, 650, utils.height);
-        //     tl.to([pressureDiscs[0], pressureDiscs[1], pressureDiscs[2], pressureDiscs[3]], 0.3, {y: '-=150', alpha: 0});
-        //     addPar(3);
-        // } else if (multi == 6) {
-        //     newMask.graphics.drawRect(0, 0, 800, utils.height);
-        //     tl.to([pressureDiscs[0], pressureDiscs[1], pressureDiscs[2], pressureDiscs[3], pressureDiscs[4]], 0.3, {y: '-=150', alpha: 0});
-        //     addPar(4);
-        // } else if (multi == 7) {
-        //     newMask.graphics.drawRect(0, 0, utils.width, utils.height);
-        //     tl.to([pressureDiscs[0], pressureDiscs[1], pressureDiscs[2], pressureDiscs[3], pressureDiscs[4], pressureDiscs[5]], 0.3, {y: '-=150', alpha: 0});
-        //     addPar(5);
-        //     getFireLogo();
-        //     getFirework();
-        //     crashGame();
-        //     getMultiLight();
-        //     const loader = storage.read('loadResult');
-        //     const x7 = new c.Bitmap(loader.getResult('x7')).set({
-        //         x: utils.width / 2 + 100,
-        //         y: utils.height / 2 - 50,
-        //         scaleX: 0.3,
-        //         scaleY: 0.3
-        //     });
-        //     utils.getCenterPoint(x7);
-        //     stage.addChild(x7);
-        //     TweenMax.to(x7, 1.5, {scaleX: 1, scaleY: 1, ease: Bounce.easeOut, onComplete: function () {
-        //         TweenMax.to(x7, 0.3, {alpha: 0, onComplete: function () {
-        //             stage.removeChild(x7);
-        //         }});
-        //     }});
-        // }
-        // pressureFire.mask = newMask;
     }
 
     function getFirework() {
@@ -549,7 +603,9 @@ export let freeSpin = (function () {
         buttonsContainer.visible = false;
         fsTotalWin = 0;
         drawFreeSpinsBG();
-        events.trigger('menu:changeSide', 'right');
+        if (storage.read('isMobile')) {
+            events.trigger('menu:changeSide', 'right');
+        }
     }
 
     function transitionFreeSpins(data) {
@@ -602,7 +658,8 @@ export let freeSpin = (function () {
         transitionWinText.y = utils.height / 2 - 90;
         transitionWinText.regX = bounds.width / 2;
         transitionWinText.regY = bounds.height / 2;
-        let transitionButton = new createjs.Bitmap(loader.getResult('But')).set({
+        const ssOther = loader.getResult('other');
+        let transitionButton = new c.Sprite(ssOther, 'But').set({
             name: 'transitionButton',
             x: utils.width / 2,
             y: utils.height / 2 + 150,
@@ -641,8 +698,8 @@ export let freeSpin = (function () {
     }
 
     function countFreeSpins(number) {
-        const fsTableContainer = stage.getChildByName('fsTableContainer');
-        const fsTotalCount = fsTableContainer.getChildByName('fsTotalCount');
+        const _lastWinCount = storage.read('rollResponse').TotalWinCoins;
+        fsLastWin.text = (_lastWinCount) ? _lastWinCount : '';
         fsTotalCount.text = number + '';
         const countBounds = fsTotalCount.getBounds();
         fsTotalCount.regX = countBounds.width / 2;
@@ -664,21 +721,38 @@ export let freeSpin = (function () {
         buttonsContainer.visible = true;
         const truba = fgContainer.getChildByName('truba');
         const pressureContainer = fgContainer.getChildByName('pressureContainer');
-        // const fsMachineBG = bgContainer.getChildByName('fsMachineBG');
         const fsBG = bgContainer.getChildByName('fsBG');
 
-        const gameBG = bgContainer.getChildByName('gameBG');
+        const gameBG = fgContainer.getChildByName('gameBG');
         gameBG.visible = true;
 
         const balanceContainer = stage.getChildByName('balanceContainer');
-        const coinsSum = balanceContainer.getChildByName('coinsSum');
-        const betSum = balanceContainer.getChildByName('betSum');
-        const coinsSumText = balanceContainer.getChildByName('coinsSumText');
-        const betSumText = balanceContainer.getChildByName('betSumText');
         const totalWinText = balanceContainer.getChildByName('totalWinText');
         const totalWinSum = balanceContainer.getChildByName('totalWinSum');
-        betSum.visible = coinsSum.visible = betSumText.visible = coinsSumText.visible = true;
-        balanceContainer.removeChild(totalWinText, totalWinSum);
+
+        const betSum = balanceContainer.getChildByName('betSum');
+        const coinsSum = balanceContainer.getChildByName('coinsSum');
+
+        if (storage.read('isMobile')) {
+            balanceContainer.removeChild(totalWinText, totalWinSum);
+
+            const coinsSumText = balanceContainer.getChildByName('coinsSumText');
+            const betSumText = balanceContainer.getChildByName('betSumText');
+            betSum.visible = coinsSum.visible = betSumText.visible = coinsSumText.visible = true;
+        } else {
+            balanceContainer.removeChild(totalWinSum);
+
+            coinsSum.set({
+                x: 960,
+                y: 580
+            });
+            betSum.set({
+                x: 360,
+                y: 581
+            });
+
+            stage.removeChild(stage.getChildByName('fsInterfaceContainer'));
+        }
         balanceContainer.updateCache();
 
         bgContainer.removeChild(fsBG);
@@ -689,8 +763,11 @@ export let freeSpin = (function () {
         stage.removeChild(stage.getChildByName('fsTableContainer'));
         stage.removeChild(stage.getChildByName('clockContainer'));
         stage.removeChild(stage.getChildByName('fsLeftContainer'));
-        storage.changeState('side', 'left');
-        events.trigger('menu:changeSide', 'left');
+
+        if (storage.read('isMobile')) {
+            storage.changeState('side', 'left');
+            events.trigger('menu:changeSide', 'left');
+        }
         // canvas.changeGamePosition('left');
     }
 
@@ -701,21 +778,23 @@ export let freeSpin = (function () {
             const totalWinText = balanceContainer.getChildByName('totalWinText');
             totalWinSum.text = +totalWinSum.text + data.TotalWinCoins;
             fsTotalWin = totalWinSum.text;
-            totalWinSum.x = totalWinText.x + 20 + totalWinText.getMeasuredWidth() / 2 + totalWinSum.getMeasuredWidth() / 2;
+            if (storage.read('isMobile')) {
+                totalWinSum.x = totalWinText.x + 20 + totalWinText.getMeasuredWidth() / 2 + totalWinSum.getMeasuredWidth() / 2;
+            }
             balanceContainer.updateCache();
         }
     }
 
     function finishFreeSpins() {
-
+        let loader = storage.read('loadResult');
         const response = storage.read('freeRollResponse');
+        const ssOther = loader.getResult('other');
         storage.read('currentBalance').coinsCash = ((+storage.read('currentBalance').coinsCash * 100 + +storage.read('currentBalance').winCash * 100) / 100).toFixed(2);
         storage.read('currentBalance').coinsSum = +storage.read('currentBalance').coinsSum + response.CoinsWinCounter + response.TotalWinCoins;
         balance.updateBalance();
 
         createjs.Sound.stop('fsAmbientSound');
         createjs.Sound.play('bonusPerehodSound', {loop: -1});
-        let loader = storage.read('loadResult');
         let finishContainer = new createjs.Container().set({
             name: 'finishContainer',
             alpha: 0
@@ -725,7 +804,8 @@ export let freeSpin = (function () {
             alpha: 0.8
         });
         finishBG.graphics.beginFill('#000').drawRect(0, 0, utils.width, utils.height);
-        let finishText = new createjs.Bitmap(loader.getResult('totalWin')).set({
+
+        let finishText = new createjs.Sprite(ssOther, 'totalWin').set({
             name: 'finishText',
             x: utils.width / 2,
             y: utils.height / 2 - 250,
@@ -733,26 +813,28 @@ export let freeSpin = (function () {
             regY: 150,
             scaleX: 0.1, scaleY: 0.1, alpha: 0
         });
-        let cultists1 = new createjs.Sprite(loader.getResult('new_elements'), '12-w').set({
+
+        const ssCustisti = loader.getResult('cultisti');
+        let cultists1 = new createjs.Sprite(ssCustisti, '12-w').set({
             name: 'cultists',
-            x: utils.width / 2 - 370,
-            y: utils.height / 2,
-            scaleX: 1.4,
-            scaleY: 1.4
+            x: utils.width / 2 - 390,
+            y: utils.height / 2 - 20,
+            scaleX: 1,
+            scaleY: 1
         });
-        let cultists2 = new createjs.Sprite(loader.getResult('new_elements'), '11-w').set({
+        let cultists2 = new createjs.Sprite(ssCustisti, '11-w').set({
             name: 'cultists',
-            x: utils.width / 2 - 270,
-            y: utils.height / 2 - 70,
-            scaleX: 1.6,
-            scaleY: 1.6
+            x: utils.width / 2 - 300,
+            y: utils.height / 2 - 90,
+            scaleX: 1.2,
+            scaleY: 1.2
         });
-        let cultists3 = new createjs.Sprite(loader.getResult('new_elements'), '13-w').set({
+        let cultists3 = new createjs.Sprite(ssCustisti, '13-w').set({
             name: 'cultists',
-            x: utils.width / 2 + 360,
-            y: utils.height / 2 - 5,
-            scaleX: 1.4,
-            scaleY: 1.4,
+            x: utils.width / 2 + 380,
+            y: utils.height / 2 - 25,
+            scaleX: 1,
+            scaleY: 1,
             skewY: 180
         });
         let finishWinText = new createjs.BitmapText(fsTotalWin + '', loader.getResult('numbers')).set({
@@ -776,7 +858,7 @@ export let freeSpin = (function () {
         let tl = new TimelineMax({repeat: -1});
         tl.from(luchi, 15, {rotation: -360, ease: Power0.easeNone});
 
-        let finishButton = new createjs.Bitmap(loader.getResult('But')).set({
+        let finishButton = new createjs.Sprite(ssOther, 'But').set({
             name: 'finishButton',
             x: utils.width / 2,
             y: utils.height / 2 + 255,
@@ -923,12 +1005,7 @@ export let freeSpin = (function () {
                 countTotalWin(storage.read('rollResponse').TotalFreeSpins - 1);
             }
         }
-        if (state === 'fsMulti') {
-            // if (config.currentMulti != storage.readState(state)) {
-            changeMultiplier(storage.readState(state));
-                // config.currentMulti = storage.readState(state);
-            // }
-        }
+        // if (state === 'fsMulti') {}
         if (state === 'fsLevel') {
             changeLevel(storage.readState(state));
         }
@@ -949,7 +1026,6 @@ export let freeSpin = (function () {
         stopFreeSpins,
         startFreeSpin,
         drawFreeSpinsBG,
-        changeMultiplier,
         getMultiLight,
         changeLevel,
         showTotalFreeSpins,

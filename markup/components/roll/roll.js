@@ -54,17 +54,73 @@ export let roll = (function () {
     }
 
     function initGameContainer() {
+        const stage = storage.read('stage');
+        const loader = storage.read('loadResult');
+        const fg = stage.getChildByName('fgContainer');
+
         gameContainer.set({
             name: 'gameContainer',
             x: config.gameX,
             y: config.gameY
         });
-        const stage = storage.read('stage');
         const gameMask = new createjs.Shape();
         gameMask.graphics.drawRect(config.gameX, config.gameY, utils.gameWidth, utils.gameHeight);
         gameContainer.mask = gameMask;
-        const fg = stage.getChildByName('fgContainer');
-        stage.addChildAt(gameContainer, stage.getChildIndex(fg));
+
+        const gameMachine = new c.Bitmap(loader.getResult('newGameMachine')).set({
+            name: 'gameMachine',
+            x: 30, // Magic Numbers
+            y: 5 // Magic Numbers
+        });
+
+        const ssOverall = loader.getResult('overall');
+        const logoNecro = new c.Sprite(ssOverall, 'logoNecro').set({
+            name: 'logoNecro',
+            x: 325, // Magic Numbers
+            y: 15 // Magic Numbers
+        });
+
+        const winNumbersContainer = new c.Container().set({name: 'winNumbersContainer'});
+
+        let winNumPrefab = new c.Sprite(loader.getResult('winAllNumbers')).set({
+            name: 'winAllNumbers',
+            x: 24, // Magic Numbers
+            y: 106, // Magic Numbers
+            visible: false
+        });
+
+        const winNumCount = winNumPrefab.spriteSheet.getNumFrames();
+        let winNumArr = [];
+        for (let i = 0; i < winNumCount; i++) {
+            winNumPrefab.gotoAndStop(i);
+            winNumArr[i] = [
+                winNumPrefab.clone(),
+                winNumPrefab.clone().set({
+                    x: 1045, // Magic Numbers
+                    y: 106 // Magic Numbers
+                })
+            ];
+            winNumbersContainer.addChild(winNumArr[i][0], winNumArr[i][1]);
+        }
+        storage.write('winNumbersArr', winNumArr);
+
+        fg.addChild(gameContainer, gameMachine, winNumbersContainer, logoNecro);
+        utils.getCenterPoint(fg);
+
+        if (storage.read('isMobile')) {
+            fg.set({
+                x: fg.regX,
+                y: fg.regY
+            });
+        } else { // Desktop
+            fg.set({
+                x: utils.width / 2 - 25,
+                y: fg.regY * 0.85,
+                scaleX: 0.85,
+                scaleY: 0.85
+            });
+        }
+
     }
 
     function initTopGameContainer() {
@@ -75,7 +131,7 @@ export let roll = (function () {
         });
         const stage = storage.read('stage');
         const fg = stage.getChildByName('fgContainer');
-        stage.addChildAt(gameTopContainer, stage.getChildIndex(fg) + 1);
+        fg.addChildAt(gameTopContainer, fg.getChildIndex( fg.getChildByName('winRectsContainer') ) );
     }
 
     function getScreenData(inds, wls) {
@@ -181,6 +237,7 @@ export let roll = (function () {
             }
             storage.changeState('firstScreen', 'done');
             events.trigger('roll:firstScreen');
+
             // TODO: createTopGameController
             initTopGameContainer();
             let topContainer = [];

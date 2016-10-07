@@ -5,7 +5,7 @@ import { events } from 'components/events/events';
 const c = createjs;
 
 export function handleSpinClick() {
-    const buttonsCache = storage.read('stage').getChildByName('buttonsContainer').getChildByName('buttonsCache');
+    // const buttonsCache = storage.read('stage').getChildByName('buttonsContainer').getChildByName('buttonsCache');
     let that = this;
     if (storage.readState('lockedMenu')) return;
     if (utils.lowBalance()) {
@@ -19,40 +19,57 @@ export function handleSpinClick() {
     if (!lockedRoll) {
         if (rollState !== 'started') {
             events.trigger('buttons:startRoll');
-            that.gotoAndStop('spinOff');
-            TweenMax.to(that, 0.5, {rotation: -45});
+            if ( storage.read('isMobile') ) {
+                that.gotoAndStop('spinOff');
+                TweenMax.to(that, 0.5, {rotation: -45});
+            }
         }
         if (fastRoll) {
-            that.gotoAndStop('spinOff');
+            if ( storage.read('isMobile') ) {
+                that.gotoAndStop('spinOff');
+                TweenMax.to(that, 0.5, {rotation: 0});
+            }
             storage.changeState('fastRoll', 'enabled');
             events.trigger('buttons:fastRoll', 'enabled');
-            TweenMax.to(that, 0.5, {rotation: 0});
         }
     }
 }
 
 export function handleSoundClick() {
-    const buttonsCache = storage.read('stage').getChildByName('buttonsContainer').getChildByName('buttonsCache');
-    let that = this;
     if (storage.readState('lockedMenu')) return;
+    if ( storage.read('isMobile') ) {
+        const buttonsCache = storage.read('stage').getChildByName('buttonsContainer').getChildByName('buttonsCache');
+        let that = this;
 
-    if (storage.readState('roll') !== 'started') {
-        const sound = storage.readState('sound');
-        if (sound) {
-            that.gotoAndStop('soundOff');
-            storage.changeState('sound', false);
-            c.Sound.muted = true;
-        } else {
-            that.gotoAndStop('soundOut');
-            storage.changeState('sound', true);
-            c.Sound.muted = false;
+        if (storage.readState('roll') !== 'started') {
+            const sound = storage.readState('sound');
+            if (sound) {
+                that.gotoAndStop('soundOff');
+                storage.changeState('sound', false);
+                c.Sound.muted = true;
+            } else {
+                that.gotoAndStop('soundOut');
+                storage.changeState('sound', true);
+                c.Sound.muted = false;
+            }
+            buttonsCache.updateCache();
         }
-        buttonsCache.updateCache();
+    } else { // desktop
+        if (storage.readState('roll') !== 'started') {
+            const sound = storage.readState('sound');
+            if (sound) {
+                storage.changeState('sound', false);
+                c.Sound.muted = true;
+            } else {
+                storage.changeState('sound', true);
+                c.Sound.muted = false;
+            }
+        }
     }
 }
 
 export function handleMenuClick() {
-    const buttonsCache = storage.read('stage').getChildByName('buttonsContainer').getChildByName('buttonsCache');
+    // const buttonsCache = storage.read('stage').getChildByName('buttonsContainer').getChildByName('buttonsCache');
     if (storage.readState('lockedMenu')) return;
 
     if (storage.readState('roll') !== 'started') {
@@ -62,11 +79,11 @@ export function handleMenuClick() {
     }
 }
 
-export function handleAutoClick() {
-    const buttonsCache = storage.read('stage').getChildByName('buttonsContainer').getChildByName('buttonsCache');
-    let that = this;
+export function handleAutoClick(mode, container, autoSpinBtn, count) {
+    // const buttonsCache = storage.read('stage').getChildByName('buttonsContainer').getChildByName('buttonsCache');
     if (storage.readState('lockedMenu')) return;
 
+    let that = this;
     if (storage.readState('roll') !== 'started' && that.currentAnimation !== 'autoStop') {
         c.Sound.play('buttonClickSound');
         storage.changeState('menu', 'auto');
@@ -80,7 +97,7 @@ export function handleAutoClick() {
 }
 
 export function handleBetClick() {
-    const buttonsCache = storage.read('stage').getChildByName('buttonsContainer').getChildByName('buttonsCache');
+    // const buttonsCache = storage.read('stage').getChildByName('buttonsContainer').getChildByName('buttonsCache');
     if (storage.readState('lockedMenu')) return;
 
     if (storage.readState('roll') !== 'started') {

@@ -1,0 +1,28 @@
+{
+
+"images": [
+    "fsScreen-2.png"
+],
+
+"frames": [
+    [1, 1, 170, 125, 0, -151, -518],
+    [173, 1, 318, 243, 0, -139, -410],
+    [493, 1, 408, 442, 0, -129, -220],
+    [1, 445, 231, 666, 0, -122, -3],
+    [234, 445, 320, 563, 0, -18, -113],
+    [556, 445, 308, 491, 0, -4, -184],
+    [1, 1113, 267, 417, 0, -32, -256],
+    [270, 1113, 389, 614, 0, -154, -712],
+    [661, 1113, 109, 170, 0, -119, -478]
+],
+
+"animations": {
+    "SB": { "frames": [0, 1, 2, 3, 4, 5, 6, 7, 8] }
+},
+
+"texturepacker": [
+        "SmartUpdateHash: $TexturePacker:SmartUpdate:bf8137f40811158f4699955bfbdc2e4b:dc480639dee6feaa78485f98a33f3136:7a77e60a2517673a849845f439afff77$",
+        "Created with TexturePacker (https://www.codeandweb.com/texturepacker) for EaselJS"
+]
+
+}

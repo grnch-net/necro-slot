@@ -68,16 +68,33 @@ export let preloader = (function () {
             name: 'fsBG'
         });
 
-        const preloaderLogo = new createjs.Bitmap(loader.getResult('preloaderLogo'));
-        preloaderLogo.set({
-            name: 'preloaderLogo',
-            x: w / 2 + 40,
-            y: h / 2 - 40,
-            regX: preloaderLogo.getBounds().width / 2,
-            regY: preloaderLogo.getBounds().height / 2,
-            scaleX: 0.65,
-            scaleY: 0.65
+        const fon2 = new createjs.Bitmap(loader.getResult('fsFonTest2')).set({
+            x: utils.width / 2,
+            y: utils.height / 2,
+            regX: 684 / 2,
+            regY: 684 / 2,
+            scaleX: 1.9,
+            scaleY: 1.9,
+            alpha: 0.5
         });
+        let tlFon = new TimelineMax({ repeat: -1 });
+        tlFon.to(fon2, 300, { rotation: 360 });
+
+        // const ssAtlas = loader.getResult('atlas');
+        // const bookTop = new c.Sprite(ssAtlas, 'book0').set({
+        //     name: 'bookTop',
+        //     x: utils.width / 2 + 77,
+        //     y: utils.height / 2 - 80,
+        //     regX: 300,
+        //     regY: 300
+        // });
+        // const bookBot = new c.Sprite(ssAtlas, 'bookBot').set({
+        //     name: 'bookBot',
+        //     x: utils.width / 2 + 77,
+        //     y: utils.height / 2 - 85,
+        //     regX: 300,
+        //     regY: 300
+        // });
 
         const preloaderPlay = new createjs.Bitmap(loader.getResult('play'));
         preloaderPlay.set({
@@ -90,9 +107,10 @@ export let preloader = (function () {
             scaleY: 0.8
         });
 
-        preloaderCache.addChild(preloaderBG, preloaderLogo);
+        preloaderCache.addChild(preloaderBG);
         preloaderCache.cache(0, 0, w, h);
-        preloaderContainer.addChild(preloaderCache, preloaderPlay);
+        preloaderContainer.addChild(preloaderCache, fon2, preloaderPlay);
+        // preloaderContainer.addChild(bookTop);
         preloaderContainer.on('click', function (e) {
             e.stopPropagation();
         });
@@ -140,10 +158,10 @@ export let preloader = (function () {
         play.on('click', handlePlayClick, play, true);
 
         let tl = new TimelineMax({repeat: -1});
-        tl.to(play, 0.1, {rotation: -20, ease: Power0.easeNone, delay: 2})
-            .to(play, 0.1, {rotation: 20, ease: Power0.easeNone})
-            .to(play, 0.1, {rotation: -20, ease: Power0.easeNone})
-            .to(play, 0.1, {rotation: 20, ease: Power0.easeNone})
+        tl.to(play, 0.1, {rotation: -5, ease: Power0.easeNone, delay: 2})
+            .to(play, 0.1, {rotation: 5, ease: Power0.easeNone})
+            .to(play, 0.1, {rotation: -5, ease: Power0.easeNone})
+            .to(play, 0.1, {rotation: 5, ease: Power0.easeNone})
             .to(play, 0.1, {rotation: 0, ease: Power0.easeNone});
 
         let newPreloaderContainer = stage.getChildByName('newPreloaderContainer');

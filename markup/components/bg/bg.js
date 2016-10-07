@@ -23,57 +23,31 @@ export let bg = (function () {
     function drawBG() {
         const stage = storage.read('stage');
         const loader = storage.read('loadResult');
+        const isMobile = storage.read('isMobile');
 
         const bgContainer = new c.Container().set({name: 'bgContainer'});
-        const fgContainer = new c.Container().set({name: 'fgContainer'});
+        const fgContainer = new c.Container().set({
+            name: 'fgContainer'
+        });
+
         const mainBG = new c.Bitmap(loader.getResult('newBGLight')).set({name: 'mainBG'});
-        const gameBG = new c.Sprite(loader.getResult('bg'), 'gameBG').set({name: 'gameBG'});
-        const gameMachine = new c.Bitmap(loader.getResult('newGameMachine')).set({
-            name: 'gameMachine',
-            x: 30, // Magic Numbers
-            y: 5 // Magic Numbers
-        });
-        const logoNecro = new c.Bitmap(loader.getResult('logoNecro')).set({
-            name: 'logoNecro',
-            x: 325, // Magic Numbers
-            y: 15 // Magic Numbers
-        });
 
-        const winNumbersContainer = new c.Container().set({name: 'winNumbersContainer'});
-
-        let winNumPrefab = new c.Sprite(loader.getResult('winAllNumbers')).set({
-            name: 'winAllNumbers',
-            x: 24, // Magic Numbers
-            y: 106, // Magic Numbers
-            visible: false
+        const gameBG = new c.Bitmap(loader.getResult('gameBG')).set({
+            name: 'gameBG',
+            x: 80,
+            y: 90
         });
-
-        const winNumCount = winNumPrefab.spriteSheet.getNumFrames();
-        let winNumArr = [];
-        for (let i = 0; i < winNumCount; i++) {
-            winNumPrefab.gotoAndStop(i);
-            winNumArr[i] = [
-                winNumPrefab.clone(),
-                winNumPrefab.clone().set({
-                    x: 1045, // Magic Numbers
-                    y: 106 // Magic Numbers
-                })
-            ];
-            winNumbersContainer.addChild(winNumArr[i][0], winNumArr[i][1]);
-        }
 
         // Это нужно перенести в модуль баланса или оставить здесь
         const footerBgDown = new c.Shape().set({name: 'footerBgDown'});
-        const footerBgUp = new c.Shape().set({name: 'footerBgUp'});
         footerBgDown.graphics.beginFill('rgba(0, 0, 0)').drawRect(0, h - config.bottomLineHeight, w, config.bottomLineHeight);
-        footerBgUp.graphics.beginFill('rgba(0, 0, 0, 0.6)').drawRect(0, h - config.bottomLineHeight - config.topLineHeight, w, config.topLineHeight);
 
         // Это нужно перенести в модуль кнопок либо отдельный модуль
         const home = new c.Bitmap(loader.getResult('home')).set({
             name: 'homeButton',
-            x: 15, // Magic Numbers
-            y: h - 63 // Magic Numbers
+            x: 15 // Magic Numbers
         });
+        home.y = (isMobile) ? h - 63 : h - 26;
         home.on('click', function () {
             utils.request('_Logout/', storage.read('sessionID'))
             .then((response) => {
@@ -83,8 +57,8 @@ export let bg = (function () {
         });
 
         const rainContainer = new c.Container().set({name: 'rainContainer'});
-        const ss = loader.getResult('randomSprites');
-        const rainSprite = new c.Sprite(ss, 'rain' );
+        const ssMainScreen = loader.getResult('mainScreen');
+        const rainSprite = new c.Sprite(ssMainScreen, 'rain' );
         for (let i = 0; i < 5; i++) {
             const _clone = rainSprite.clone().set({
                 name: 'rainSprite' + i,
@@ -94,7 +68,7 @@ export let bg = (function () {
             rainContainer.addChild(_clone);
         }
 
-        const lightningSprite = new c.Sprite(ss, 'lightning0');
+        const lightningSprite = new c.Sprite(ssMainScreen, 'lightning0');
         rainContainer.addChild(lightningSprite);
 
         (function animLightning() {
@@ -109,29 +83,28 @@ export let bg = (function () {
             }, Math.round(Math.random() * 2000 + 300) );
         })();
 
-        bgContainer.addChild(mainBG, rainContainer, gameBG, footerBgUp, footerBgDown, home);
-        fgContainer.addChild(gameMachine, winNumbersContainer, logoNecro);
+        bgContainer.addChild(mainBG, rainContainer);
+        if (isMobile) {
+            const footerBgUp = new c.Shape().set({name: 'footerBgUp'});
+            footerBgUp.graphics.beginFill('rgba(0, 0, 0, 0.6)').drawRect(0, h - config.bottomLineHeight - config.topLineHeight, w, config.topLineHeight);
+            bgContainer.addChild(footerBgUp);
+        }
+        bgContainer.addChild(footerBgDown, home);
+        fgContainer.addChild(gameBG);
         stage.addChildAt(bgContainer, fgContainer, 0);
 
         // TODO: Разобраться с кешированием бекграундов
         // TODO: Перенасти отрисовку нижних полосок меню в модуль balance
 
-        storage.write('winNumbersArr', winNumArr);
         storage.changeState('bgDraw', 'main');
         events.trigger('bg:main');
         storage.changeState('side', 'left');
         events.trigger('bg:changeSide', 'left');
     }
 
-    function changeSide(side) {
-        const stage = storage.read('stage');
-        const fg = stage.getChildByName('fgContainer');
-    }
-
     return {
         start,
-        drawBG,
-        changeSide
+        drawBG
     };
 
 })();

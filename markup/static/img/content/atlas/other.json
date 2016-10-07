@@ -1,0 +1,24 @@
+{
+
+"images": [
+    "static/img/content/atlas/other.png"
+],
+
+"frames": [
+    [1, 1, 236, 95, 0, 0, 0],
+    [1, 98, 824, 263, 0, -90, -19],
+    [1, 363, 827, 223, 0, -88, -39]
+],
+
+"animations": {
+    "But": { "frames": [0] },
+    "bigWin": { "frames": [1] },
+    "totalWin": { "frames": [2] }
+},
+
+"texturepacker": [
+        "SmartUpdateHash: $TexturePacker:SmartUpdate:15309dec14381a88d2fc57a5a6d1f6d5:b6dd3c50ab3c8f9f7abc3324af98ee7e:1cbfb6f09f60b1c2cb8fdc3cc5ba6204$",
+        "Created with TexturePacker (https://www.codeandweb.com/texturepacker) for EaselJS"
+]
+
+}
