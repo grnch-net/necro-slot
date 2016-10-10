@@ -42,20 +42,6 @@ export let bg = (function () {
         const footerBgDown = new c.Shape().set({name: 'footerBgDown'});
         footerBgDown.graphics.beginFill('rgba(0, 0, 0)').drawRect(0, h - config.bottomLineHeight, w, config.bottomLineHeight);
 
-        // Это нужно перенести в модуль кнопок либо отдельный модуль
-        const home = new c.Bitmap(loader.getResult('home')).set({
-            name: 'homeButton',
-            x: 15 // Magic Numbers
-        });
-        home.y = (isMobile) ? h - 63 : h - 26;
-        home.on('click', function () {
-            utils.request('_Logout/', storage.read('sessionID'))
-            .then((response) => {
-                console.log('Logout response:', response);
-            });
-            window.history.back();
-        });
-
         const rainContainer = new c.Container().set({name: 'rainContainer'});
         const ssMainScreen = loader.getResult('mainScreen');
         const rainSprite = new c.Sprite(ssMainScreen, 'rain' );
@@ -83,13 +69,30 @@ export let bg = (function () {
             }, Math.round(Math.random() * 2000 + 300) );
         })();
 
-        bgContainer.addChild(mainBG, rainContainer);
+        bgContainer.addChild(mainBG, rainContainer, footerBgDown);
         if (isMobile) {
             const footerBgUp = new c.Shape().set({name: 'footerBgUp'});
             footerBgUp.graphics.beginFill('rgba(0, 0, 0, 0.6)').drawRect(0, h - config.bottomLineHeight - config.topLineHeight, w, config.topLineHeight);
             bgContainer.addChild(footerBgUp);
+
+            const ssOverall = loader.getResult('overall');
+            const home = new c.Sprite(ssOverall, 'home' ).set({
+                name: 'homeButton',
+                x: 15, // Magic Numbers,
+                scaleX: 1.5,
+                scaleY: 1.5
+            });
+            home.y = h - 70;
+            home.on('click', function () {
+                utils.request('_Logout/', storage.read('sessionID'))
+                .then((response) => {
+                    console.log('Logout response:', response);
+                });
+                window.history.back();
+            });
+            bgContainer.addChild(home);
         }
-        bgContainer.addChild(footerBgDown, home);
+
         fgContainer.addChild(gameBG);
         stage.addChildAt(bgContainer, fgContainer, 0);
 
@@ -100,6 +103,7 @@ export let bg = (function () {
         events.trigger('bg:main');
         storage.changeState('side', 'left');
         events.trigger('bg:changeSide', 'left');
+
     }
 
     return {
