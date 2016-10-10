@@ -209,25 +209,6 @@ export let freeSpin = (function () {
         });
         fsLeftContainer.addChild(cultistBlack1, cultistBlack2, cultistBlack3);
 
-        const particleContainer = new c.Container().set({
-            name: 'particleContainerRight',
-            x: utils.width / 2,
-            y: utils.height / 2
-        });
-        let containerCount = 4;
-        let particlesInContainer = 13;
-        for (let i = 0; i < containerCount; i++) {
-            _createContainers(particleContainer, particlesInContainer, i);
-        }
-        particleContainer.set({
-            x: 90,
-            y: utils.height - 200
-        });
-
-        let _mask = new createjs.Shape();
-        _mask.graphics.beginFill( 'rgba(0, 0, 0, 1)' ).drawRect(0, 190, utils.width, 500);
-        particleContainer.mask = _mask;
-
 
         fgContainer.uncache();
 
@@ -253,6 +234,25 @@ export let freeSpin = (function () {
         const clockContainer = new c.Container().set({
             name: 'clockContainer'
         });
+        const particleContainer = new c.Container().set({
+            name: 'particleContainerRight',
+            x: utils.width / 2,
+            y: utils.height / 2
+        });
+        let containerCount = 4;
+        let particlesInContainer = 13;
+        for (let i = 0; i < containerCount; i++) {
+            _createContainers(particleContainer, particlesInContainer, i);
+        }
+        particleContainer.set({
+            x: 90,
+            y: utils.height - 200
+        });
+
+        let _mask = new createjs.Shape();
+        _mask.graphics.beginFill( 'rgba(0, 0, 0, 1)' ).drawRect(0, 190, utils.width, 500);
+        particleContainer.mask = _mask;
+
         const fsX = new createjs.BitmapText('+', loader.getResult('numbers')).set({
             name: 'fsX',
             x: 81,
@@ -292,7 +292,7 @@ export let freeSpin = (function () {
             regY: 120,
             rotation: -20
         });
-        clockContainer.addChild(bookBot, bookTop, particleContainer, fsX, fsMulti, particleContainer);
+        clockContainer.addChild(bookBot, bookTop, fsX, fsMulti, particleContainer);
 
         stage.addChild(fsLeftContainer, clockContainer);
         moveClock(clockContainer);
@@ -431,8 +431,76 @@ export let freeSpin = (function () {
             scaleY: 0.7
         });
 
+        const clockContainer = new c.Container().set({
+            name: 'clockContainer'
+        });
+        const particleContainer = new c.Container().set({
+            name: 'particleContainerRight',
+            x: utils.width / 2,
+            y: utils.height / 2
+        });
+        let containerCount = 4;
+        let particlesInContainer = 13;
+        for (let i = 0; i < containerCount; i++) {
+            _createContainers(particleContainer, particlesInContainer, i);
+        }
+        particleContainer.set({
+            x: 110,
+            y: utils.height - 225
+        });
+
+        let _mask = new createjs.Shape();
+        _mask.graphics.beginFill( 'rgba(0, 0, 0, 1)' ).drawRect(0, 190, utils.width, 500);
+        particleContainer.mask = _mask;
+
+        const fsX = new createjs.BitmapText('+', loader.getResult('numbers')).set({
+            name: 'fsX',
+            x: 93,
+            y: utils.height - 220,
+            scaleX: 0.2,
+            scaleY: 0.2,
+            rotation: -20
+        });
+        let fsXBounds = fsTotalCount.getBounds();
+        fsX.regX = fsXBounds.width / 2;
+        fsX.regY = fsXBounds.height / 2;
+        const fsMulti = new createjs.BitmapText('2', loader.getResult('numbers')).set({
+            name: 'fsMulti',
+            x: 120,
+            y: utils.height - 245,
+            scaleX: 0.3,
+            scaleY: 0.3,
+            rotation: -20
+        });
+        let multiBounds = fsTotalCount.getBounds();
+        fsMulti.regX = multiBounds.width / 2;
+        fsMulti.regY = multiBounds.height / 2;
+
+        const bookTop = new c.Sprite(ssFSScreen, 'book1').set({
+            name: 'bookTop',
+            x: 140,
+            y: utils.height - 267,
+            regX: 120,
+            regY: 120,
+            scaleX: 1.4,
+            scaleY: 1.4,
+            rotation: -20
+        });
+        const bookBot = new c.Sprite(ssFSScreen, 'bookBot').set({
+            name: 'bookBot',
+            x: 146,
+            y: utils.height - 269,
+            regX: 120,
+            regY: 120,
+            scaleX: 1.4,
+            scaleY: 1.4,
+            rotation: -20
+        });
+        clockContainer.addChild(bookBot, bookTop, fsX, fsMulti, particleContainer);
+        moveClock(clockContainer);
+
         fsInterfaceContainer.addChild(fsInterfaceBg, fsInterface, fsTableContainer, infoBtn, fsLastWin, cultistBlack1, cultistBlack3, cultistBlack2, linesTxt, betLevelTxt, countValueTxt);
-        stage.addChildAt(fsInterfaceContainer, stage.getChildIndex(stage.getChildByName('fgContainer')) + 1);
+        stage.addChildAt(fsInterfaceContainer, clockContainer, stage.getChildIndex(stage.getChildByName('fgContainer')) + 1);
     }
 
     function drawFreeSpinsBG() {
