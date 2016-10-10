@@ -300,7 +300,23 @@ export let buttons = (function () {
         });
         infoBtn.on('click', handleInfoClick);
 
-        const staticBtnContainer = new c.Container({name: 'staticBtnContainer'});
+        const staticBtnContainer = new c.Container({name: 'staticBtnContainer'}).set({
+            name: 'staticBtnContainer',
+            x: -170
+        });
+
+        const home = new c.Sprite(ssOverall, 'home' ).set({
+            name: 'homeButton',
+            x: 180,
+            y: 690
+        });
+        home.on('click', function () {
+            utils.request('_Logout/', storage.read('sessionID'))
+            .then((response) => {
+                console.log('Logout response:', response);
+            });
+            window.history.back();
+        });
 
         const settingsBtn = new c.Sprite(ssOverall, 'settings').set({
             x: 210,
@@ -332,22 +348,8 @@ export let buttons = (function () {
             isSound = !isSound;
         });
 
-        const helpBtn = new c.Sprite(ssOverall, 'help').set({
-            x: 270,
-            y: 690
-        });
-        let isHelp = false;
-        helpBtn.on('click', () => {
-            if (isHelp) {
-                helpBtn.gotoAndStop('help');
-            } else {
-                helpBtn.gotoAndStop('helpOn');
-            }
-            isHelp = !isHelp;
-        });
-
         const fastSpinBtn = new c.Sprite(ssOverall, 'reload').set({
-            x: 300,
+            x: 270,
             y: 690
         });
         let isFastSpin = storage.readState('fastSpinSetting');
@@ -362,7 +364,7 @@ export let buttons = (function () {
             isFastSpin = !isFastSpin;
         });
 
-        staticBtnContainer.addChild(settingsBtn, soundBtn, helpBtn, fastSpinBtn);
+        staticBtnContainer.addChild(home, settingsBtn, soundBtn, fastSpinBtn);
         buttonsContainer.addChild(optionsBg, optionsInterface, maxBetBtn, infoBtn, betLevelContainer, coinContainer, linesTxt, autoSpinContainer, spinBtn);
         stage.addChildAt(buttonsContainer, staticBtnContainer, stage.getChildIndex(stage.getChildByName('balanceContainer')));
     }
@@ -478,7 +480,7 @@ export let buttons = (function () {
             buttonsCache.updateCache();
         } else {
             const spinBtn = buttonsContainer.getChildByName('spinBtn');
-            spinBtn.gotoAndStop('stopBtnOn');
+            // spinBtn.gotoAndStop('stopBtnOn');
         }
     }
 
