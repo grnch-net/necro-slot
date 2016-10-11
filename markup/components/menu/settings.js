@@ -205,5 +205,9 @@ export function handleInfoClick() {
 }
 
 function handleHistoryClick() {
-    utils.showPopup('Coming soon!');
+    $('.history').toggleClass('closed');
 }
+
+$('.history__button').click((event) => {
+    $('.history').toggleClass('closed');
+});
