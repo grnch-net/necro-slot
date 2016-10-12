@@ -114,10 +114,10 @@ export let roll = (function () {
             });
         } else { // Desktop
             fg.set({
-                x: utils.width / 2 - 25,
+                x: utils.width / 2 - 28,
                 y: fg.regY * 0.85,
-                scaleX: 0.85,
-                scaleY: 0.85
+                scaleX: 0.89,
+                scaleY: 0.89
             });
         }
 
