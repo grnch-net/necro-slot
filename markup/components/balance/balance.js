@@ -33,6 +33,7 @@ export let balance = (function () {
     function initBalance() {
         stage = storage.read('stage');
         param = (storage.read('isMobile')) ? parameters.mobile : parameters.desktop;
+
         const data = storage.read('initState');
         balanceData.linesLength = storage.read('lines').length;
 
@@ -53,6 +54,9 @@ export let balance = (function () {
         balanceData.currency = data.Currency;
 
         currencySymbol = checkCurrency(balanceData.currency);
+
+        storage.write('lastScoreCents', balanceData.coinsCash * 100);
+        storage.write('lastScoreCoins', balanceData.coinsSum);
 
         writeBalance();
     }
@@ -137,12 +141,14 @@ export let balance = (function () {
 
     function updateBalance() {
         if (balanceText.coinsSum.text !== balanceData.coinsSum) {
+            storage.write('lastScoreCoins', balanceData.coinsSum);
             balanceText.coinsSum.text = balanceData.coinsSum;
         }
         if (balanceText.betSum.text !== balanceData.betSum) {
             balanceText.betSum.text = balanceData.betSum;
         }
         if (balanceText.coinsCash.text.toString().slice(1) !== balanceData.coinsCash) {
+            storage.write('lastScoreCents', balanceData.coinsCash * 100);
             balanceText.coinsCash.text = currencySymbol + balanceData.coinsCash;
         }
         if (balanceText.betCash.text.toString().slice(1) !== balanceData.betCash) {

@@ -313,6 +313,7 @@ export let win = (function () {
             });
         });
         if (storage.read('rollResponse').BonusResults[0] === 'FreeSpinBonus') {
+            storage.write('isFreeSpin', true);
             setTimeout(function () {
                 events.trigger('initFreeSpins');
             }, 1000);
@@ -547,6 +548,7 @@ export let win = (function () {
                 }, time);
                 storage.write('fsTimeout', fsTimeout);
             } else {
+                storage.write('isFreeSpin', false);
                 console.warn('I am stoping Free Spins!');
                 events.trigger('finishFreeSpins');
             }

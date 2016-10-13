@@ -323,12 +323,12 @@ export let roll = (function () {
         const coinsValue = currentBalance.coinsValue * 100;
 
         if (isNoConnect) {
-            let response = JSON.parse(noConnect._Roll);
+            let response = JSON.parse( noConnect.roll() );
             _startRollSuccessful(response);
         } else {
             utils.request('_Roll/', `${sessionID}/${betValue}/${coinsValue}`)
                 .then((response) => {
-                    // console.log('req; _Roll', JSON.stringify(response) );
+                    // console.info('req; _Roll', JSON.stringify(response) );
                     _startRollSuccessful(response);
                 });
         }
@@ -350,7 +350,7 @@ export let roll = (function () {
 
     function endRoll() {
         if (isNoConnect) {
-            let response = JSON.parse(noConnect._Ready);
+            let response = JSON.parse( noConnect.ready() );
             _endRollSuccessful(response);
         } else {
             utils.request('_Ready/', storage.read('sessionID'))
