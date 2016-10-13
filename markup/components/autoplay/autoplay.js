@@ -47,7 +47,7 @@ export let autoplay = (function () {
         autoEnd = true;
         clearTimeout(storage.read('autoTimeout'));
         if (storage.readState('autoplay') !== 'ended') {
-            events.trigger('autoplay:ended');
+            // events.trigger('autoplay:ended');
             storage.changeState('autoplay', 'ended');
         }
     }
