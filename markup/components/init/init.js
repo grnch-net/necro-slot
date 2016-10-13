@@ -105,7 +105,7 @@ export let init = (function () {
 
         // Отправляем запрос на инициализацию
         if (isNoConnect) {
-            let _initData = JSON.parse(noConnect._Initialise);
+            let _initData = JSON.parse( noConnect.initialise() );
             setTimeout(function () {
                 _initSuccessful(_initData);
             }, 100);
