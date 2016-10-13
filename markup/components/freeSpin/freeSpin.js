@@ -374,7 +374,7 @@ export let freeSpin = (function () {
         fsTotalCount.regX = bounds.width / 2;
         fsTotalCount.regY = bounds.height / 2;
 
-        fsLastWin = new createjs.Text(0, 'normal 14px Helvetica', '#dddddd').set({
+        fsLastWin = new createjs.Text('0', 'normal 14px Helvetica', '#dddddd').set({
             name: 'totalWinSum',
             x: 1007,
             y: 579,
@@ -686,6 +686,8 @@ export let freeSpin = (function () {
             config.currentCount = data.count;
             config.currentWinCoins = data.currentWinCoins;
             config.currentWinCents = data.currentWinCents;
+        } else {
+            config.currentCount = storage.read('rollResponse').TotalFreeSpins;
         }
         const loader = storage.read('loadResult');
         stage = storage.read('stage');
@@ -767,7 +769,7 @@ export let freeSpin = (function () {
 
     function countFreeSpins(number) {
         const _lastWinCount = storage.read('rollResponse').TotalWinCoins;
-        fsLastWin.text = (_lastWinCount) ? _lastWinCount : '';
+        if (!storage.read('isMobile')) fsLastWin.text = (_lastWinCount) ? _lastWinCount + '' : '';
         fsTotalCount.text = number + '';
         const countBounds = fsTotalCount.getBounds();
         fsTotalCount.regX = countBounds.width / 2;
