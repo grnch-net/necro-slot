@@ -21,12 +21,12 @@ import { bonuses } from 'components/bonuses/bonuses';
 import { freeSpin } from 'components/freeSpin/freeSpin';
 
 // Init Module
-let isMouse = false;
+let isMobile = false;
 init.start({
     userID: 3,
     casinoID: 3,
     mode: 'normal',
-    isMobile: isMouse
+    isMobile: isMobile
 });
 
 init.login();
@@ -34,7 +34,7 @@ init.login();
 // Canvas Module
 canvas.start({
     canvas: '#game',
-    mouseOver: (isMouse) ? 0 : 20,
+    mouseOver: (isMobile) ? 0 : 20,
     timeToSlide: 0.5
 });
 events.on('init:inited', canvas.initStage);
