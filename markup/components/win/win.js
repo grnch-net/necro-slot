@@ -336,28 +336,6 @@ export let win = (function () {
         // fireLizaAndCards(currentRow);
     }
 
-    function fireLizaAndCards(rowNumber) {
-        const loader = storage.read('loadResult');
-        const gameContainer = stage.getChildByName('gameContainer');
-        const lizaWin = new c.Sprite(loader.getResult('lizaWin'), 'win').set({
-            name: 'lizaWin',
-            x: gameContainer.x + rowNumber * utils.elementWidth - 23, // Magic Numbers
-            y: gameContainer.y - 29 // Magic Numbers
-        });
-        lizaWin.on('animationend', function () {
-            if (storage.read('rollResponse').BonusResults[0] === 'FreeSpinBonus') {
-                events.trigger('initFreeSpins');
-                stage.removeChild(lizaWin);
-            }
-        });
-        lizaWin.on('change', function () {
-            if (Math.floor(lizaWin.currentAnimationFrame) === 12) { // Magic Numbers
-                fireCards(lizaWin.x, lizaWin.y);
-            }
-        });
-        stage.addChild(lizaWin);
-    }
-
     function calcCardCoords(rot, x0, y0) {
         let xFinal, yFinal;
         if (rot < 90) {
