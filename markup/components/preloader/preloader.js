@@ -60,8 +60,9 @@ export let preloader = (function () {
     }
 
     function drawInitScreen() {
-
         const loader = storage.read('loadResult');
+
+        createjs.Sound.play('initBookSound', {loop: -1});
         const preloaderContainer = new c.Container().set({ name: 'preloaderContainer' });
         const preloaderCache = new c.Container().set({ name: 'preloaderCache' });
         const preloaderBG = new createjs.Bitmap(loader.getResult('fsBG')).set({
@@ -80,20 +81,63 @@ export let preloader = (function () {
         let tlFon = new TimelineMax({ repeat: -1 });
         tlFon.to(fon2, 300, { rotation: 360 });
 
-        // const ssAtlas = loader.getResult('atlas');
-        // const bookTop = new c.Sprite(ssAtlas, 'book0').set({
-        //     name: 'bookTop',
-        //     x: utils.width / 2 + 77,
-        //     y: utils.height / 2 - 80,
-        //     regX: 300,
-        //     regY: 300
-        // });
-        // const bookBot = new c.Sprite(ssAtlas, 'bookBot').set({
+        const bookTop = new createjs.Bitmap(loader.getResult('bookTopPreload')).set({
+            name: 'bookTopPreload',
+            x: utils.width / 2 + 35,
+            y: utils.height / 2 - 80,
+            scaleX: 0.66,
+            scaleY: 0.66,
+            regX: 500,
+            regY: 650
+        });
+        const bookBackPreload = new createjs.Bitmap(loader.getResult('bookBackPreload')).set({
+            name: 'bookTopPreload',
+            x: utils.width / 2 + 35,
+            y: utils.height / 2 - 80,
+            scaleX: 0.66,
+            scaleY: 0.66,
+            regX: 500,
+            regY: 650
+        });
+        const logoPreload = new createjs.Bitmap(loader.getResult('logoPreload')).set({
+            name: 'logoPreload',
+            x: utils.width / 2,
+            y: utils.height / 2 - 80,
+            scaleX: 0.66,
+            scaleY: 0.66,
+            regX: 250,
+            regY: 60
+        });
+
+        const ssNewElements = loader.getResult('new_elements');
+        const elem1 = new c.Sprite(ssNewElements, '6-n').set({
+            name: 'elem1',
+            x: utils.width / 2 - 100,
+            y: utils.height / 2 - 320
+        });
+        const elem2 = new c.Sprite(ssNewElements, '4-n').set({
+            name: 'elem2',
+            x: utils.width / 2 - 100,
+            y: utils.height / 2 - 125
+        });
+        const elem3 = new c.Sprite(ssNewElements, '8-n').set({
+            name: 'elem3',
+            x: utils.width / 2 - 240,
+            y: utils.height / 2 - 125
+        });
+        const elem4 = new c.Sprite(ssNewElements, '2-n').set({
+            name: 'elem4',
+            x: utils.width / 2 - 240,
+            y: utils.height / 2 - 325
+        });
+
+        // const ssfsScreen = loader.getResult('fsScreen');
+        // const bookBot = new c.Sprite(ssfsScreen, 'bookBot').set({
         //     name: 'bookBot',
-        //     x: utils.width / 2 + 77,
-        //     y: utils.height / 2 - 85,
-        //     regX: 300,
-        //     regY: 300
+        //     x: utils.width / 2 - 220,
+        //     y: utils.height / 2 - 430,
+        //     scaleX: 2.6,
+        //     scaleY: 2.6
         // });
 
         const preloaderPlay = new createjs.Bitmap(loader.getResult('play'));
@@ -109,8 +153,7 @@ export let preloader = (function () {
 
         preloaderCache.addChild(preloaderBG);
         preloaderCache.cache(0, 0, w, h);
-        preloaderContainer.addChild(preloaderCache, fon2, preloaderPlay);
-        // preloaderContainer.addChild(bookTop);
+        preloaderContainer.addChild(preloaderCache, fon2, preloaderPlay, bookBackPreload, bookTop, elem1, elem2, elem3, elem4, logoPreload);
         preloaderContainer.on('click', function (e) {
             e.stopPropagation();
         });
@@ -178,6 +221,7 @@ export let preloader = (function () {
         storage.changeState('fastSpinSetting', false);
 
         // Это стоит вынести в модуль музыки
+        createjs.Sound.stop('initBookSound');
         const ambient = c.Sound.play('ambientSound', {loop: -1});
         storage.write('ambient', ambient);
         storage.changeState('music', true);
