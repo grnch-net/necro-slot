@@ -358,12 +358,13 @@ export let buttons = (function () {
         let isSound = true;
         storage.changeState('sound', isSound);
         soundBtn.on('click', () => {
-            handleSoundClick();
-            // if (isSound) {
-            //     soundBtn.gotoAndStop('sound');
-            // } else {
-            //     soundBtn.gotoAndStop('soundOn');
-            // }
+            if (isSound) {
+                soundBtn.gotoAndStop('sound');
+                c.Sound.muted = true;
+            } else {
+                soundBtn.gotoAndStop('soundOn');
+                c.Sound.muted = false;
+            }
             isSound = !isSound;
         });
 

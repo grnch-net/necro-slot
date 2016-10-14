@@ -678,7 +678,8 @@ export let freeSpin = (function () {
 
     function transitionFreeSpins(data) {
         createjs.Sound.stop('ambientSound');
-        createjs.Sound.play('bonusPerehodSound', {loop: -1});
+        createjs.Sound.play('bonusPerehodSound');
+
         fsStartData = data;
         if (data) {
             config.currentLevel = data.level - 1;
@@ -742,8 +743,10 @@ export let freeSpin = (function () {
         tl0.from(transitionLuchi, 15, {rotation: -360, ease: Power0.easeNone});
 
         transitionContainer.on('click', function () {
-            createjs.Sound.stop('bonusPerehodSound');
-            createjs.Sound.play('fsAmbientSound', {loop: -1});
+            setTimeout(() => {
+                createjs.Sound.stop('bonusPerehodSound');
+                createjs.Sound.play('fsAmbientSound', {loop: -1});
+            }, 100);
 
             let tl = new TimelineMax();
             tl.to(transitionBG, 0.4, {alpha: 1})
@@ -863,8 +866,11 @@ export let freeSpin = (function () {
         storage.read('currentBalance').coinsSum = +storage.read('currentBalance').coinsSum + response.CoinsWinCounter + response.TotalWinCoins;
         balance.updateBalance();
 
-        createjs.Sound.stop('fsAmbientSound');
-        createjs.Sound.play('bonusPerehodSound', {loop: -1});
+        setTimeout(() => {
+            createjs.Sound.stop('fsAmbientSound');
+            createjs.Sound.play('bonusPerehodSound');
+        }, 100);
+
         let finishContainer = new createjs.Container().set({
             name: 'finishContainer',
             alpha: 0
@@ -1062,6 +1068,7 @@ export let freeSpin = (function () {
     function checkState(state) {
         if (state === 'roll' && storage.readState(state) === 'ended') {
             if (storage.readState('mode') === 'fsBonus') {
+                createjs.Sound.stop('barabanSound');
                 countTotalWin(storage.read('rollResponse'));
                 countFreeSpins(storage.read('freeRollResponse').TotalFreeSpins);
                 countMoney(storage.read('freeRollResponse'));
@@ -1072,12 +1079,9 @@ export let freeSpin = (function () {
         }
         if (state === 'roll' && storage.readState(state) === 'started') {
             if (storage.readState('mode') === 'fsBonus') {
+                createjs.Sound.play('barabanSound');
                 countTotalWin(storage.read('rollResponse').TotalFreeSpins - 1);
             }
-        }
-        // if (state === 'fsMulti') {}
-        if (state === 'fsLevel') {
-            changeLevel(storage.readState(state));
         }
     }
 

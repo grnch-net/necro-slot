@@ -342,6 +342,7 @@ export let roll = (function () {
     }
 
     function _endRollSuccessful(response) {
+        createjs.Sound.stop('barabanSound');
         events.trigger('roll:ended');
         storage.changeState('roll', 'ended');
         storage.changeState('fastRoll', false);
