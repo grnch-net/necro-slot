@@ -4,7 +4,7 @@
     "static/img/content/atlas/fsScreen.png"
 ],
 
-"framerate": 15,
+"framerate": 10,
 
 "frames": [
     [1, 1, 166, 175, 0, -28, -23],
