@@ -14,6 +14,7 @@ export let roll = (function () {
     let columnsNumber;
     let rowsNumber;
     let longRowsNumber;
+    let barabanSound;
 
     let config;
     const defaultConfig = {
@@ -325,7 +326,7 @@ export let roll = (function () {
                 storage.changeState('mode', 'normal');
             }
             createjs.Sound.play('spinSound');
-            createjs.Sound.play('barabanSound');
+            barabanSound = createjs.Sound.play('barabanSound');
             rollData.nextScreen = getScreenData(response.Indexes, storage.read('wheels'));
             drawScreen(rollData.currentScreen, rollData.nextScreen);
             rollAnimation = new TimelineMax();
@@ -346,6 +347,7 @@ export let roll = (function () {
             if (storage.readState('mode') !== 'fsBonus') {
                 storage.changeState('mode', 'fsBonus');
             }
+            createjs.Sound.play('spinSound');
             rollData.nextScreen = getScreenData(response.Indexes, storage.read('fsWheels'));
             drawScreen(rollData.currentScreen, rollData.nextScreen);
             rollAnimation = new TimelineMax();
@@ -395,7 +397,6 @@ export let roll = (function () {
     }
 
     function _endRollSuccessful(response) {
-        createjs.Sound.stop('barabanSound');
         if (storage.read('isClawMode')) {
             let clawsStack = storage.read('clawsStack');
             if (clawsStack) {
@@ -406,6 +407,8 @@ export let roll = (function () {
                 storage.write('clawsStack', []);
             }
         }
+
+        if (barabanSound) barabanSound.stop();
         events.trigger('roll:ended');
         storage.changeState('roll', 'ended');
         storage.changeState('fastRoll', false);
