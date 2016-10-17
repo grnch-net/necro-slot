@@ -234,7 +234,13 @@ export let roll = (function () {
                         || +elementNumber === 16
                     )
                 ) {
-                    // element.visible = false;
+                    if (storage.read('isClawMode')) {
+                        let clawsStack = storage.read('clawsStack');
+                        clawsStack.forEach((obj) => {
+                            if (column.name !== 'gameColumn' + obj.pos) return;
+                            element.visible = false;
+                        });
+                    }
                 }
             } else {
                 const elementNumber = Math.ceil(Math.random() * 10);
@@ -261,10 +267,6 @@ export let roll = (function () {
                     });
                     // claw.gotoAndStop('idle');
                     column.addChild(claw);
-
-                    column.items.forEach((elem) => {
-                        elem.visible = false;
-                    });
                 });
             }
         }
