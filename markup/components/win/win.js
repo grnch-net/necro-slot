@@ -281,7 +281,7 @@ export let win = (function () {
         } else if (+winLine.lineWin !== 0) {
             fireAllScatters();
         } else {
-            fireScatterWild();
+            // fireScatterWild();
         }
         storage.changeState('anotherLine', index);
         events.trigger('win:anotherLine', index);
@@ -308,11 +308,6 @@ export let win = (function () {
                         colInd: colInd
                     });
                 }
-                // if (+elementIndex === 14) {
-                //     element.gotoAndPlay(`${elementIndex}-w`);
-                //     let totalFreeSpins = storage.read('rollResponse').TotalFreeSpins;
-                //     freeSpin.showTotalFreeSpins(totalFreeSpins);
-                // }
             });
         });
         if (storage.read('rollResponse').BonusResults[0] === 'FreeSpinBonus') {
@@ -321,23 +316,6 @@ export let win = (function () {
                 events.trigger('initFreeSpins');
             }, 1000);
         }
-    }
-
-    function fireScatterWild() {
-        // let currentRow;
-        // storage.changeState('autoplay', 'ended');
-        // winElements.forEach((winLine) => {
-        //     winLine.forEach((element, index) => {
-        //         const animationName = element.currentAnimation;
-        //         const elementIndex = element.currentAnimation.split('-')[0];
-        //         if (+elementIndex === 11 || +elementIndex === 12 || +elementIndex === 13) {
-        //             if (!currentRow) {
-        //                 currentRow = index;
-        //             }
-        //         }
-        //     });
-        // });
-        // fireLizaAndCards(currentRow);
     }
 
     function calcCardCoords(rot, x0, y0) {
@@ -361,38 +339,6 @@ export let win = (function () {
         };
     }
 
-    function fireCards(curX, curY) {
-        console.log('I am called with', curX, curY);
-        const loader = storage.read('loadResult');
-        const cardsContainer = new c.Container().set({
-            name: 'cardsContainer'
-        });
-        const cards = [];
-        cards.push(
-            new c.Sprite(loader.getResult('cardsForLizaWin'), '01card'),
-            new c.Sprite(loader.getResult('cardsForLizaWin'), '02card'),
-            new c.Sprite(loader.getResult('cardsForLizaWin'), '03card'),
-            new c.Sprite(loader.getResult('cardsForLizaWin'), '04card')
-        );
-        const amount = Math.round(Math.random() * 50 + 50);
-        for (let i = 0; i < amount; i++) {
-            const cardIndex = Math.floor(Math.random() * 4);
-            const cardRotation = Math.round(Math.random() * 360);
-            const cardTime = Math.random() * 2 + 0.7;
-            const finalCoords = calcCardCoords(cardRotation, curX + utils.elementWidth / 2, curY + utils.elementHeight / 2);
-            const newCard = cards[cardIndex].clone(true);
-            newCard.rotation = cardRotation;
-            newCard.x = curX + utils.elementWidth / 2;
-            newCard.y = curY + utils.elementHeight / 2;
-            utils.getCenterPoint(newCard);
-            TweenMax.to(newCard, cardTime, {x: finalCoords.x, y: finalCoords.y, onComplete: function () {
-                cardsContainer.removeChild(this.target);
-            }});
-            cardsContainer.addChild(newCard);
-        }
-        stage.addChild(cardsContainer);
-    }
-
     function drawTotalWin(lines) {
         lines.forEach((line) => {
             const lineNumber = line.lineNumber;
@@ -401,14 +347,9 @@ export let win = (function () {
             if (+lineNumber !== -1) {
                 fireWinLine(lineNumber, lineAmount);
                 lightLinesCounter++;
-            } else { // if (+lineWin !== 0 && storage.readState('mode') !== 'fsBonus') {
+            } else {
                 fireAllScatters();
             }
-            // else if (+lineWin === 0 && storage.readState('mode') === 'fsBonus') {
-            //     fireAllScatters();
-            // } else {
-            //     fireScatterWild();
-            // }
         });
         const totalWin = storage.read('rollResponse').TotalWinCoins;
         if (totalWin > 0) {
@@ -471,8 +412,7 @@ export let win = (function () {
                 gameContainer.addChild(claw);
                 clawsStack.push({
                     elem: claw,
-                    pos: colum.ind,
-                    items: colum.items
+                    pos: colum.ind
                 });
 
                 storage.write('claw', claw);
@@ -482,15 +422,30 @@ export let win = (function () {
                     claw.visible = true;
                     claw.gotoAndPlay('combo');
                     setTimeout(() => {
-                        colum.items['cultist0'].elem.visible = false;
+                        let elem = colum.items['cultist0'].elem;
+                        let elemPars = elem.currentAnimation.split('-');
+                        elem.gotoAndPlay(elemPars[0] + '-h');
+                        setTimeout(() => {
+                            elem.visible = false;
+                        }, 300);
                         freeSpin.eatCultist();
                     }, 400);
                     setTimeout(() => {
-                        colum.items['cultist1'].elem.visible = false;
+                        let elem = colum.items['cultist1'].elem;
+                        let elemPars = elem.currentAnimation.split('-');
+                        elem.gotoAndPlay(elemPars[0] + '-h');
+                        setTimeout(() => {
+                            elem.visible = false;
+                        }, 300);
                         freeSpin.eatCultist();
                     }, 1000);
                     setTimeout(() => {
-                        colum.items['cultist2'].elem.visible = false;
+                        let elem = colum.items['cultist2'].elem;
+                        let elemPars = elem.currentAnimation.split('-');
+                        elem.gotoAndPlay(elemPars[0] + '-h');
+                        setTimeout(() => {
+                            elem.visible = false;
+                        }, 300);
                         freeSpin.eatCultist();
                     }, 1900);
                     setTimeout(() => {
@@ -549,6 +504,10 @@ export let win = (function () {
                     for (let i = 0; i < amount; i++) {
                         const element = winElements[number - 1][i];
                         const topElement = gameTopElements[+winLine[i][0]][+winLine[i][1]];
+
+                        let animationParse = element.currentAnimation.split('-');
+                        let elementIndex = animationParse[0];
+
                         element.visible = true;
                         topElement.visible = false;
                     }
