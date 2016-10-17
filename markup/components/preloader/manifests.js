@@ -1,7 +1,7 @@
 export const preloaderManifest = [
     {id: 'coin', src: 'static/img/content/preloader/coin.json', type: 'spritesheet'},
     {id: 'line', src: 'static/img/content/preloader/line.json', type: 'spritesheet'},
-    {id: 'new_elements', src: 'static/img/content/new/elements_new3.json', type: 'spritesheet'}
+    {id: 'new_elements', src: 'static/img/content/atlas/newElem.json', type: 'spritesheet'}
 ];
 
 export const mainManifest = [
@@ -18,6 +18,7 @@ export const mainManifest = [
     {id: 'cultisti', src: 'static/img/content/atlas/cultisti.json', type: 'spritesheet'},
     {id: 'other', src: 'static/img/content/atlas/other.json', type: 'spritesheet'},
     {id: 'claw', src: 'static/img/content/atlas/claw.json', type: 'spritesheet'},
+    {id: 'new_elements', src: 'static/img/content/atlas/newElem.json', type: 'spritesheet'},
 
     // test
     {id: 'optionsInterface', src: 'static/img/content/test/optionsInterface.png'},
@@ -37,7 +38,7 @@ export const mainManifest = [
     {id: 'buttons', src: 'static/img/content/buttons/buttons.json', type: 'spritesheet'},
 
     // roll module
-    {id: 'new_elements', src: 'static/img/content/new/elements_new3.json', type: 'spritesheet'},
+    // {id: 'new_elements', src: 'static/img/content/new/elements_new3.json', type: 'spritesheet'},
     {id: 'gameShadow', src: 'static/img/content/bg/gameShadow.png'},
 
     // win module
