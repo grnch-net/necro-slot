@@ -23,13 +23,16 @@ export let win = (function () {
     let lightLinesCounter = 0;
     let lightDoneCounter = 0;
     let config;
+    let cultistStack;
     const defaultConfig = {
         topScreen: true
     };
 
+    let isClawMode;
 
     function start(configObj) {
         config = configObj || defaultConfig;
+        isClawMode = storage.read('isClawMode');
     }
 
     function initWin() {
@@ -440,6 +443,75 @@ export let win = (function () {
         }
     }
 
+    function showClaw() {
+        let isCombo = false;
+        const loader = storage.read('loadResult');
+        const fg = stage.getChildByName('fgContainer');
+        const gameContainer = fg.getChildByName('gameContainer');
+
+        let clawsStack = [];
+        let timer = 0;
+        Object.keys(cultistStack).forEach((columKey) => {
+            let colum = cultistStack[columKey];
+            let itemsKey = Object.keys(colum.items);
+            if (itemsKey.length === 3) {
+                isCombo = true;
+                let gameColum = gameContainer.getChildByName('gameColumn' + colum.ind);
+                let clawX = 75 + 200 * (colum.ind - 1); // 160, 360, 560
+
+                const ssClaw = loader.getResult('claw');
+                const claw = new c.Sprite(ssClaw).set({
+                    name: 'claw',
+                    x: clawX,
+                    y: -570,
+                    scaleX: 1.25,
+                    scaleY: 1.25,
+                    visible: false
+                });
+                gameContainer.addChild(claw);
+                clawsStack.push({
+                    elem: claw,
+                    pos: colum.ind,
+                    items: colum.items
+                });
+
+                storage.write('claw', claw);
+
+                setTimeout(() => {
+                    /* eslint-disable dot-notation */
+                    claw.visible = true;
+                    claw.gotoAndPlay('combo');
+                    setTimeout(() => {
+                        colum.items['cultist0'].elem.visible = false;
+                        freeSpin.eatCultist();
+                    }, 400);
+                    setTimeout(() => {
+                        colum.items['cultist1'].elem.visible = false;
+                        freeSpin.eatCultist();
+                    }, 1000);
+                    setTimeout(() => {
+                        colum.items['cultist2'].elem.visible = false;
+                        freeSpin.eatCultist();
+                    }, 1900);
+                    setTimeout(() => {
+                        claw.x += 85;
+                        claw.y = 0;
+                        claw.gotoAndPlay('idle');
+                    }, 2250);
+                    /* eslint-enable dot-notation */
+                }, 1000);
+            } else
+            if (itemsKey.length > 0) {
+                // itemsKey.forEach(() => {
+                //     freeSpin.eatCultist();
+                // });
+                // claw.gotoAndPlay('zahvat');
+            }
+        });
+        storage.write('clawsStack', clawsStack);
+        return isCombo;
+    }
+
     function _elemPlayDefaultAnim(el) {
         let animationParse = el.currentAnimation.split('-');
         let elementIndex = animationParse[0];
@@ -515,34 +587,59 @@ export let win = (function () {
     }
 
     function endRoll() {
+        let time;
+
+        if (storage.read('rollResponse').LinesResult.length > 0) {
+            time = 1000;
+        } else {
+            time = 300;
+        }
+
+        if (isClawMode) {
+            // TODO: Изменять время в зависимости от количества выпавших культистов
+            cultistStack = {};
+
+            winElements.forEach((winLine) => {
+                winLine.forEach((element, colInd) => {
+                    const animationName = element.currentAnimation;
+                    const elementIndex = animationName.split('-')[0];
+                    if (+elementIndex > 10 && +elementIndex < 20) {
+                        // let topElement = gameTopElements[colInd][+element.posY];
+                        // topElement.visible = true;
+                        if (!cultistStack['colum' + colInd]) {
+                            cultistStack['colum' + colInd] = {
+                                ind: colInd,
+                                items: {}
+                            };
+                        }
+
+                        if (!cultistStack['colum' + colInd].items['cultist' + element.posY]) {
+                            cultistStack['colum' + colInd].items['cultist' + element.posY] = {
+                                pos: element.posY,
+                                elem: element
+                            };
+                            element.gotoAndPlay(`${elementIndex}-w`);
+                        }
+                    }
+                });
+            });
+
+            // Условие: все анимации claws проигрываются синхронно
+            if ( showClaw() ) time = 3700;
+        }
+
         showWin();
+
         if (storage.read('rollResponse').BonusResults.length) {
             storage.changeState('lockedMenu', true);
         }
-        if (storage.readState('autoplay') === 'started') {
-            let time;
-            if (storage.read('rollResponse').LinesResult.length > 0) {
-                time = 1000;
-            } else {
-                time = 300;
-            }
-            const autoTimeout = setTimeout(function () {
-                autoplay.startAutoplay();
-            }, time);
-            storage.write('autoTimeout', autoTimeout);
-        }
+
         if (storage.readState('mode') === 'fsBonus') {
             let count = storage.read('rollResponse').TotalFreeSpins;
             storage.changeState('fsMulti', storage.read('rollResponse').Multiplier.MultiplierValue);
             storage.changeState('fsLevel', storage.read('rollResponse').Multiplier.MultiplierStep);
             if (count > 0) {
                 console.log('I start free Spin', count);
-                let time;
-                if (storage.read('rollResponse').LinesResult.length > 0) {
-                    time = 1000;
-                } else {
-                    time = 300;
-                }
                 const fsTimeout = setTimeout(function () {
                     freeSpin.startFreeSpin();
                 }, time);
@@ -552,6 +649,15 @@ export let win = (function () {
                 console.warn('I am stoping Free Spins!');
                 events.trigger('finishFreeSpins');
             }
+        } else {
+            const autoTimeout = setTimeout(function () {
+                autoplay.startAutoplay();
+            }, time);
+
+            if (storage.readState('autoplay') === 'started') {
+                storage.write('autoTimeout', autoTimeout);
+            }
+
         }
     }
 

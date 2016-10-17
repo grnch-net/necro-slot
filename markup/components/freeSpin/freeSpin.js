@@ -25,9 +25,16 @@ export let freeSpin = (function () {
     let fsStartData;
     let fsTotalWin;
     let fireTimer;
-    let parTimer;
     let fsTotalCount;
     let fsLastWin;
+    let currCultistCount = 0;
+    let currMultiplier = 2;
+    let fsMulti;
+    let culstistsStack;
+    let barabanSound;
+
+    let isClawMode;
+    let isMobile;
 
     let config;
     const defaultConfig = {
@@ -40,13 +47,15 @@ export let freeSpin = (function () {
 
     function start(configObj) {
         config = configObj || defaultConfig;
+        isClawMode = storage.read('isClawMode');
+        isMobile = storage.read('isMobile');
     }
 
     function hideBalance() {
         const balanceContainer = stage.getChildByName('balanceContainer');
         const coinsSum = balanceContainer.getChildByName('coinsSum');
         const betSum = balanceContainer.getChildByName('betSum');
-        if (storage.read('isMobile')) {
+        if (isMobile) {
             const coinsSumText = balanceContainer.getChildByName('coinsSumText');
             const betSumText = balanceContainer.getChildByName('betSumText');
             betSum.visible = coinsSum.visible = betSumText.visible = coinsSumText.visible = false;
@@ -63,7 +72,6 @@ export let freeSpin = (function () {
     }
 
     function showFsBalance() {
-        const isMobile = storage.read('isMobile');
         const balanceContainer = stage.getChildByName('balanceContainer');
 
         if (config.currentWinCents) {
@@ -207,7 +215,40 @@ export let freeSpin = (function () {
             scaleX: 0.6,
             scaleY: 0.6
         });
-        fsLeftContainer.addChild(cultistBlack1, cultistBlack2, cultistBlack3);
+
+        const ssCustisti = loader.getResult('new_elements');
+        let cultists1 = new createjs.Sprite(ssCustisti, '11-n').set({
+            name: 'cultists',
+            x: -39,
+            y: 74,
+            scaleX: 0.8,
+            scaleY: 0.8,
+            visible: false
+        });
+        let cultists2 = new createjs.Sprite(ssCustisti, '12-n').set({
+            name: 'cultists',
+            x: -34,
+            y: -48,
+            scaleX: 0.8,
+            scaleY: 0.8,
+            visible: false
+        });
+        let cultists3 = new createjs.Sprite(ssCustisti, '13-n').set({
+            name: 'cultists',
+            x: 227,
+            y: 198,
+            scaleX: 0.8,
+            scaleY: 0.8,
+            skewY: 180,
+            visible: false
+        });
+        culstistsStack = [
+            cultists2,
+            cultists1,
+            cultists3
+        ];
+
+        fsLeftContainer.addChild(cultistBlack1, cultistBlack2, cultistBlack3, cultists3, cultists2, cultists1);
 
 
         fgContainer.uncache();
@@ -253,28 +294,35 @@ export let freeSpin = (function () {
         _mask.graphics.beginFill( 'rgba(0, 0, 0, 1)' ).drawRect(0, 190, utils.width, 500);
         particleContainer.mask = _mask;
 
-        const fsX = new createjs.BitmapText('+', loader.getResult('numbers')).set({
-            name: 'fsX',
+        const bookTextContainer = new c.Container().set({
+            name: 'bookTextContainer',
             x: 81,
             y: utils.height - 195,
-            scaleX: 0.14,
-            scaleY: 0.14,
             rotation: -20
+        });
+        const fsX = new createjs.BitmapText('+', loader.getResult('numbers')).set({
+            name: 'fsX',
+            scaleX: 0.14,
+            scaleY: 0.14
         });
         let fsXBounds = fsTotalCount.getBounds();
-        fsX.regX = fsXBounds.width / 2;
-        fsX.regY = fsXBounds.height / 2;
-        const fsMulti = new createjs.BitmapText('2', loader.getResult('numbers')).set({
+        fsX.set({
+            regX: fsXBounds.width / 2,
+            regY: fsXBounds.height / 2
+        });
+        fsMulti = new createjs.BitmapText(currMultiplier + '', loader.getResult('numbers')).set({
             name: 'fsMulti',
-            x: 102,
-            y: utils.height - 210,
+            x: 24,
+            y: -8,
             scaleX: 0.2,
-            scaleY: 0.2,
-            rotation: -20
+            scaleY: 0.2
         });
         let multiBounds = fsTotalCount.getBounds();
-        fsMulti.regX = multiBounds.width / 2;
-        fsMulti.regY = multiBounds.height / 2;
+        fsMulti.set({
+            regX: multiBounds.width / 2,
+            regY: multiBounds.height / 2
+        });
+        bookTextContainer.addChild(fsX, fsMulti);
 
         const bookTop = new c.Sprite(ssFSScreen, 'book1').set({
             name: 'bookTop',
@@ -292,14 +340,10 @@ export let freeSpin = (function () {
             regY: 120,
             rotation: -20
         });
-        clockContainer.addChild(bookBot, bookTop, fsX, fsMulti, particleContainer);
+        clockContainer.addChild(bookBot, bookTop, bookTextContainer, particleContainer);
 
         stage.addChild(fsLeftContainer, clockContainer);
         moveClock(clockContainer);
-
-        if (config.currentLevel !== 0) {
-            changeLevel(config.currentLevel + 1);
-        }
     }
 
     function _drawFsBgDesktop(loader) {
@@ -431,6 +475,39 @@ export let freeSpin = (function () {
             scaleY: 0.7
         });
 
+        const ssCustisti = loader.getResult('new_elements');
+        let cultists1 = new createjs.Sprite(ssCustisti, '11-n').set({
+            name: 'cultists',
+            x: 395,
+            y: 480,
+            scaleX: 0.9,
+            scaleY: 0.9,
+            visible: false
+        });
+        let cultists2 = new createjs.Sprite(ssCustisti, '12-n').set({
+            name: 'cultists',
+            x: 335,
+            y: 505,
+            scaleX: 0.8,
+            scaleY: 0.8,
+            visible: false
+        });
+        let cultists3 = new createjs.Sprite(ssCustisti, '13-n').set({
+            name: 'cultists',
+            x: 762,
+            y: 498,
+            scaleX: 0.8,
+            scaleY: 0.8,
+            skewY: 180,
+            visible: false
+        });
+
+        culstistsStack = [
+            cultists2,
+            cultists1,
+            cultists3
+        ];
+
         const clockContainer = new c.Container().set({
             name: 'clockContainer'
         });
@@ -453,28 +530,35 @@ export let freeSpin = (function () {
         _mask.graphics.beginFill( 'rgba(0, 0, 0, 1)' ).drawRect(0, 190, utils.width, 500);
         particleContainer.mask = _mask;
 
+        const bookTextContainer = new c.Container().set({
+            name: 'bookTextContainer',
+            x: 89,
+            y: utils.height - 215,
+            rotation: -20
+        });
         const fsX = new createjs.BitmapText('+', loader.getResult('numbers')).set({
             name: 'fsX',
-            x: 93,
-            y: utils.height - 220,
             scaleX: 0.2,
-            scaleY: 0.2,
-            rotation: -20
+            scaleY: 0.2
         });
         let fsXBounds = fsTotalCount.getBounds();
-        fsX.regX = fsXBounds.width / 2;
-        fsX.regY = fsXBounds.height / 2;
-        const fsMulti = new createjs.BitmapText('2', loader.getResult('numbers')).set({
+        fsX.set({
+            regX: fsXBounds.width / 2,
+            regY: fsXBounds.height / 2
+        });
+        fsMulti = new createjs.BitmapText(currMultiplier + '', loader.getResult('numbers')).set({
             name: 'fsMulti',
-            x: 120,
-            y: utils.height - 245,
+            x: 34,
+            y: -15,
             scaleX: 0.3,
-            scaleY: 0.3,
-            rotation: -20
+            scaleY: 0.3
         });
         let multiBounds = fsTotalCount.getBounds();
-        fsMulti.regX = multiBounds.width / 2;
-        fsMulti.regY = multiBounds.height / 2;
+        fsMulti.set({
+            regX: multiBounds.width / 2,
+            regY: multiBounds.height / 2
+        });
+        bookTextContainer.addChild(fsX, fsMulti);
 
         const bookTop = new c.Sprite(ssFSScreen, 'book1').set({
             name: 'bookTop',
@@ -496,10 +580,10 @@ export let freeSpin = (function () {
             scaleY: 1.4,
             rotation: -20
         });
-        clockContainer.addChild(bookBot, bookTop, fsX, fsMulti, particleContainer);
+        clockContainer.addChild(bookBot, bookTop, bookTextContainer, particleContainer);
         moveClock(clockContainer);
 
-        fsInterfaceContainer.addChild(fsInterfaceBg, fsInterface, fsTableContainer, infoBtn, fsLastWin, cultistBlack1, cultistBlack3, cultistBlack2, linesTxt, betLevelTxt, countValueTxt);
+        fsInterfaceContainer.addChild(fsInterfaceBg, fsInterface, fsTableContainer, infoBtn, fsLastWin, cultistBlack1, cultistBlack3, cultistBlack2, cultists2, cultists3, cultists1, linesTxt, betLevelTxt, countValueTxt);
         stage.addChildAt(fsInterfaceContainer, clockContainer, stage.getChildIndex(stage.getChildByName('fgContainer')) + 1);
     }
 
@@ -507,7 +591,6 @@ export let freeSpin = (function () {
         pressureDiscs = [];
         stage = storage.read('stage');
         const loader = storage.read('loadResult');
-        const isMobile = storage.read('isMobile');
 
         hideBalance();
         showFsBalance();
@@ -518,27 +601,6 @@ export let freeSpin = (function () {
             _drawFsBgDesktop(loader);
         }
 
-    }
-
-    function changeLevel(num) {
-        // if (num != config.currentLevel) {
-        //     config.currentLevel = num;
-        //     createjs.Sound.play('fsClockSound');
-        //     const clockContainer = stage.getChildByName('clockContainer');
-        //     const hours = clockContainer.getChildByName('clockHours');
-        //     const minutes = clockContainer.getChildByName('clockMinutes');
-        //     minutes.play();
-        //     minutes.on('animationend', function () {
-        //         minutes.paused = true;
-        //         minutes.gotoAndStop('minute');
-        //         if (num !== 11) {
-        //             hours.gotoAndStop(`h-${num + 2}`);
-        //         } else {
-        //             hours.gotoAndStop('h-1');
-        //             minutes.gotoAndPlay('finish');
-        //         }
-        //     });
-        // }
     }
 
     function getFirework() {
@@ -606,72 +668,16 @@ export let freeSpin = (function () {
         stage.addChildAt(fsLogoContainer, stage.getChildIndex(fgContainer) + 1);
     }
 
-    function movePipe() {
-        const fgContainer = stage.getChildByName('fgContainer');
-        const truba = fgContainer.getChildByName('truba');
-        let tl = new TimelineMax({repeat: 5, yoyo: true});
-        tl.to(truba, 0.15, {x: 908 - 150});
-        if (window.navigator.vibrate) {
-            window.navigator.vibrate([300, 200, 300]);
-        }
-    }
-
-    function getSomePar() {
-        const loader = storage.read('loadResult');
-        createjs.Sound.play('parSound');
-        const parContainer = new c.Container().set({
-            name: 'parContainer'
-        });
-        const par1 = new createjs.Sprite(loader.getResult('parPack'), 'parVar2_').set({
-            x: 930,
-            y: -50,
-            scaleX: 0.5,
-            scaleY: 0.5,
-            alpha: 0
-        });
-        const par2 = new createjs.Sprite(loader.getResult('parPack'), 'parVar1_').set({
-            x: 1147,
-            y: 302,
-            scaleX: 0.5,
-            scaleY: 0.5,
-            rotation: 270,
-            alpha: 0
-        });
-        const par3 = new createjs.Sprite(loader.getResult('parPack'), 'parVar1_').set({
-            x: 1285,
-            y: 5,
-            scaleX: 0.4,
-            scaleY: 0.4,
-            rotation: 60,
-            alpha: 0
-        });
-        const par4 = new createjs.Sprite(loader.getResult('parPack'), 'parVar2_').set({
-            x: 1092,
-            y: 588,
-            scaleX: 0.4,
-            scaleY: 0.4,
-            rotation: 0,
-            alpha: 0
-        });
-        let tl = new TimelineMax();
-        tl.from([par1, par2, par3, par4], 0.5, {alpha: 1})
-            .delay(2)
-            .to([par1, par2, par3, par4], 0.5, {alpha: 0})
-            .call(function () {
-                parContainer.removeChild(par1, par2, par3, par4);
-                stage.removeChild(parContainer);
-            });
-        parContainer.addChild(par1, par2, par3, par4);
-        const fgContainer = stage.getChildByName('fgContainer');
-        stage.addChildAt(parContainer, stage.getChildIndex(fgContainer) + 1);
-    }
-
     function initFreeSpins(data) {
+        currCultistCount = 0;
+        currMultiplier = 2;
+        storage.write('lastCultist', 0);
+
         const buttonsContainer = stage.getChildByName('buttonsContainer');
         buttonsContainer.visible = false;
         fsTotalWin = 0;
         drawFreeSpinsBG();
-        if (storage.read('isMobile')) {
+        if (isMobile) {
             events.trigger('menu:changeSide', 'right');
         }
     }
@@ -772,7 +778,7 @@ export let freeSpin = (function () {
 
     function countFreeSpins(number) {
         const _lastWinCount = storage.read('rollResponse').TotalWinCoins;
-        if (!storage.read('isMobile')) fsLastWin.text = (_lastWinCount) ? _lastWinCount + '' : '';
+        if (!isMobile) fsLastWin.text = (_lastWinCount) ? _lastWinCount + '' : '';
         fsTotalCount.text = number + '';
         const countBounds = fsTotalCount.getBounds();
         fsTotalCount.regX = countBounds.width / 2;
@@ -786,14 +792,11 @@ export let freeSpin = (function () {
 
     function stopFreeSpins() {
         clearTimeout(fireTimer);
-        clearTimeout(parTimer);
         storage.changeState('lockedMenu', false);
         const bgContainer = stage.getChildByName('bgContainer');
         const fgContainer = stage.getChildByName('fgContainer');
         const buttonsContainer = stage.getChildByName('buttonsContainer');
         buttonsContainer.visible = true;
-        const truba = fgContainer.getChildByName('truba');
-        const pressureContainer = fgContainer.getChildByName('pressureContainer');
         const fsBG = bgContainer.getChildByName('fsBG');
 
         const gameBG = fgContainer.getChildByName('gameBG');
@@ -806,7 +809,7 @@ export let freeSpin = (function () {
         const betSum = balanceContainer.getChildByName('betSum');
         const coinsSum = balanceContainer.getChildByName('coinsSum');
 
-        if (storage.read('isMobile')) {
+        if (isMobile) {
             balanceContainer.removeChild(totalWinText, totalWinSum);
 
             const coinsSumText = balanceContainer.getChildByName('coinsSumText');
@@ -830,18 +833,17 @@ export let freeSpin = (function () {
 
         bgContainer.removeChild(fsBG);
         bgContainer.uncache();
-        fgContainer.removeChild(truba, pressureContainer);
         fgContainer.uncache();
         stage.removeChild(stage.getChildByName('fsLogoContainer'));
         stage.removeChild(stage.getChildByName('fsTableContainer'));
         stage.removeChild(stage.getChildByName('clockContainer'));
         stage.removeChild(stage.getChildByName('fsLeftContainer'));
 
-        if (storage.read('isMobile')) {
+        if (isMobile) {
             storage.changeState('side', 'left');
             events.trigger('menu:changeSide', 'left');
         }
-        // canvas.changeGamePosition('left');
+
     }
 
     function countTotalWin(data) {
@@ -851,7 +853,7 @@ export let freeSpin = (function () {
             const totalWinText = balanceContainer.getChildByName('totalWinText');
             totalWinSum.text = +totalWinSum.text + data.TotalWinCoins;
             fsTotalWin = totalWinSum.text;
-            if (storage.read('isMobile')) {
+            if (isMobile) {
                 totalWinSum.x = totalWinText.x + 20 + totalWinText.getMeasuredWidth() / 2 + totalWinSum.getMeasuredWidth() / 2;
             }
             balanceContainer.updateCache();
@@ -867,100 +869,111 @@ export let freeSpin = (function () {
         balance.updateBalance();
 
         setTimeout(() => {
+            console.warn('I am remove ambient!');
             createjs.Sound.stop('fsAmbientSound');
             createjs.Sound.play('bonusPerehodSound');
         }, 100);
 
         let finishContainer = new createjs.Container().set({
-            name: 'finishContainer',
-            alpha: 0
+            name: 'finishContainer'
         });
         let finishBG = new createjs.Shape().set({
             name: 'finishBG',
-            alpha: 0.8
+            alpha: 0
         });
         finishBG.graphics.beginFill('#000').drawRect(0, 0, utils.width, utils.height);
+        finishContainer.addChild(finishBG);
 
-        let finishText = new createjs.Sprite(ssOther, 'totalWin').set({
-            name: 'finishText',
-            x: utils.width / 2,
-            y: utils.height / 2 - 250,
-            regX: 500,
-            regY: 150,
-            scaleX: 0.1, scaleY: 0.1, alpha: 0
-        });
+        let tl2 = new TimelineMax();
+        tl2.to(finishBG, 0.5, {alpha: 1, onComplete: () => {
+            events.trigger('stopFreeSpins');
 
-        const ssCustisti = loader.getResult('cultisti');
-        let cultists1 = new createjs.Sprite(ssCustisti, '12-w').set({
-            name: 'cultists',
-            x: utils.width / 2 - 390,
-            y: utils.height / 2 - 20,
-            scaleX: 1,
-            scaleY: 1
-        });
-        let cultists2 = new createjs.Sprite(ssCustisti, '11-w').set({
-            name: 'cultists',
-            x: utils.width / 2 - 300,
-            y: utils.height / 2 - 90,
-            scaleX: 1.2,
-            scaleY: 1.2
-        });
-        let cultists3 = new createjs.Sprite(ssCustisti, '13-w').set({
-            name: 'cultists',
-            x: utils.width / 2 + 380,
-            y: utils.height / 2 - 25,
-            scaleX: 1,
-            scaleY: 1,
-            skewY: 180
-        });
-        let finishWinText = new createjs.BitmapText(fsTotalWin + '', loader.getResult('numbers')).set({
-            name: 'transitionWinText',
-            x: utils.width / 2 - 40,
-            y: utils.height / 2 - 110,
-            scaleX: 0.1, scaleY: 0.1, alpha: 0
-        });
-        let bounds = finishWinText.getBounds();
-        finishWinText.regX = bounds.width / 2;
-        finishWinText.regY = bounds.height / 2;
-
-        let luchi = new createjs.Bitmap(loader.getResult('luchi')).set({
-            name: 'transitionLuchi',
-            x: utils.width / 2,
-            y: utils.height / 2 - 50,
-            regX: 410,
-            regY: 403,
-            alpha: 0.5
-        });
-        let tl = new TimelineMax({repeat: -1});
-        tl.from(luchi, 15, {rotation: -360, ease: Power0.easeNone});
-
-        let finishButton = new createjs.Sprite(ssOther, 'But').set({
-            name: 'finishButton',
-            x: utils.width / 2,
-            y: utils.height / 2 + 255,
-            regX: 118,
-            regY: 47.5,
-            alpha: 1
-        });
-        finishContainer.addChild(finishBG, luchi, finishText, cultists1, cultists3, cultists2, finishButton, finishWinText);
-        createjs.Tween.get(finishContainer)
-            .to({alpha: 1}, 500)
-            .call(function () {
-                events.trigger('stopFreeSpins');
-                let tl2 = new TimelineMax();
-                tl2.to(finishText, 1.2, {scaleX: 0.7, scaleY: 0.7, alpha: 1, ease: Elastic.easeOut.config(1, 0.3)}, '-=0.2')
-                    .to(finishWinText, 1.2, {scaleX: 1.1, scaleY: 1.1, alpha: 1, ease: Elastic.easeOut.config(1, 0.3)}, '-=0.2');
+            let finishText = new createjs.Sprite(ssOther, 'totalWin').set({
+                name: 'finishText',
+                x: utils.width / 2,
+                y: utils.height / 2 - 250,
+                regX: 500,
+                regY: 150,
+                scaleX: 0.1, scaleY: 0.1, alpha: 0
             });
 
-        finishButton.on('click', function () {
-            createjs.Sound.stop('bonusPerehodSound');
-            createjs.Sound.play('ambientSound', {loop: -1});
-            createjs.Tween.get(finishContainer)
+            const ssCustisti = loader.getResult('cultisti');
+            let cultists1 = new createjs.Sprite(ssCustisti, '12-w').set({
+                name: 'cultists',
+                x: utils.width / 2 - 390,
+                y: utils.height / 2 - 20,
+                scaleX: 1,
+                scaleY: 1
+            });
+            let cultists2 = new createjs.Sprite(ssCustisti, '11-w').set({
+                name: 'cultists',
+                x: utils.width / 2 - 300,
+                y: utils.height / 2 - 90,
+                scaleX: 1.2,
+                scaleY: 1.2
+            });
+            let cultists3 = new createjs.Sprite(ssCustisti, '13-w').set({
+                name: 'cultists',
+                x: utils.width / 2 + 380,
+                y: utils.height / 2 - 25,
+                scaleX: 1,
+                scaleY: 1,
+                skewY: 180
+            });
+            let finishWinText = new createjs.BitmapText(fsTotalWin + '', loader.getResult('numbers')).set({
+                name: 'transitionWinText',
+                x: utils.width / 2 - 40,
+                y: utils.height / 2 - 110,
+                scaleX: 0.1, scaleY: 0.1, alpha: 0
+            });
+            let bounds = finishWinText.getBounds();
+            finishWinText.regX = bounds.width / 2;
+            finishWinText.regY = bounds.height / 2;
+
+            let luchi = new createjs.Bitmap(loader.getResult('luchi')).set({
+                name: 'transitionLuchi',
+                x: utils.width / 2,
+                y: utils.height / 2 - 50,
+                regX: 410,
+                regY: 403,
+                alpha: 0.5
+            });
+            let tl4 = new TimelineMax({repeat: -1});
+            tl4.from(luchi, 15, {rotation: -360, ease: Power0.easeNone});
+
+            let finishButton = new createjs.Sprite(ssOther, 'But').set({
+                name: 'finishButton',
+                x: utils.width / 2,
+                y: utils.height / 2 + 255,
+                regX: 118,
+                regY: 47.5,
+                alpha: 1
+            });
+
+            finishButton.on('click', function () {
+                createjs.Sound.stop('bonusPerehodSound');
+                createjs.Sound.play('ambientSound', {loop: -1});
+                createjs.Tween.get(finishContainer)
                 .to({alpha: 0}, 500)
                 .call(function () {
                     stage.removeChild(finishContainer);
                 });
-        });
+            });
+
+            let cultistConteiner = new createjs.Container().set({ alpha: 0 });
+            cultistConteiner.addChild(luchi, cultists1, cultists3, cultists2, finishButton);
+
+            finishContainer.addChild(cultistConteiner, finishText, finishWinText);
+
+            let tl1 = new TimelineMax();
+            tl1.to(finishBG, 0.5, {alpha: 0.8});
+
+            let tl = new TimelineMax();
+            tl.to(cultistConteiner, 1, {alpha: 1})
+                .to(finishText, 1, {scaleX: 0.7, scaleY: 0.7, alpha: 1, ease: Elastic.easeOut.config(1, 0.3)}, '-=0.2')
+                .to(finishWinText, 1, {scaleX: 1.1, scaleY: 1.1, alpha: 1, ease: Elastic.easeOut.config(1, 0.3)}, '-=0.2');
+        }});
+
         stage.addChild(finishContainer);
     }
 
@@ -998,9 +1011,6 @@ export let freeSpin = (function () {
     function addMultiBonus(data) {
         let multiStage = storage.read('stage');
         let loader = storage.read('loadResult');
-        // fsTotalWin = fsTotalWin + data.coins;
-        // multiStage.getChildByName('fsTotalContainer').getChildByName('fsTotalWinText').text = fsTotalWin;
-
 
         let multiContainer = new createjs.Container().set({
             name: 'multiContainer',
@@ -1034,9 +1044,7 @@ export let freeSpin = (function () {
         multiContainer.addChild(multiBG, multiTitle, multiCoins, multiWinText, multiButton);
         createjs.Tween.get(multiContainer)
             .to({alpha: 1}, 500);
-        // multiButton.on('mousedown', function () {
-        //     multiButton.gotoAndStop('over');
-        // });
+
         multiButton.on('click', function () {
             utils.request('_Ready/', storage.read('sessionID'))
                 .then((response) => {
@@ -1053,13 +1061,6 @@ export let freeSpin = (function () {
         multiStage.addChild(multiContainer);
     }
 
-    function crashGame() {
-        const time = Math.random() * 3000 + 1000;
-        getSomePar();
-        movePipe();
-        parTimer = setTimeout(crashGame, time);
-    }
-
     function countMoney(response) {
         storage.read('currentBalance').winCash = ((response.CentsWinCounter + response.TotalWinCents) / 100).toFixed(2);
         balance.updateBalance();
@@ -1068,10 +1069,11 @@ export let freeSpin = (function () {
     function checkState(state) {
         if (state === 'roll' && storage.readState(state) === 'ended') {
             if (storage.readState('mode') === 'fsBonus') {
-                createjs.Sound.stop('barabanSound');
+                barabanSound.stop();
                 countTotalWin(storage.read('rollResponse'));
                 countFreeSpins(storage.read('freeRollResponse').TotalFreeSpins);
                 countMoney(storage.read('freeRollResponse'));
+
                 if (storage.read('rollResponse').LinesResult.length && storage.readState('fsMulti') == 7) {
                     getFirework();
                 }
@@ -1079,15 +1081,35 @@ export let freeSpin = (function () {
         }
         if (state === 'roll' && storage.readState(state) === 'started') {
             if (storage.readState('mode') === 'fsBonus') {
-                createjs.Sound.play('barabanSound');
+                barabanSound = createjs.Sound.play('barabanSound');
                 countTotalWin(storage.read('rollResponse').TotalFreeSpins - 1);
             }
         }
     }
 
+    function eatCultist() {
+        if (currCultistCount > 2) {
+            setTimeout(() => {
+                culstistsStack[currCultistCount % 3].visible = true;
+            }, (currCultistCount - 2) * 100 + 500);
+        } else {
+            culstistsStack[currCultistCount].visible = true;
+        }
+
+        if (++currCultistCount === 3) {
+            setTimeout(() => {
+                fsMulti.text = ++currMultiplier + '';
+                currCultistCount = 0;
+                culstistsStack[0].visible = false;
+                culstistsStack[1].visible = false;
+                culstistsStack[2].visible = false;
+            }, 500);
+        }
+        storage.write('lastCultist', currCultistCount % 3);
+    }
+
     events.on('initFreeSpins', transitionFreeSpins);
     events.on('drawFreeSpins', initFreeSpins);
-    // events.on('initFreeSpins', initFreeSpins);
     events.on('stopFreeSpins', stopFreeSpins);
     events.on('finishFreeSpins', finishFreeSpins);
     events.on('startFreeSpin', startFreeSpin);
@@ -1101,9 +1123,7 @@ export let freeSpin = (function () {
         startFreeSpin,
         drawFreeSpinsBG,
         getMultiLight,
-        changeLevel,
         showTotalFreeSpins,
-        crashGame,
-        getSomePar
+        eatCultist
     };
 })();

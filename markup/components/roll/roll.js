@@ -153,6 +153,24 @@ export let roll = (function () {
                 }
             }
         }
+
+        let lastCultist = storage.read('lastCultist');
+        let seeElementsNextScreen = [];
+        screen.forEach((wheel, wheelInd) => {
+            seeElementsNextScreen[wheelInd] = [];
+            // Условие: культисты выпадают только на 1, 2 и 3 колесах
+            for (let indEl = 1; indEl < 4; indEl++) {
+                // if (wheel[indEl] === 14 || wheel[indEl] === 15 || wheel[indEl] === 16) {
+                if (wheel[indEl] > 10 && wheel[indEl] < 20) {
+                    wheel[indEl] = 14 + (lastCultist++ % 3);
+                }
+
+                seeElementsNextScreen[wheelInd][indEl - 1] = wheel[indEl];
+            }
+        });
+        storage.write('seeElementsInd', seeElementsNextScreen);
+        // storage.write('lastCultist', lastCultist % 3);
+
         return screen;
     }
 
@@ -201,18 +219,53 @@ export let roll = (function () {
                 const elementNumber = endArray[i];
                 const element = column.getChildByName(`gameElement${i}`);
                 element.gotoAndStop(`${elementNumber}-n`);
+                element.visible = true;
             } else if (i >= longRowsNumber - rowsNumber) {
                 const elementNumber = startArray[i - longRowsNumber + rowsNumber];
                 const element = column.getChildByName(`gameElement${i}`);
                 element.gotoAndStop(`${elementNumber}-n`);
+
+                element.visible = true;
+                if (storage.read('isClawMode')
+                    && (
+                        +elementNumber === 14
+                        || +elementNumber === 15
+                        || +elementNumber === 16
+                    )
+                ) {
+                    // element.visible = false;
+                }
             } else {
                 const elementNumber = Math.ceil(Math.random() * 10);
                 const element = column.getChildByName(`gameElement${i}`);
                 element.gotoAndStop(`${elementNumber}-b`);
+                element.visible = true;
             }
             column.set({
                 y: -elementHeight * (longRowsNumber - config.rowsNumber + 1)
             });
+
+        }
+        if (storage.read('isClawMode')) {
+            let clawsStack = storage.read('clawsStack');
+            if (clawsStack) {
+                clawsStack.forEach((obj) => {
+                    if (column.name !== 'gameColumn' + obj.pos) return;
+                    let claw = obj.elem;
+                    let clawPos = claw.parent.localToGlobal(claw.x, claw.y);
+                    clawPos = column.globalToLocal(clawPos.x, clawPos.y);
+                    claw.set({
+                        x: clawPos.x,
+                        y: clawPos.y
+                    });
+                    // claw.gotoAndStop('idle');
+                    column.addChild(claw);
+
+                    column.items.forEach((elem) => {
+                        elem.visible = false;
+                    });
+                });
+            }
         }
     }
 
@@ -343,6 +396,16 @@ export let roll = (function () {
 
     function _endRollSuccessful(response) {
         createjs.Sound.stop('barabanSound');
+        if (storage.read('isClawMode')) {
+            let clawsStack = storage.read('clawsStack');
+            if (clawsStack) {
+                clawsStack.forEach((obj) => {
+                    let claw = obj.elem;
+                    claw.parent.removeChild(claw);
+                });
+                storage.write('clawsStack', []);
+            }
+        }
         events.trigger('roll:ended');
         storage.changeState('roll', 'ended');
         storage.changeState('fastRoll', false);

@@ -21,7 +21,10 @@ import { bonuses } from 'components/bonuses/bonuses';
 import { freeSpin } from 'components/freeSpin/freeSpin';
 
 // Init Module
-let isMobile = false;
+const isClawMode = true;
+storage.write('isClawMode', isClawMode);
+
+const isMobile = false;
 init.start({
     userID: 3,
     casinoID: 3,

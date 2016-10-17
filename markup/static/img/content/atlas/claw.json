@@ -82,7 +82,7 @@
 
 "animations": {
     "idle": [0, 15],
-    "kombo": [16, 49],
+    "combo": [16, 49],
     "zahvat": [50, 68]
 },
 
