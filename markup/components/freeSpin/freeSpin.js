@@ -217,28 +217,34 @@ export let freeSpin = (function () {
         });
 
         const ssCustisti = loader.getResult('new_elements');
-        let cultists1 = new createjs.Sprite(ssCustisti, '11-n').set({
+        let cultists1 = new createjs.Sprite(ssCustisti, '15-n').set({
             name: 'cultists',
-            x: -39,
-            y: 74,
-            scaleX: 0.8,
-            scaleY: 0.8,
+            x: -15,
+            y: 94,
+            scaleX: 0.7,
+            scaleY: 0.7,
+            regX: 120,
+            regY: 115,
             visible: false
         });
-        let cultists2 = new createjs.Sprite(ssCustisti, '12-n').set({
+        let cultists2 = new createjs.Sprite(ssCustisti, '14-n').set({
             name: 'cultists',
-            x: -34,
-            y: -48,
-            scaleX: 0.8,
-            scaleY: 0.8,
+            x: -10,
+            y: -27,
+            scaleX: 0.7,
+            scaleY: 0.7,
+            regX: 120,
+            regY: 115,
             visible: false
         });
-        let cultists3 = new createjs.Sprite(ssCustisti, '13-n').set({
+        let cultists3 = new createjs.Sprite(ssCustisti, '16-n').set({
             name: 'cultists',
-            x: 227,
-            y: 198,
-            scaleX: 0.8,
-            scaleY: 0.8,
+            x: 52,
+            y: 217,
+            scaleX: 0.7,
+            scaleY: 0.7,
+            regX: 120,
+            regY: 115,
             skewY: 180,
             visible: false
         });
@@ -247,8 +253,12 @@ export let freeSpin = (function () {
             cultists1,
             cultists3
         ];
-
-        fsLeftContainer.addChild(cultistBlack1, cultistBlack2, cultistBlack3, cultists3, cultists2, cultists1);
+        const cultContainer = new createjs.Container().set({
+            x: 77,
+            y: 73
+        });
+        cultContainer.addChild(cultists3, cultists2, cultists1);
+        fsLeftContainer.addChild(cultistBlack1, cultistBlack2, cultistBlack3, cultContainer);
 
 
         fgContainer.uncache();
@@ -1090,19 +1100,48 @@ export let freeSpin = (function () {
     function eatCultist() {
         if (currCultistCount > 2) {
             setTimeout(() => {
-                culstistsStack[currCultistCount % 3].visible = true;
+                let cult = culstistsStack[currCultistCount % 3];
+                cult.visible = true;
+                cult.gotoAndStop((14 + currCultistCount) + '-n');
             }, (currCultistCount - 2) * 100 + 500);
         } else {
-            culstistsStack[currCultistCount].visible = true;
+            let cult = culstistsStack[currCultistCount];
+            cult.visible = true;
+            cult.gotoAndStop((14 + currCultistCount) + '-n');
         }
 
         if (++currCultistCount === 3) {
             setTimeout(() => {
                 fsMulti.text = ++currMultiplier + '';
                 currCultistCount = 0;
-                culstistsStack[0].visible = false;
-                culstistsStack[1].visible = false;
-                culstistsStack[2].visible = false;
+                culstistsStack[0].set({
+                    scaleX: 0.8,
+                    scaleY: 0.8
+                });
+                culstistsStack[0].gotoAndPlay('14-h');
+                culstistsStack[1].set({
+                    scaleX: 0.8,
+                    scaleY: 0.8
+                });
+                culstistsStack[1].gotoAndPlay('15-h');
+                culstistsStack[2].set({
+                    scaleX: 0.8,
+                    scaleY: 0.8
+                });
+                culstistsStack[2].gotoAndPlay('16-h');
+
+                // let tl0 = new TimelineMax({repeat: -1});
+                // tl0.to(culstistsStack[0], 0.3, {scaleX: 1.2, scaleY: 1.2});
+                // let tl1 = new TimelineMax({repeat: -1});
+                // tl1.to(culstistsStack[1], 0.3, {scaleX: 1.2, scaleY: 1.2});
+                // let tl2 = new TimelineMax({repeat: -1});
+                // tl2.to(culstistsStack[2], 0.3, {scaleX: 1.2, scaleY: 1.2});
+
+                setTimeout(() => {
+                    culstistsStack[0].visible = false;
+                    culstistsStack[1].visible = false;
+                    culstistsStack[2].visible = false;
+                }, 300);
             }, 500);
         }
         storage.write('lastCultist', currCultistCount % 3);
