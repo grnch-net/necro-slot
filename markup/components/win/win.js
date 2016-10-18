@@ -609,11 +609,10 @@ export let win = (function () {
                 events.trigger('finishFreeSpins');
             }
         } else {
-            const autoTimeout = setTimeout(function () {
-                autoplay.startAutoplay();
-            }, time);
-
             if (storage.readState('autoplay') === 'started') {
+                const autoTimeout = setTimeout(function () {
+                    autoplay.startAutoplay();
+                }, time);
                 storage.write('autoTimeout', autoTimeout);
             }
 
