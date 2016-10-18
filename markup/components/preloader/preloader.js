@@ -217,6 +217,44 @@ export let preloader = (function () {
     }
 
     function handlePlayClick(event, data) {
+        let isMobile = storage.read('isMobile');
+        if (isMobile) {
+            const loader = storage.read('loadResult');
+
+            document.getElementById('game').addEventListener('click', () => {
+                events.trigger('preloader:goFullscreen');
+            });
+
+            const portratContainer = new c.Container().set({
+                name: 'portratContainer'
+            });
+            const bgBlack = new c.Shape();
+            bgBlack.graphics.beginFill('rgba(0, 0, 0)').drawRect(0, 0, w, h);
+            const portrat = new c.Bitmap(loader.getResult('portrat'));
+            portrat.set({
+                x: w / 2,
+                y: h / 2,
+                regX: 360,
+                regY: 242
+            });
+            portratContainer.addChild(bgBlack, portrat);
+            stage.addChild(portratContainer);
+
+            if (screen.orientation.type.indexOf('landscape') === -1) {
+                portratContainer.visible = true;
+            } else {
+                portratContainer.visible = false;
+            }
+
+            window.addEventListener('orientationchange', () => {
+                if (screen.orientation.type.indexOf('landscape') === -1 ) {
+                    portratContainer.visible = true;
+                } else {
+                    portratContainer.visible = false;
+                }
+            });
+        }
+
         events.trigger('preloader:goFullscreen');
         storage.changeState('fastSpinSetting', false);
 
