@@ -27,6 +27,7 @@ export const mainManifest = [
     // init screen
     {id: 'fsBG', src: 'static/img/content/bg/fsBG.png'},
     {id: 'play', src: 'static/img/content/preloader/play.png'},
+    {id: 'portrat', src: 'static/img/content/bg/portrait.png'},
 
     // bg module
     {id: 'newBGLight', src: 'static/img/content/bg/newBGLight.png'},
